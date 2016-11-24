@@ -11,44 +11,39 @@ class ReturnWalker extends Lint.RuleWalker {
     public visitReturnStatement(node: ts.ReturnStatement) {
         if (node.expression !== undefined && node.expression.kind === ts.SyntaxKind.Identifier) {
             const name = (<ts.Identifier>node.expression).text;
-            const sourceFile = this.getSourceFile();
-            // TODO irgendwie sinnvoll an die SyntaxList kommen
-            const children = (<ts.Block>node.parent).statements;
+            const children = (<ts.BlockLike>node.parent).statements;
             const index = children.indexOf(node);
             if (index > 0) {
                 const statement = children[index - 1];
-                if (statement.kind === ts.SyntaxKind.VariableStatement && declaresVariable(<ts.VariableStatement>statement, name))
+                if (statement.kind === ts.SyntaxKind.VariableStatement && isOnlyDeclaration(<ts.VariableStatement>statement, name)) {
+                    const sourceFile = this.getSourceFile();
                     this.addFailure(this.createFailure(node.expression.getStart(sourceFile),
                                                        node.expression.getWidth(sourceFile),
-                                                       'don\'t assign variable to return it immediately'));
+                                                       'don\'t declare a variable to return it immediately'));
+                }
             }
         }
         super.visitReturnStatement(node);
     }
 }
 
-function declaresVariable(statement: ts.VariableStatement, name: string): boolean {
-    // TODO use option to determine if only check single variable declarations
-    let found = false;
-    let used = false;
-    function walk(node: ts.Node) {
-        if (found) {
-            if (used)
-                return; // nothing to do here
+function isOnlyDeclaration(statement: ts.VariableStatement, name: string): boolean {
+    if (statement.declarationList.declarations.length > 1)
+        return false;
 
-            if (node.kind === ts.SyntaxKind.Identifier && (<ts.Identifier>node).text === name) {
-                used = true;
-                return;
-            }
-        } else if (node.kind === ts.SyntaxKind.VariableDeclaration) {
-            const declaration = <ts.VariableDeclaration>node;
-            if (declaration.name.kind === ts.SyntaxKind.Identifier && (<ts.Identifier>declaration.name).text === name) {
-                found = true;
-                return;
-            }
-        }
-        ts.forEachChild(node, walk);
+    return bindingNameContains(statement.declarationList.declarations[0].name, name);
+}
+
+function destructDeclarationContains(pattern: ts.BindingPattern, name: string): boolean {
+    for (let element of pattern.elements) {
+        if (element.kind === ts.SyntaxKind.BindingElement && bindingNameContains((<ts.BindingElement>element).name, name))
+            return true;
     }
-    ts.forEachChild(statement, walk);
-    return found && !used;
+    return false;
+}
+
+function bindingNameContains(bindingName: ts.BindingName, name: string): boolean {
+    return bindingName.kind === ts.SyntaxKind.Identifier ?
+           (<ts.Identifier>bindingName).text === name :
+           destructDeclarationContains(bindingName, name);
 }

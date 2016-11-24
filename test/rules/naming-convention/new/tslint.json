@@ -1,0 +1,19 @@
+{
+  "rulesDirectory": ["../../../../rules"],
+  "rules": {
+    "naming-convention": [
+       true,
+       {"type": "default", "leadingUnderscore": "forbid", "trailingUnderscore": "forbid"},
+       {"type": "variable", "format": "camelCase"},
+       {"type": "variable", "modifiers": ["global", "const"], "format": "UPPER_CASE"},
+       {"type": "member", "format": "camelCase"},
+       {"type": "member", "modifiers": "private", "leadingUnderscore": "require"},
+       {"type": "member", "modifiers": "protected", "leadingUnderscore": "require"},
+       {"type": "member", "modifiers": "static", "format": "PascalCase"},
+       {"type": "property", "modifiers": "const", "format": "UPPER_CASE"},
+       {"type": "property", "modifiers": ["static", "const"], "format": "UPPER_CASE"},
+       {"type": "property", "modifiers": ["private", "readonly"], "format": null, "prefix": "FOO_", "suffix": "Bar"},
+       {"type": "type", "format": "PascalCase", "prefix": ["Foo", "Bar"]}
+    ]
+  }
+}

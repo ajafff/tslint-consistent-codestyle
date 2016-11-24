@@ -1,0 +1,25 @@
+class Foo {
+    constructor(foo: string, public bar: number, readonly baz?) {}
+                                                 ~~~~~~~~~~~~~ [parameter property must have access modifier]
+}
+
+class Bar {
+    constructor() {}
+}
+
+class Baz {
+    constructor(bas) {}
+}
+
+class Bas {
+    constructor(readonly baz) {}
+                ~~~~~~~~~~~~ [parameter property must have access modifier]
+}
+
+class Quux {
+    constructor(protected readonly foo, bar) {}
+}
+
+class Ajaff {
+    constructor(private foo, bar, public baz) {}
+}

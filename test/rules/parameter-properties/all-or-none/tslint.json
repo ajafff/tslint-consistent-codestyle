@@ -1,0 +1,9 @@
+{
+  "rulesDirectory": "../../../../rules",
+  "rules": {
+    "parameter-properties": [
+      true,
+      "all-or-none"
+    ]
+  }
+}

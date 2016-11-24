@@ -1,0 +1,16 @@
+class Foo {
+    constructor(foo: string, public bar: number, readonly baz?) {}
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [don't mix parameter properties with regular parameters]
+}
+
+class Bar {
+    constructor() {}
+}
+
+class Baz {
+    constructor(bas) {}
+}
+
+class Bas {
+    constructor(readonly baz) {}
+}

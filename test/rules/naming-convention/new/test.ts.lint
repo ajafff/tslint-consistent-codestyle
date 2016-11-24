@@ -1,0 +1,54 @@
+var moduleCamel  = "camel";
+var ModulePascal = "pascal";
+    ~~~~~~~~~~~~    [variable name must be in camelCase]
+const MODULE_CONST  = "const"
+const another_const = "const"
+      ~~~~~~~~~~~~~ [variable name must be in UPPER_CASE]
+var _noLeading = "";
+    ~~~~~~~~~~  [variable name must not have leading underscore]
+var trailing_ = "";
+    ~~~~~~~~~   [variable name must not have trailing underscore]
+var number = 42;
+
+function foo() {}
+function Foo() {}
+         ~~~ [function name must be in camelCase]
+
+class TestClass {
+      ~~~~~~~~~ [class name must start with one of Foo,Bar]
+    private privCamel = 10;
+            ~~~~~~~~~ [property name must have leading underscore]
+    private _leadPriv = 10;
+    private trailPriv_ = 10;
+            ~~~~~~~~~~  [property name must not have trailing underscore]
+            ~~~~~~~~~~  [property name must have leading underscore]
+    private _snake_priv = 10;
+            ~~~~~~~~~~~  [property name must be in camelCase]
+
+    public snake_pub = 10;
+           ~~~~~~~~~  [property name must be in camelCase]
+    public _camelPub = 10;
+           ~~~~~~~~~  [property name must not have leading underscore]
+
+    public get camelPubAcc() {}
+    public set camelPubAcc(Var) {}
+                           ~~~ [parameter name must be in camelCase]
+    private get snake_priv_acc() {}
+                ~~~~~~~~~~~~~~  [property name must be in camelCase]
+                ~~~~~~~~~~~~~~  [property name must have leading underscore]
+
+    readonly public static FOO = "foo";
+    readonly public static foo = "foo";
+                           ~~~ [property name must be in UPPER_CASE]
+    public static Bar() {};
+    public static bar() {};
+                  ~~~ [method name must be in PascalCase]
+    constructor(public readonly foo, protected bar) {}
+                                ~~~ [parameterProperty name must be in UPPER_CASE]
+                                               ~~~ [parameterProperty name must have leading underscore]
+    constructor(private readonly _FOO_Bar) {}
+}
+
+class FooBar {}
+
+class BarFoo {}

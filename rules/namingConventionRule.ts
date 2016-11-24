@@ -295,7 +295,7 @@ class NameChecker {
 
 class IdentifierNameWalker extends Lint.ScopeAwareRuleWalker<ts.Node> {
     private _rules: NormalizedConfig[];
-    private _cache: { [key: string]: NameChecker|null};
+    private _cache: Map<string, NameChecker>;
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
@@ -307,7 +307,7 @@ class IdentifierNameWalker extends Lint.ScopeAwareRuleWalker<ts.Node> {
             this._rules = [];
         }
 
-        this._cache = {};
+        this._cache = new Map<string, NameChecker>();
     }
 
     public createScope(node: ts.Node): ts.Node {
@@ -385,26 +385,27 @@ class IdentifierNameWalker extends Lint.ScopeAwareRuleWalker<ts.Node> {
     private _checkName(node: ts.Declaration, type: TypeSelector, modifiers = 0) {
         if (node.name !== undefined && node.name.kind === ts.SyntaxKind.Identifier) {
             const matchingChecker = this._getMatchingChecker(type, this._getModifiers(node, type, modifiers));
-            if (matchingChecker !== null)
+            if (matchingChecker !== undefined)
                 matchingChecker.check(<ts.Identifier> node.name, this);
         }
     }
 
-    private _getMatchingChecker(type: TypeSelector, modifiers: number): NameChecker|null {
+    private _getMatchingChecker(type: TypeSelector, modifiers: number): NameChecker|undefined {
         const key = `${type},${modifiers}`;
-        if (key in this._cache)
-            return this._cache[key];
+        if (this._cache.has(key))
+            return this._cache.get(key);
 
-        return this._cache[key] = this._createChecker(type, modifiers);
+        const checker = this._createChecker(type, modifiers);
+        this._cache.set(key, checker);
+        return checker;
     }
 
-    private _createChecker(type: TypeSelector, modifiers: number) {
-        const rules = this._rules.filter((rule: NormalizedConfig) => rule.matches(type, modifiers));
-        if (rules.length === 0)
-            return null;
-
-        const config = rules.reduce<IFormat>(
+    private _createChecker(type: TypeSelector, modifiers: number): NameChecker|undefined {
+        const config = this._rules.reduce<IFormat>(
             (format, rule) => {
+                if (!rule.matches(type, modifiers))
+                    return format;
+
                 const ruleFormat = rule.getFormat();
                 if (ruleFormat.leadingUnderscore !== undefined)
                     format.leadingUnderscore = ruleFormat.leadingUnderscore;
@@ -436,7 +437,7 @@ class IdentifierNameWalker extends Lint.ScopeAwareRuleWalker<ts.Node> {
             !config.prefix &&
             !config.regex &&
             !config.suffix)
-            return null;
+            return;
 
         return new NameChecker(type, config);
     }

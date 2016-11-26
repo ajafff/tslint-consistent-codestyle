@@ -49,6 +49,13 @@ class TestClass {
     constructor(private readonly _FOO_Bar) {}
 }
 
-class FooBar {}
+class FooBar<t> {}
+             ~ [genericTypeParameter name must be in PascalCase]
+             ~ [genericTypeParameter name must start with T]
 
-class BarFoo {}
+class Foo<Test> {}
+          ~~~~ [genericTypeParameter name must be in PascalCase]
+
+class Foo<TFoo> {}
+
+class BarFoo<T> {}

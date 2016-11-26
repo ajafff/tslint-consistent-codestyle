@@ -61,7 +61,9 @@ enum Types {
     type = 1 << 6,
     class = 1 << 7,
     interface = 1 << 8,
-    genericTypeParameter = 1 << 9,
+    typeAlias = 1 << 9,
+    genericTypeParameter = 1 << 10,
+    enum = 1 << 11,
 }
 
 enum TypeSelector {
@@ -73,7 +75,9 @@ enum TypeSelector {
     method = Types.member + Types.method,
     class = Types.type + Types.class,
     interface = Types.type + Types.interface,
+    typeAlias = Types.type + Types.typeAlias,
     genericTypeParameter = Types.type + Types.genericTypeParameter,
+    enum = Types.type + Types.enum,
 }
 
 enum Modifiers {
@@ -110,7 +114,9 @@ enum Specifity {
     type = 1 << 10,
     class = 1 << 11,
     interface = Specifity.class,
+    typeAlias = Specifity.class,
     genericTypeParameter = Specifity.class,
+    enum = Specifity.class,
 }
 
 export class Rule extends AbstractConfigDependentRule {
@@ -333,7 +339,17 @@ class IdentifierNameWalker extends Lint.ScopeAwareRuleWalker<ts.Node> {
         }
     }
 
-    // TODO TypeAliasDeclaration?
+    public visitEnumDeclaration(node: ts.EnumDeclaration) {
+        this._checkDeclaration(node, TypeSelector.enum);
+        // TODO check enum members?
+        super.visitEnumDeclaration(node);
+    }
+
+    public visitTypeAliasDeclaration(node: ts.TypeAliasDeclaration) {
+        this._checkDeclaration(node, TypeSelector.typeAlias);
+        this._checkTypeParameters(node, Modifiers.global);
+        super.visitTypeAliasDeclaration(node);
+    }
 
     public visitClassExpression(node: ts.ClassExpression) {
         if (node.name !== undefined)

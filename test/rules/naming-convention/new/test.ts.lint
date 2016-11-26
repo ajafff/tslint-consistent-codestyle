@@ -59,3 +59,11 @@ class Foo<Test> {}
 class Foo<TFoo> {}
 
 class BarFoo<T> {}
+
+enum foo {}
+     ~~~ [enum name must be in PascalCase]
+const enum foo {}
+           ~~~ [enum name must be in UPPER_CASE]
+
+type foo = "bar";
+     ~~~ [typeAlias name must be in PascalCase]

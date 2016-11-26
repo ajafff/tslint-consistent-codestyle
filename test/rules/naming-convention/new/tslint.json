@@ -13,8 +13,10 @@
        {"type": "property", "modifiers": "const", "format": "UPPER_CASE"},
        {"type": "property", "modifiers": ["static", "const"], "format": "UPPER_CASE"},
        {"type": "property", "modifiers": ["private", "readonly"], "format": null, "prefix": "FOO_", "suffix": "Bar"},
-       {"type": "type", "format": "PascalCase", "prefix": ["Foo", "Bar"]},
-       {"type": "genericTypeParameter", "prefix": "T"}
+       {"type": "type", "format": "PascalCase"},
+       {"type": "class", "prefix": ["Foo", "Bar"]},
+       {"type": "genericTypeParameter", "prefix": "T"},
+       {"type": "enum", "modifiers": "const", "format": "UPPER_CASE"}
     ]
   }
 }

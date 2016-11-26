@@ -1,10 +1,18 @@
 {
   "name": "tslint-consistent-codestyle",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Enforce constistent code style with tslint",
   "repository": {
     "type": "git",
     "url": "https://github.com/ajafff/tslint-consistent-codestyle"
+  },
+  "scripts": {
+    "test": "echo test/rules/*/* | xargs -n 1 tslint --test",
+    "pretest": "npm run build",
+    "prebuild": "npm run lint",
+    "build": "tsc -p .",
+    "prepublish": "npm test",
+    "lint": "tslint '{rules,src}/**/*.ts'"
   },
   "keywords": [
     "eslint",

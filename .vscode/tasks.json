@@ -11,7 +11,7 @@
 	"tasks": [
     {
       "taskName": "build",
-      "args": ["./build.sh"],
+      "args": ["npm build"],
       "suppressTaskName": true,
       "isBuildCommand": true,
       "isTestCommand": false,
@@ -19,7 +19,7 @@
     },
     {
       "taskName": "tests",
-      "args": ["./run_tests.sh"],
+      "args": ["npm test"],
       "suppressTaskName": true,
       "isBuildCommand": false,
       "isTestCommand": true

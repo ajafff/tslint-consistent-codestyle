@@ -1,6 +1,8 @@
 import * as ts from 'typescript';
 import * as Lint from 'tslint';
 
+import {isUndefined, getPreviousStatement} from '../src/utils';
+
 export class Rule extends Lint.Rules.AbstractRule {
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new ReturnWalker(sourceFile, this.getOptions()));
@@ -11,15 +13,16 @@ class ReturnWalker extends Lint.RuleWalker {
     public visitReturnStatement(node: ts.ReturnStatement) {
         if (node.expression !== undefined && node.expression.kind === ts.SyntaxKind.Identifier) {
             const name = (<ts.Identifier>node.expression).text;
-            const children = (<ts.BlockLike>node.parent).statements;
-            const index = children.indexOf(node);
-            if (index > 0) {
-                const statement = children[index - 1];
-                if (statement.kind === ts.SyntaxKind.VariableStatement && isOnlyDeclaration(<ts.VariableStatement>statement, name)) {
-                    const sourceFile = this.getSourceFile();
-                    this.addFailure(this.createFailure(node.expression.getStart(sourceFile),
-                                                       node.expression.getWidth(sourceFile),
-                                                       'don\'t declare a variable to return it immediately'));
+            const statement = getPreviousStatement(node);
+            if (statement !== undefined) {
+                if (statement.kind === ts.SyntaxKind.VariableStatement) {
+                    const declarationList = (<ts.VariableStatement>statement).declarationList.declarations;
+                    if (bindingNameContains(declarationList[declarationList.length - 1].name, name, true)) {
+                        const sourceFile = this.getSourceFile();
+                        this.addFailure(this.createFailure(node.expression.getStart(sourceFile),
+                                                           node.expression.getWidth(sourceFile),
+                                                           `don't declare variable ${name} to return it immediately`));
+                    }
                 }
             }
         }
@@ -27,23 +30,24 @@ class ReturnWalker extends Lint.RuleWalker {
     }
 }
 
-function isOnlyDeclaration(statement: ts.VariableStatement, name: string): boolean {
-    if (statement.declarationList.declarations.length > 1)
-        return false;
-
-    return bindingNameContains(statement.declarationList.declarations[0].name, name);
-}
-
-function destructDeclarationContains(pattern: ts.BindingPattern, name: string): boolean {
+function destructDeclarationContains(pattern: ts.BindingPattern, name: string, ignoreDefaults?: boolean): boolean {
     for (let element of pattern.elements) {
-        if (element.kind === ts.SyntaxKind.BindingElement && bindingNameContains((<ts.BindingElement>element).name, name))
+        if (element.kind !== ts.SyntaxKind.BindingElement)
+            continue;
+
+        const bindingElement = <ts.BindingElement>element;
+        // defaulting to undefined is not really a default -> check for undefined and void initializer
+        if (ignoreDefaults && bindingElement.initializer !== undefined && !isUndefined(bindingElement.initializer))
+            continue;
+
+        if (bindingNameContains(bindingElement.name, name))
             return true;
     }
     return false;
 }
 
-function bindingNameContains(bindingName: ts.BindingName, name: string): boolean {
+function bindingNameContains(bindingName: ts.BindingName, name: string, ignoreDefaults?: boolean): boolean {
     return bindingName.kind === ts.SyntaxKind.Identifier ?
            (<ts.Identifier>bindingName).text === name :
-           destructDeclarationContains(bindingName, name);
+           destructDeclarationContains(bindingName, name, ignoreDefaults);
 }

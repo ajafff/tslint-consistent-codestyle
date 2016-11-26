@@ -1,7 +1,25 @@
 function foo(bar) {
+    return bar;
+}
+
+function foo(bar) {
+    if (bar) {
+        let baz = bar;
+        return baz;
+               ~~~  [don't declare variable baz to return it immediately]
+    }
+}
+
+function foo(bar) {
+    let baz = bar;
+    if (bar)
+        return baz;
+}
+
+function foo(bar) {
     let baz = bar;
     return baz;
-           ~~~  [don't declare a variable to return it immediately]
+           ~~~  [don't declare variable baz to return it immediately]
 }
 
 function foo(bar) {
@@ -17,35 +35,63 @@ function foo(bar) {
 function foo(bar) {
     let {baz} = bar;
     return baz;
-           ~~~  [don't declare a variable to return it immediately]
+           ~~~  [don't declare variable baz to return it immediately]
+}
+
+function foo(bar) {
+    let {baz = 1} = bar;
+    return baz;
+}
+
+function foo(bar) {
+    let {baz = void 0} = bar;
+    return baz;
+           ~~~  [don't declare variable baz to return it immediately]
 }
 
 function foo(bar) {
     let {foo: baz} = bar;
     return baz;
-           ~~~  [don't declare a variable to return it immediately]
+           ~~~  [don't declare variable baz to return it immediately]
 }
 
 function foo(bar) {
     let {foo: {bar: baz}} = bar;
     return baz;
-           ~~~  [don't declare a variable to return it immediately]
+           ~~~  [don't declare variable baz to return it immediately]
 }
 
 function foo(bar) {
     let [baz] = bar;
     return baz;
-           ~~~  [don't declare a variable to return it immediately]
+           ~~~  [don't declare variable baz to return it immediately]
+}
+
+function foo(bar) {
+    let [baz = undefined] = bar;
+    return baz;
+           ~~~  [don't declare variable baz to return it immediately]
+}
+
+function foo(bar) {
+    let [baz = 1] = bar;
+    return baz;
 }
 
 function foo(bar) {
     let [[baz], bas] = bar;
     return baz;
-           ~~~  [don't declare a variable to return it immediately]
+           ~~~  [don't declare variable baz to return it immediately]
 }
 
 function foo(bar) {
     let [{bar: [baz]}] = bar;
     return baz;
-           ~~~  [don't declare a variable to return it immediately]
+           ~~~  [don't declare variable baz to return it immediately]
+}
+
+function foo(bar) {
+    let foo = bar, baz = bar;
+    return baz;
+           ~~~  [don't declare variable baz to return it immediately]
 }

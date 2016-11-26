@@ -30,8 +30,15 @@ Now configure some of the new rules.
 ## naming-convention
 Enforce consistent names for almost everything.
 
+## no-return-undefined
+Using `return undefined` or `return void 0` is unnecessary, because `undefined` is the default return value. Just use `return;` instead.
+
 ## no-var-before-return
-Declaring a variable only to immediately return it is a **bad practice**. Some developers argue that the practice improves code readability, because it enables them to explicitly name what is being returned. However, this variable is an internal implementation detail that is not exposed to the callers of the method. **The method name should be sufficient for callers to know exactly what will be returned.**
+> Declaring a variable only to immediately return it is a **bad practice**. Some developers argue that the practice improves code readability, because it enables them to explicitly name what is being returned. However, this variable is an internal implementation detail that is not exposed to the callers of the method. **The method name should be sufficient for callers to know exactly what will be returned.**
+
+This rule checks, if the last variable declared in a variable declaration right before the return statement contains the returned variable.
+Destructuring assignments are also checked because `let {foo} = bar; return foo;` can also be written as `return bar.foo;`.
+But if the destructuring assignment for this variable contains a default value other than `undefined` or `void`, there will be no error.
 
 ## parameter-properties
 Usage:

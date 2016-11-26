@@ -28,7 +28,7 @@ export function getPreviousStatement(statement: ts.Statement): ts.Statement|unde
         if (index > 0)
             return parent.statements[index - 1];
     }
-    return undefined;
+    return;
 }
 
 function isBlockLike(node: ts.Node): node is ts.BlockLike {

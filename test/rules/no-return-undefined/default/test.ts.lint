@@ -1,0 +1,26 @@
+function foo(bar) {
+    return;
+}
+
+function foo(bar) {
+    return bar;
+}
+
+function foo(bar) {
+    return null;
+}
+
+function foo(bar) {
+    return undefined;
+           ~~~~~~~~~ [don't return undefined or void]
+}
+
+function foo(bar) {
+    return void 0;
+           ~~~~~~ [don't return undefined or void]
+}
+
+function foo(bar) {
+    return void bar;
+           ~~~~~~~~ [don't return undefined or void]
+}

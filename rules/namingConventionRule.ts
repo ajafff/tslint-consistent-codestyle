@@ -2,6 +2,7 @@ import * as ts from 'typescript';
 import * as Lint from 'tslint';
 
 import {isParameterProperty} from '../src/utils';
+import {AbstractConfigDependentRule} from '../src/rules';
 
 // TODO don't flag inherited members
 
@@ -108,7 +109,7 @@ enum Specifity {
     interface = Specifity.class,
 }
 
-export class Rule extends Lint.Rules.AbstractRule {
+export class Rule extends AbstractConfigDependentRule {
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new IdentifierNameWalker(sourceFile, this.getOptions()));
     }

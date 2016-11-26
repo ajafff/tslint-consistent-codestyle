@@ -2,6 +2,7 @@ import * as ts from 'typescript';
 import * as Lint from 'tslint';
 
 import { hasAccessModifier, isParameterProperty } from '../src/utils';
+import { AbstractConfigDependentRule } from '../src/rules';
 
 const ALL_OR_NONE_OPTION = 'all-or-none';
 const LEADING_OPTION = 'leading';
@@ -22,7 +23,7 @@ const MEMBER_ACCESS_FAIL = 'parameter property must have access modifier';
 //   - no reassign readonly parameter
 //   - no reassign readonly property
 
-export class Rule extends Lint.Rules.AbstractRule {
+export class Rule extends AbstractConfigDependentRule {
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new ParameterPropertyWalker(sourceFile, this.getOptions()));
     }

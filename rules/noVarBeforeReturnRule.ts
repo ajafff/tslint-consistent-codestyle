@@ -1,7 +1,8 @@
 import * as ts from 'typescript';
 import * as Lint from 'tslint';
 
-import {isUndefined, getPreviousStatement} from '../src/utils';
+import {bindingNameContains, getPreviousStatement} from '../src/utils';
+import {ReturnStatementWalker} from '../src/walker';
 
 export class Rule extends Lint.Rules.AbstractRule {
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
@@ -9,7 +10,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-class ReturnWalker extends Lint.RuleWalker {
+class ReturnWalker extends ReturnStatementWalker {
     public visitReturnStatement(node: ts.ReturnStatement) {
         if (node.expression !== undefined && node.expression.kind === ts.SyntaxKind.Identifier) {
             const name = (<ts.Identifier>node.expression).text;
@@ -26,28 +27,5 @@ class ReturnWalker extends Lint.RuleWalker {
                 }
             }
         }
-        super.visitReturnStatement(node);
     }
-}
-
-function destructDeclarationContains(pattern: ts.BindingPattern, name: string, ignoreDefaults?: boolean): boolean {
-    for (let element of pattern.elements) {
-        if (element.kind !== ts.SyntaxKind.BindingElement)
-            continue;
-
-        const bindingElement = <ts.BindingElement>element;
-        // defaulting to undefined is not really a default -> check for undefined and void initializer
-        if (ignoreDefaults && bindingElement.initializer !== undefined && !isUndefined(bindingElement.initializer))
-            continue;
-
-        if (bindingNameContains(bindingElement.name, name))
-            return true;
-    }
-    return false;
-}
-
-function bindingNameContains(bindingName: ts.BindingName, name: string, ignoreDefaults?: boolean): boolean {
-    return bindingName.kind === ts.SyntaxKind.Identifier ?
-           (<ts.Identifier>bindingName).text === name :
-           destructDeclarationContains(bindingName, name, ignoreDefaults);
 }

@@ -3,6 +3,7 @@ import * as Lint from 'tslint';
 
 import { hasAccessModifier, isParameterProperty } from '../src/utils';
 import { AbstractConfigDependentRule } from '../src/rules';
+import { ConstructorDeclarationWalker } from '../src/walker';
 
 const ALL_OR_NONE_OPTION = 'all-or-none';
 const LEADING_OPTION = 'leading';
@@ -29,7 +30,7 @@ export class Rule extends AbstractConfigDependentRule {
     }
 }
 
-class ParameterPropertyWalker extends Lint.RuleWalker {
+class ParameterPropertyWalker extends ConstructorDeclarationWalker {
     private _allOrNone: boolean;
     private _leading: boolean;
     private _readOnly: boolean;
@@ -37,20 +38,19 @@ class ParameterPropertyWalker extends Lint.RuleWalker {
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
-        const args = options.ruleArguments;
-        if (args !== undefined) {
-            this._allOrNone = args.indexOf(ALL_OR_NONE_OPTION) !== -1;
-            this._leading = args.indexOf(LEADING_OPTION) !== -1;
-            this._readOnly = args.indexOf(READONLY_OPTION) !== -1;
-            this._memberAccess = args.indexOf(MEMBER_ACCESS_OPTION) !== -1;
-        }
+        const args = <any[]>options.ruleArguments;
+
+        this._allOrNone = args.indexOf(ALL_OR_NONE_OPTION) !== -1;
+        this._leading = args.indexOf(LEADING_OPTION) !== -1;
+        this._readOnly = args.indexOf(READONLY_OPTION) !== -1;
+        this._memberAccess = args.indexOf(MEMBER_ACCESS_OPTION) !== -1;
     }
 
     public visitConstructorDeclaration(node: ts.ConstructorDeclaration) {
         const parameters = node.parameters;
         const length = parameters.length;
         if (length === 0)
-            return super.visitConstructorDeclaration(node);
+            return;
 
         let index = -1;
         for (let i = 0; i < length; ++i) {
@@ -60,7 +60,7 @@ class ParameterPropertyWalker extends Lint.RuleWalker {
             }
         }
         if (index === -1)
-            return super.visitConstructorDeclaration(node);
+            return;
 
         const sourceFile = this.getSourceFile();
 
@@ -106,7 +106,5 @@ class ParameterPropertyWalker extends Lint.RuleWalker {
                     this.addFailure(this.createFailure(parameter.getStart(sourceFile), parameter.getWidth(sourceFile), READONLY_FAIL));
             }
         }
-
-        super.visitConstructorDeclaration(node);
     }
 }

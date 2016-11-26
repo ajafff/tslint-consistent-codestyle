@@ -16,6 +16,28 @@ export function hasAccessModifier(node: ts.Node): boolean {
                             ts.SyntaxKind.PrivateKeyword);
 }
 
+export function destructDeclarationContains(pattern: ts.BindingPattern, name: string, ignoreDefaults?: boolean): boolean {
+    for (let element of pattern.elements) {
+        if (element.kind !== ts.SyntaxKind.BindingElement)
+            continue;
+
+        const bindingElement = <ts.BindingElement>element;
+        // defaulting to undefined is not really a default -> check for undefined and void initializer
+        if (ignoreDefaults && bindingElement.initializer !== undefined && !isUndefined(bindingElement.initializer))
+            continue;
+
+        if (bindingNameContains(bindingElement.name, name))
+            return true;
+    }
+    return false;
+}
+
+export function bindingNameContains(bindingName: ts.BindingName, name: string, ignoreDefaults?: boolean): boolean {
+    return bindingName.kind === ts.SyntaxKind.Identifier ?
+           (<ts.Identifier>bindingName).text === name :
+           destructDeclarationContains(bindingName, name, ignoreDefaults);
+}
+
 export function isUndefined(expression: ts.Expression): boolean {
     return expression.kind === ts.SyntaxKind.Identifier && (<ts.Identifier>expression).text === 'undefined' ||
         expression.kind === ts.SyntaxKind.VoidExpression;

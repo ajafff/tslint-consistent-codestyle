@@ -53,6 +53,6 @@ export function getPreviousStatement(statement: ts.Statement): ts.Statement|unde
     return;
 }
 
-function isBlockLike(node: ts.Node): node is ts.BlockLike {
+export function isBlockLike(node: ts.Node): node is ts.BlockLike {
     return 'statements' in node;
 }

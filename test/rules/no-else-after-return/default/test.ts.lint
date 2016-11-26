@@ -1,0 +1,64 @@
+if (true) {
+    return;
+} else {}
+  ~~~~ [don't use else after return]
+
+if (true) return;
+else ;
+~~~~ [don't use else after return]
+
+if (true) {
+    {
+        return;
+    }
+} else {}
+  ~~~~ [don't use else after return]
+
+if (true) {
+    if (true) {
+        return;
+    } else {
+      ~~~~ [don't use else after return]
+        return;
+    }
+} else {}
+  ~~~~ [don't use else after return]
+
+if (true) {
+    if (true) {
+        return;
+    }
+} else {}
+
+if (true) return;
+
+if (true) foo();
+else bar();
+
+if (true) {
+    return;
+}
+
+if (true) {
+    foo();
+} else {
+    bar();
+}
+
+if (true) {
+    {
+    }
+} else {}
+
+if (true) {
+    if (true) {
+        return;
+    } else {
+      ~~~~ [don't use else after return]
+    }
+} else {}
+
+if (true) {
+    if (true) {
+    }
+} else {}

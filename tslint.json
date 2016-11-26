@@ -101,6 +101,7 @@
       {"type": "class", "modifiers": "abstract", "prefix": "Abstract"},
       {"type": "interface", "prefix": "I"}
     ],
+    "no-else-after-return": true,
     "no-return-undefined": true,
     "no-var-before-return": true,
     "parameter-properties": [

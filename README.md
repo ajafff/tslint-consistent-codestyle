@@ -30,6 +30,11 @@ Now configure some of the new rules.
 ## naming-convention
 Enforce consistent names for almost everything.
 
+## no-else-after-return
+Works like [no-else-return from eslint](http://eslint.org/docs/rules/no-else-return).
+
+>f an if block contains a return statement, the else block becomes unnecessary. Its contents can be placed outside of the block.
+
 ## no-return-undefined
 Using `return undefined` or `return void 0` is unnecessary, because `undefined` is the default return value. Just use `return;` instead.
 

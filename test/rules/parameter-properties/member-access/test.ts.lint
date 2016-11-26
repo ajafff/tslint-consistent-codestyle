@@ -1,6 +1,6 @@
 class Foo {
     constructor(foo: string, public bar: number, readonly baz?) {}
-                                                 ~~~~~~~~~~~~~ [parameter property must have access modifier]
+                                                 ~~~~~~~~~~~~~ [fail]
 }
 
 class Bar {
@@ -13,7 +13,7 @@ class Baz {
 
 class Bas {
     constructor(readonly baz) {}
-                ~~~~~~~~~~~~ [parameter property must have access modifier]
+                ~~~~~~~~~~~~ [fail]
 }
 
 class Quux {
@@ -23,3 +23,5 @@ class Quux {
 class Ajaff {
     constructor(private foo, bar, public baz) {}
 }
+
+[fail]: parameter property must have access modifier

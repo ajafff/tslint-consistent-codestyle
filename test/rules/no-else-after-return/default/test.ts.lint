@@ -1,28 +1,28 @@
 if (true) {
     return;
 } else {}
-  ~~~~ [don't use else after return]
+  ~~~~ [fail]
 
 if (true) return;
 else ;
-~~~~ [don't use else after return]
+~~~~ [fail]
 
 if (true) {
     {
         return;
     }
 } else {}
-  ~~~~ [don't use else after return]
+  ~~~~ [fail]
 
 if (true) {
     if (true) {
         return;
     } else {
-      ~~~~ [don't use else after return]
+      ~~~~ [fail]
         return;
     }
 } else {}
-  ~~~~ [don't use else after return]
+  ~~~~ [fail]
 
 if (true) {
     if (true) {
@@ -54,7 +54,7 @@ if (true) {
     if (true) {
         return;
     } else {
-      ~~~~ [don't use else after return]
+      ~~~~ [fail]
     }
 } else {}
 
@@ -62,3 +62,5 @@ if (true) {
     if (true) {
     }
 } else {}
+
+[fail]: unnecessary else after return

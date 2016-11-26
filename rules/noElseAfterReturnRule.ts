@@ -1,9 +1,10 @@
 import * as ts from 'typescript';
 import * as Lint from 'tslint';
 
-import { isBlockLike } from '../src/utils';
+import { getKeyword, isBlockLike } from '../src/utils';
+import { IfStatementWalker } from '../src/walker';
 
-const FAIL_MESSAGE = `don't use else after return`;
+const FAIL_MESSAGE = `unnecessary else after return`;
 
 export class Rule extends Lint.Rules.AbstractRule {
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
@@ -11,22 +12,21 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-class IfWalker extends Lint.RuleWalker {
+class IfWalker extends IfStatementWalker {
     public visitIfStatement(node: ts.IfStatement) {
         if (node.elseStatement !== undefined && isLastStatementReturn(node.thenStatement)) {
             const sourceFile = this.getSourceFile();
-            const elseKeyword = <ts.KeywordTypeNode> getElseKeyword(node, sourceFile);
+            const elseKeyword = <ts.KeywordTypeNode> getKeyword(node, ts.SyntaxKind.ElseKeyword, sourceFile);
             this.addFailure(this.createFailure(elseKeyword.getStart(sourceFile),
                                                4,
                                                FAIL_MESSAGE));
         }
-        super.visitIfStatement(node);
     }
 }
 
 function isLastStatementReturn(statement: ts.Statement): boolean {
+    // recurse into nested blocks
     while (isBlockLike(statement)) {
-        // recurse into nested blocks
         if (statement.statements.length === 0)
             return false;
 
@@ -48,12 +48,4 @@ function isDefinitelyReturned(statement: ts.Statement): boolean {
     }
     // TODO add checks for switch, etc.
     return false;
-}
-
-function getElseKeyword(statement: ts.IfStatement, sourceFile?: ts.SourceFile): ts.KeywordTypeNode|undefined {
-    const children = statement.getChildren(sourceFile);
-    for (let child of children) {
-        if (child.kind === ts.SyntaxKind.ElseKeyword)
-            return <ts.KeywordTypeNode> child;
-    }
 }

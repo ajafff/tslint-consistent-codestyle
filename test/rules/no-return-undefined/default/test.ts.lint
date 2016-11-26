@@ -12,15 +12,17 @@ function foo(bar) {
 
 function foo(bar) {
     return undefined;
-           ~~~~~~~~~ [don't return undefined or void]
+           ~~~~~~~~~ [fail]
 }
 
 function foo(bar) {
     return void 0;
-           ~~~~~~ [don't return undefined or void]
+           ~~~~~~ [fail]
 }
 
 function foo(bar) {
     return void bar;
-           ~~~~~~~~ [don't return undefined or void]
+           ~~~~~~~~ [fail]
 }
+
+[fail]: don't return undefined or void

@@ -1,6 +1,6 @@
 class Foo {
     constructor(foo: string, public bar: number, readonly baz?) {}
-                             ~~~~~~~~~~~~~~~~~~ [parameter property must be readonly]
+                             ~~~~~~~~~~~~~~~~~~ [fail]
 }
 
 class Bar {
@@ -21,6 +21,8 @@ class Quux {
 
 class Ajaff {
     constructor(private foo, bar, public baz) {}
-                ~~~~~~~~~~~ [parameter property must be readonly]
-                                  ~~~~~~~~~~ [parameter property must be readonly]
+                ~~~~~~~~~~~ [fail]
+                                  ~~~~~~~~~~ [fail]
 }
+
+[fail]: parameter property must be readonly

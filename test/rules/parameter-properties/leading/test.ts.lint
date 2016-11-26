@@ -1,7 +1,7 @@
 class Foo {
     constructor(foo: string, public bar: number, readonly baz?) {}
-                             ~~~~~~~~~~~~~~~~~~ [parameter properties must precede regular parameters]
-                                                 ~~~~~~~~~~~~~ [parameter properties must precede regular parameters]
+                             ~~~~~~~~~~~~~~~~~~ [fail]
+                                                 ~~~~~~~~~~~~~ [fail]
 }
 
 class Bar {
@@ -22,5 +22,7 @@ class Quux {
 
 class Ajaff {
     constructor(private foo, bar, public baz) {}
-                                  ~~~~~~~~~~ [parameter properties must precede regular parameters]
+                                  ~~~~~~~~~~ [fail]
 }
+
+[fail]: parameter properties must precede regular parameters

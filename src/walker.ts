@@ -22,3 +22,14 @@ export class ConstructorDeclarationWalker extends Lint.RuleWalker {
         ts.forEachChild(node, cb);
     }
 }
+
+export class IfStatementWalker extends Lint.RuleWalker {
+    public walk(node: ts.Node) {
+        const cb = (child: ts.Node) => {
+            if (child.kind === ts.SyntaxKind.IfStatement)
+                this.visitIfStatement(<ts.IfStatement>child);
+            ts.forEachChild(child, cb);
+        };
+        ts.forEachChild(node, cb);
+    }
+}

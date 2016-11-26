@@ -56,3 +56,11 @@ export function getPreviousStatement(statement: ts.Statement): ts.Statement|unde
 export function isBlockLike(node: ts.Node): node is ts.BlockLike {
     return 'statements' in node;
 }
+
+export function getKeyword(node: ts.Node, keyword: ts.SyntaxKind, sourceFile?: ts.SourceFile): ts.KeywordTypeNode|undefined {
+    const children = node.getChildren(sourceFile);
+    for (let child of children) {
+        if (child.kind === keyword)
+            return <ts.KeywordTypeNode> child;
+    }
+}

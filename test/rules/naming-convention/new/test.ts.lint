@@ -88,3 +88,18 @@ const enum foo {
 
 type foo = "bar";
      ~~~ [typeAlias name must be in PascalCase]
+
+for (let {Foo} of []);
+          ~~~ [variable name must be in camelCase]
+
+for (let Foo in []);
+         ~~~ [variable name must be in camelCase]
+
+for (let I = 0;;);
+         ~ [variable name must be in camelCase]
+
+for (Foo of []);
+
+for (Foo in []);
+
+for (I = 0;;);

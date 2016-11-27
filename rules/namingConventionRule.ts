@@ -7,6 +7,7 @@ import {AbstractConfigDependentRule} from '../src/rules';
 // TODO don't flag inherited members
 // TODO check renamed imports
 // TODO skip all ambient declarations
+// TODO use startsWith and endsWith
 
 const PASCAL_OPTION = 'PascalCase';
 const CAMEL_OPTION  = 'camelCase';
@@ -344,8 +345,8 @@ class IdentifierNameWalker extends Lint.ScopeAwareRuleWalker<ts.Node> {
 
     private _checkTypeParameters(node: ts.DeclarationWithTypeParameters, modifiers: Modifiers) {
         if (node.typeParameters !== undefined) {
-            for (let typeParameter of node.typeParameters) {
-                this._checkName(typeParameter.name, TypeSelector.genericTypeParameter, modifiers);
+            for (let {name} of node.typeParameters) {
+                this._checkName(name, TypeSelector.genericTypeParameter, modifiers);
             }
         }
     }
@@ -428,18 +429,40 @@ class IdentifierNameWalker extends Lint.ScopeAwareRuleWalker<ts.Node> {
         super.visitGetAccessor(node);
     }
 
+    private _checkVariableDeclarationList(list: ts.VariableDeclarationList) {
+        // compute modifiers once and reuse for all declared variables
+        let modifiers = this.getCurrentDepth() === 1 ? Modifiers.global : Modifiers.local;
+        if (Lint.isNodeFlagSet(list, ts.NodeFlags.Const))
+            modifiers |= Modifiers.const;
+        const cb = (name: ts.Identifier) => this._checkName(name, TypeSelector.variable, modifiers);
+        for (let {name} of list.declarations) {
+            // handle identifiers and destructuring
+            foreachDeclaredIdentifier(name, cb);
+        }
+    }
+
+    public visitForStatement(node: ts.ForStatement) {
+        if (node.initializer !== undefined && node.initializer.kind === ts.SyntaxKind.VariableDeclarationList)
+            this._checkVariableDeclarationList(<ts.VariableDeclarationList>node.initializer);
+        super.visitForStatement(node);
+    }
+
+    public visitForOfStatement(node: ts.ForOfStatement) {
+        if (node.initializer.kind === ts.SyntaxKind.VariableDeclarationList)
+            this._checkVariableDeclarationList(<ts.VariableDeclarationList>node.initializer);
+        super.visitForOfStatement(node);
+    }
+
+    public visitForInStatement(node: ts.ForInStatement) {
+        if (node.initializer.kind === ts.SyntaxKind.VariableDeclarationList)
+            this._checkVariableDeclarationList(<ts.VariableDeclarationList>node.initializer);
+        super.visitForInStatement(node);
+    }
+
     public visitVariableStatement(node: ts.VariableStatement) {
         // skip 'declare' keywords
         if (!Lint.hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword)) {
-            // compute modifiers once and reuse for all declared variables
-            let modifiers = this.getCurrentDepth() === 1 ? Modifiers.global : Modifiers.local;
-            if (Lint.isNodeFlagSet(node.declarationList, ts.NodeFlags.Const))
-                modifiers |= Modifiers.const;
-            const cb = (name: ts.Identifier) => this._checkName(name, TypeSelector.variable, modifiers);
-            for (let declaration of node.declarationList.declarations) {
-                // handle identifiers and destructuring
-                foreachDeclaredIdentifier(declaration.name, cb);
-            }
+            this._checkVariableDeclarationList(node.declarationList);
             super.visitVariableStatement(node);
         }
     }

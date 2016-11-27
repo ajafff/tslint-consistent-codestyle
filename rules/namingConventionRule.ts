@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 import * as Lint from 'tslint';
 
-import {isParameterProperty} from '../src/utils';
+import { isIdentifier, isParameterProperty } from '../src/utils';
 import {AbstractConfigDependentRule} from '../src/rules';
 
 // TODO don't flag inherited members
@@ -358,8 +358,13 @@ class IdentifierNameWalker extends Lint.ScopeAwareRuleWalker<ts.Node> {
     }
 
     public visitEnumDeclaration(node: ts.EnumDeclaration) {
-        this._checkDeclaration(node, TypeSelector.enum);
-        // TODO check enum members?
+        let modifiers = this._getModifiers(node, TypeSelector.enum);
+        this._checkName(node.name, TypeSelector.enum, modifiers);
+        modifiers |= Modifiers.static | Modifiers.public; // treat enum members as static properties
+        for (let {name} of node.members) {
+            if (isIdentifier(name))
+                this._checkName(name, TypeSelector.enumMember, modifiers);
+        }
         super.visitEnumDeclaration(node);
     }
 
@@ -576,11 +581,10 @@ function isNameIdentifier(node: ts.Declaration & {name: any}): node is Declarati
 }
 
 function foreachDeclaredIdentifier(bindingName: ts.BindingName, cb: (name: ts.Identifier) => void) {
-    if (bindingName.kind === ts.SyntaxKind.Identifier)
-        return cb(<ts.Identifier>bindingName);
+    if (isIdentifier(bindingName))
+        return cb(bindingName);
 
-    const bindingPattern = <ts.BindingPattern>bindingName;
-    for (let element of bindingPattern.elements) {
+    for (let element of bindingName.elements) {
         if (element.kind === ts.SyntaxKind.BindingElement)
             foreachDeclaredIdentifier((<ts.BindingElement>element).name, cb);
     }

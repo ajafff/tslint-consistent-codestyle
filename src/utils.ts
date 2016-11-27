@@ -33,13 +33,13 @@ export function destructDeclarationContains(pattern: ts.BindingPattern, name: st
 }
 
 export function bindingNameContains(bindingName: ts.BindingName, name: string, ignoreDefaults?: boolean): boolean {
-    return bindingName.kind === ts.SyntaxKind.Identifier ?
-           (<ts.Identifier>bindingName).text === name :
+    return isIdentifier(bindingName) ?
+           bindingName.text === name :
            destructDeclarationContains(bindingName, name, ignoreDefaults);
 }
 
 export function isUndefined(expression: ts.Expression): boolean {
-    return expression.kind === ts.SyntaxKind.Identifier && (<ts.Identifier>expression).text === 'undefined' ||
+    return isIdentifier(expression) && expression.text === 'undefined' ||
         expression.kind === ts.SyntaxKind.VoidExpression;
 }
 
@@ -66,4 +66,8 @@ export function getKeyword(node: ts.Node, keyword: ts.SyntaxKind, sourceFile?: t
         if (child.kind === keyword)
             return child;
     }
+}
+
+export function isIdentifier(node: ts.Node): node is ts.Identifier {
+    return node.kind === ts.SyntaxKind.Identifier;
 }

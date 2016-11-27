@@ -16,7 +16,8 @@
        {"type": "type", "format": "PascalCase"},
        {"type": "class", "prefix": ["Foo", "Bar"]},
        {"type": "genericTypeParameter", "prefix": "T"},
-       {"type": "enum", "modifiers": "const", "format": "UPPER_CASE"}
+       {"type": "enum", "modifiers": "const", "format": "UPPER_CASE"},
+       {"type": "enumMember", "modifiers": "const", "leadingUnderscore": "require"}
     ]
   }
 }

@@ -44,7 +44,7 @@ export function isUndefined(expression: ts.Expression): boolean {
 }
 
 export function getPreviousStatement(statement: ts.Statement): ts.Statement|undefined {
-    const parent = <ts.Node>statement.parent;
+    const parent = statement.parent!;
     if (isBlockLike(parent)) {
         const index = parent.statements.indexOf(statement);
         if (index > 0)

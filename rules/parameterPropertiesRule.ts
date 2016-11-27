@@ -38,7 +38,7 @@ class ParameterPropertyWalker extends ConstructorDeclarationWalker {
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
-        const args = <any[]>options.ruleArguments;
+        const args = options.ruleArguments!;
 
         this._allOrNone = args.indexOf(ALL_OR_NONE_OPTION) !== -1;
         this._leading = args.indexOf(LEADING_OPTION) !== -1;

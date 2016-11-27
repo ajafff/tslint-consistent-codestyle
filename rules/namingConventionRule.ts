@@ -171,12 +171,12 @@ class NormalizedConfig {
 }
 
 class NameChecker {
-    private _format:             string|undefined;
-    private _leadingUnderscore:  UnderscoreOption|undefined;
-    private _trailingUnderscore: UnderscoreOption|undefined;
-    private _prefix:             string|string[]|undefined;
-    private _suffix:             string|string[]|undefined;
-    private _regex:              RegExp|undefined;
+    private _format?: string;
+    private _leadingUnderscore?: UnderscoreOption;
+    private _trailingUnderscore?: UnderscoreOption;
+    private _prefix?: string|string[];
+    private _suffix?: string|string[];
+    private _regex?: RegExp;
     constructor(private readonly _type: TypeSelector, format: IFormat) {
         if (format.format)
             this._format = format.format;
@@ -328,14 +328,7 @@ class IdentifierNameWalker extends Lint.ScopeAwareRuleWalker<ts.Node> {
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
-
-        const rules = options.ruleArguments;
-        if (rules !== undefined) {
-            this._rules = this._normalizeRules(<IRuleConfig[]> rules);
-        } else {
-            this._rules = [];
-        }
-
+        this._rules = this._normalizeRules(<IRuleConfig[]> options.ruleArguments);
         this._cache = new Map<string, NameChecker>();
     }
 
@@ -344,7 +337,7 @@ class IdentifierNameWalker extends Lint.ScopeAwareRuleWalker<ts.Node> {
     }
 
     private _normalizeRules(rules: IRuleConfig[]): NormalizedConfig[] {
-        return rules.map((rule: IRuleConfig) => {
+        return rules.map((rule) => {
             return new NormalizedConfig(rule);
         }).sort(NormalizedConfig.sort);
     }

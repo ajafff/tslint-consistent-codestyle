@@ -97,7 +97,7 @@
       {"type": "member", "modifiers": "private", "leadingUnderscore": "require"},
       {"type": "member", "modifiers": "protected", "leadingUnderscore": "require"},
       {"type": "property", "modifiers": ["public", "static", "const"], "format": "UPPER_CASE"},
-      {"type": "type", "format": "PacalCase"},
+      {"type": "type", "format": "PascalCase"},
       {"type": "class", "modifiers": "abstract", "prefix": "Abstract"},
       {"type": "interface", "prefix": "I"},
       {"type": "genericTypeParameter", "prefix": "T"}

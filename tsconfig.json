@@ -5,10 +5,13 @@
     "removeComments": true,
     "inlineSourceMap": true,
     "preserveConstEnums": true,
-    "noImplicitAny": false,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "suppressImplicitAnyIndexErrors": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "strictNullChecks": true,
+    "stripInternal": true,
     "noFallthroughCasesInSwitch": true,
     "lib": ["es6"]
   }

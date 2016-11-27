@@ -5,6 +5,7 @@ import {isParameterProperty} from '../src/utils';
 import {AbstractConfigDependentRule} from '../src/rules';
 
 // TODO don't flag inherited members
+// TODO check renamed imports
 
 const PASCAL_OPTION = 'PascalCase';
 const CAMEL_OPTION  = 'camelCase';
@@ -24,6 +25,8 @@ const PREFIX_FAIL   = ' name must start with ';
 const SUFFIX_FAIL   = ' name must end with ';
 const PREFIX_FAIL_ARR  = ' name must start with one of ';
 const SUFFIX_FAIL_ARR  = ' name must end with one of ';
+
+type DeclarationWithIdentifierName = ts.Declaration & {name: ts.Identifier};
 
 type TFormat = 'camelCase' | 'PascalCase' | 'snake_case' | 'UPPER_CASE';
 type IdentifierType = 'class' | 'interface' | 'function' | 'variable' | 'method' |
@@ -366,8 +369,8 @@ class IdentifierNameWalker extends Lint.ScopeAwareRuleWalker<ts.Node> {
     }
 
     public visitMethodDeclaration(node: ts.MethodDeclaration) {
-        if (node.name.kind === ts.SyntaxKind.Identifier)
-            this._checkDeclaration(<ts.Declaration & {name: ts.Identifier}>node, TypeSelector.method);
+        if (isNameIdentifier(node))
+            this._checkDeclaration(node, TypeSelector.method);
         this._checkTypeParameters(node, Modifiers.local);
         super.visitMethodDeclaration(node);
     }
@@ -380,43 +383,43 @@ class IdentifierNameWalker extends Lint.ScopeAwareRuleWalker<ts.Node> {
 
     // what is this?
     public visitBindingElement(node: ts.BindingElement) {
-        if (node.name.kind === ts.SyntaxKind.Identifier)
-            this._checkDeclaration(<ts.Declaration & {name: ts.Identifier}>node, TypeSelector.variable);
+        if (isNameIdentifier(node))
+            this._checkDeclaration(node, TypeSelector.variable);
         super.visitBindingElement(node);
     }
 
     public visitParameterDeclaration(node: ts.ParameterDeclaration) {
         // TODO check everything in destructuring parameter
-        if (node.name.kind === ts.SyntaxKind.Identifier)
-            this._checkDeclaration(<ts.Declaration & {name: ts.Identifier}>node,
-                                    isParameterProperty(node) ? TypeSelector.parameterProperty
-                                                              : TypeSelector.parameter);
+        if (isNameIdentifier(node))
+            this._checkDeclaration(node,
+                                   isParameterProperty(node) ? TypeSelector.parameterProperty
+                                                             : TypeSelector.parameter);
 
         super.visitParameterDeclaration(node);
     }
 
     public visitPropertyDeclaration(node: ts.PropertyDeclaration) {
-        if (node.name.kind === ts.SyntaxKind.Identifier)
-            this._checkDeclaration(<ts.Declaration & {name: ts.Identifier}>node, TypeSelector.property);
+        if (isNameIdentifier(node))
+            this._checkDeclaration(node, TypeSelector.property);
         super.visitPropertyDeclaration(node);
     }
 
     public visitSetAccessor(node: ts.SetAccessorDeclaration) {
-        if (node.name.kind === ts.SyntaxKind.Identifier)
-            this._checkDeclaration(<ts.Declaration & {name: ts.Identifier}>node, TypeSelector.property);
+        if (isNameIdentifier(node))
+            this._checkDeclaration(node, TypeSelector.property);
         super.visitSetAccessor(node);
     }
 
     public visitGetAccessor(node: ts.GetAccessorDeclaration) {
-        if (node.name.kind === ts.SyntaxKind.Identifier)
-            this._checkDeclaration(<ts.Declaration & {name: ts.Identifier}>node, TypeSelector.property);
+        if (isNameIdentifier(node))
+            this._checkDeclaration(node, TypeSelector.property);
         super.visitGetAccessor(node);
     }
 
     public visitVariableDeclaration(node: ts.VariableDeclaration) {
         // TODO destructuring
-        if (node.name.kind === ts.SyntaxKind.Identifier)
-            this._checkDeclaration(<ts.Declaration & {name: ts.Identifier}>node, TypeSelector.variable);
+        if (isNameIdentifier(node))
+            this._checkDeclaration(node, TypeSelector.variable);
         super.visitVariableDeclaration(node);
     }
 
@@ -429,14 +432,14 @@ class IdentifierNameWalker extends Lint.ScopeAwareRuleWalker<ts.Node> {
 
     public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
         if (node.name !== undefined)
-            this._checkDeclaration(<ts.FunctionDeclaration & {name}>node, TypeSelector.function);
+            this._checkDeclaration(<ts.FunctionDeclaration & {name: ts.Identifier}>node, TypeSelector.function);
         this._checkTypeParameters(node, Modifiers.local);
         super.visitFunctionDeclaration(node);
     }
 
     public visitFuncitonExpression(node: ts.FunctionExpression) {
         if (node.name !== undefined)
-            this._checkDeclaration(<ts.FunctionExpression & {name}>node, TypeSelector.function);
+            this._checkDeclaration(<ts.FunctionExpression & {name: ts.Identifier}>node, TypeSelector.function);
         this._checkTypeParameters(node, Modifiers.local);
         super.visitFunctionExpression(node);
     }
@@ -446,7 +449,7 @@ class IdentifierNameWalker extends Lint.ScopeAwareRuleWalker<ts.Node> {
         super.visitArrowFunction(node);
     }
 
-    private _checkDeclaration(node: ts.Declaration & {name: ts.Identifier}, type: TypeSelector) {
+    private _checkDeclaration(node: DeclarationWithIdentifierName, type: TypeSelector) {
         this._checkName(node.name, type, this._getModifiers(node, type));
     }
 
@@ -511,7 +514,7 @@ class IdentifierNameWalker extends Lint.ScopeAwareRuleWalker<ts.Node> {
     private _getModifiers(node: ts.Node, type: TypeSelector): number {
         let modifiers = 0;
         if (node.modifiers !== undefined) {
-            if (type | TypeSelector.property) { // property, method, parameter property
+            if (type | Types.member) { // property, method, parameter property
                 if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.PrivateKeyword)) {
                     modifiers |= Modifiers.private;
                 } else if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.ProtectedKeyword)) {
@@ -552,4 +555,8 @@ function isSnakeCase(name: string) {
 
 function isUpperCase(name: string) {
     return name === name.toUpperCase();
+}
+
+function isNameIdentifier(node: ts.Declaration & {name: any}): node is DeclarationWithIdentifierName {
+    return node.name.kind === ts.SyntaxKind.Identifier;
 }

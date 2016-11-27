@@ -44,7 +44,7 @@ export function isUndefined(expression: ts.Expression): boolean {
 }
 
 export function getPreviousStatement(statement: ts.Statement): ts.Statement|undefined {
-    const parent = <ts.BlockLike>statement.parent;
+    const parent = <ts.Node>statement.parent;
     if (isBlockLike(parent)) {
         const index = parent.statements.indexOf(statement);
         if (index > 0)
@@ -57,10 +57,13 @@ export function isBlockLike(node: ts.Node): node is ts.BlockLike {
     return 'statements' in node;
 }
 
-export function getKeyword(node: ts.Node, keyword: ts.SyntaxKind, sourceFile?: ts.SourceFile): ts.KeywordTypeNode|undefined {
+export function getKeyword(node: ts.Node, keyword: ts.SyntaxKind, sourceFile?: ts.SourceFile): ts.Node|undefined {
+    if (keyword < ts.SyntaxKind.FirstKeyword || keyword > ts.SyntaxKind.LastKeyword)
+        return;
+
     const children = node.getChildren(sourceFile);
     for (let child of children) {
         if (child.kind === keyword)
-            return <ts.KeywordTypeNode> child;
+            return child;
     }
 }

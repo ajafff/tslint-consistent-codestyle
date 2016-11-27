@@ -4,15 +4,25 @@ var ModulePascal = "pascal";
 const MODULE_CONST  = "const"
 const another_const = "const"
       ~~~~~~~~~~~~~ [variable name must be in UPPER_CASE]
+const {foo, bar} = baz;
+       ~~~      [variable name must be in UPPER_CASE]
+            ~~~ [variable name must be in UPPER_CASE]
+const [foo, , bar] = baz;
+       ~~~        [variable name must be in UPPER_CASE]
+              ~~~ [variable name must be in UPPER_CASE]
 var _noLeading = "";
     ~~~~~~~~~~  [variable name must not have leading underscore]
 var trailing_ = "";
     ~~~~~~~~~   [variable name must not have trailing underscore]
 var number = 42;
 
-function foo() {}
-function Foo() {}
+function foo({Bar, Baz}) {}
+              ~~~      [parameter name must be in camelCase]
+                   ~~~ [parameter name must be in camelCase]
+function Foo([Foo, , Bar) {}
          ~~~ [function name must be in camelCase]
+              ~~~        [parameter name must be in camelCase]
+                     ~~~ [parameter name must be in camelCase]
 
 class TestClass {
       ~~~~~~~~~ [class name must start with one of Foo,Bar]

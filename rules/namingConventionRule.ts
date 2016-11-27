@@ -6,6 +6,7 @@ import {AbstractConfigDependentRule} from '../src/rules';
 
 // TODO don't flag inherited members
 // TODO check renamed imports
+// TODO skip all ambient declarations
 
 const PASCAL_OPTION = 'PascalCase';
 const CAMEL_OPTION  = 'camelCase';
@@ -67,20 +68,22 @@ enum Types {
     typeAlias = 1 << 9,
     genericTypeParameter = 1 << 10,
     enum = 1 << 11,
+    enumMember = 1 << 12,
 }
 
 enum TypeSelector {
     variable = Types.variable,
-    function = variable + Types.function,
-    parameter = variable + Types.parameter,
-    property = Types.member + Types.property,
-    parameterProperty = parameter + property,
-    method = Types.member + Types.method,
-    class = Types.type + Types.class,
-    interface = Types.type + Types.interface,
-    typeAlias = Types.type + Types.typeAlias,
-    genericTypeParameter = Types.type + Types.genericTypeParameter,
-    enum = Types.type + Types.enum,
+    function = variable | Types.function,
+    parameter = variable | Types.parameter,
+    property = Types.member | Types.property,
+    parameterProperty = parameter | property,
+    method = Types.member | Types.method,
+    class = Types.type | Types.class,
+    interface = Types.type | Types.interface,
+    typeAlias = Types.type | Types.typeAlias,
+    genericTypeParameter = Types.type | Types.genericTypeParameter,
+    enum = Types.type | Types.enum,
+    enumMember = property | Types.enumMember,
 }
 
 enum Modifiers {
@@ -107,15 +110,17 @@ enum Specifity {
     private = Specifity.public,
     abstract = 1 << 3,
     export = 1 << 4,
-    default = 1 << 5,
-    variable = 1 << 6,
+    import = 1 << 5,
+    default = 1 << 6,
+    variable = 2 << 6,
     function = Specifity.variable,
-    parameter = 1 << 7,
-    member = 1 << 8,
-    property = 1 << 9,
+    parameter = 3 << 6,
+    member = 4 << 6,
+    property = 5 << 6,
     method = Specifity.property,
-    type = 1 << 10,
-    class = 1 << 11,
+    enumMember = 6 << 6,
+    type = 7 << 6,
+    class = 8 << 6,
     interface = Specifity.class,
     typeAlias = Specifity.class,
     genericTypeParameter = Specifity.class,
@@ -179,10 +184,20 @@ class NameChecker {
             this._leadingUnderscore = format.leadingUnderscore;
         if (format.trailingUnderscore && format.trailingUnderscore !== 'allow')
             this._trailingUnderscore = format.trailingUnderscore;
-        if (format.prefix && (!Array.isArray(format.prefix) || format.prefix.length > 0))
-            this._prefix = format.prefix;
-        if (format.suffix && (!Array.isArray(format.suffix) || format.suffix.length > 0))
-            this._suffix = format.suffix;
+        if (format.prefix) {
+            if (!Array.isArray(format.prefix) || format.prefix.length > 1) {
+                this._prefix = format.prefix;
+            } else if (format.prefix.length === 1) {
+                this._prefix = format.prefix[0];
+            }
+        }
+        if (format.suffix) {
+            if (!Array.isArray(format.suffix) || format.suffix.length > 1) {
+                this._suffix = format.suffix;
+            } else if (format.suffix.length === 1) {
+                this._suffix = format.suffix[0];
+            }
+        }
         if (format.regex)
             this._regex = new RegExp(format.regex);
     }
@@ -381,19 +396,18 @@ class IdentifierNameWalker extends Lint.ScopeAwareRuleWalker<ts.Node> {
         super.visitInterfaceDeclaration(node);
     }
 
-    // what is this?
-    public visitBindingElement(node: ts.BindingElement) {
-        if (isNameIdentifier(node))
-            this._checkDeclaration(node, TypeSelector.variable);
-        super.visitBindingElement(node);
-    }
-
     public visitParameterDeclaration(node: ts.ParameterDeclaration) {
-        // TODO check everything in destructuring parameter
-        if (isNameIdentifier(node))
+        if (isNameIdentifier(node)) {
+            // param properties cannot be destructuring assignments
             this._checkDeclaration(node,
                                    isParameterProperty(node) ? TypeSelector.parameterProperty
                                                              : TypeSelector.parameter);
+        } else {
+            // handle destructuring
+            foreachDeclaredIdentifier(node.name, (name) => {
+                this._checkName(name, TypeSelector.parameter, Modifiers.local);
+            });
+        }
 
         super.visitParameterDeclaration(node);
     }
@@ -416,16 +430,18 @@ class IdentifierNameWalker extends Lint.ScopeAwareRuleWalker<ts.Node> {
         super.visitGetAccessor(node);
     }
 
-    public visitVariableDeclaration(node: ts.VariableDeclaration) {
-        // TODO destructuring
-        if (isNameIdentifier(node))
-            this._checkDeclaration(node, TypeSelector.variable);
-        super.visitVariableDeclaration(node);
-    }
-
     public visitVariableStatement(node: ts.VariableStatement) {
         // skip 'declare' keywords
         if (!Lint.hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword)) {
+            // compute modifiers once and reuse for all declared variables
+            let modifiers = this.getCurrentDepth() === 1 ? Modifiers.global : Modifiers.local;
+            if (Lint.isNodeFlagSet(node.declarationList, ts.NodeFlags.Const))
+                modifiers |= Modifiers.const;
+            const cb = (name: ts.Identifier) => this._checkName(name, TypeSelector.variable, modifiers);
+            for (let declaration of node.declarationList.declarations) {
+                // handle identifiers and destructuring
+                foreachDeclaredIdentifier(declaration.name, cb);
+            }
             super.visitVariableStatement(node);
         }
     }
@@ -532,9 +548,7 @@ class IdentifierNameWalker extends Lint.ScopeAwareRuleWalker<ts.Node> {
         if (type !== TypeSelector.property && type !== TypeSelector.method)
             modifiers |= this.getCurrentDepth() > 1 ? Modifiers.local : Modifiers.global;
 
-        // TODO destructuring
-        if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.ConstKeyword) ||
-            node.kind === ts.SyntaxKind.VariableDeclaration && Lint.isNodeFlagSet(<ts.Node>node.parent, ts.NodeFlags.Const))
+        if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.ConstKeyword)) // stuff like const enums
             modifiers |= Modifiers.const;
 
         return modifiers;
@@ -559,4 +573,15 @@ function isUpperCase(name: string) {
 
 function isNameIdentifier(node: ts.Declaration & {name: any}): node is DeclarationWithIdentifierName {
     return node.name.kind === ts.SyntaxKind.Identifier;
+}
+
+function foreachDeclaredIdentifier(bindingName: ts.BindingName, cb: (name: ts.Identifier) => void) {
+    if (bindingName.kind === ts.SyntaxKind.Identifier)
+        return cb(<ts.Identifier>bindingName);
+
+    const bindingPattern = <ts.BindingPattern>bindingName;
+    for (let element of bindingPattern.elements) {
+        if (element.kind === ts.SyntaxKind.BindingElement)
+            foreachDeclaredIdentifier((<ts.BindingElement>element).name, cb);
+    }
 }

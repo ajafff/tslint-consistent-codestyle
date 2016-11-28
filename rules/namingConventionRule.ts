@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 import * as Lint from 'tslint';
 
-import { isIdentifier, isParameterProperty } from '../src/utils';
+import { isIdentifier, isParameterProperty, isScopeBoundary } from '../src/utils';
 import {AbstractConfigDependentRule} from '../src/rules';
 
 // TODO don't flag inherited members
@@ -99,6 +99,7 @@ enum Modifiers {
     local = 64,
     abstract = 128,
     export = 256,
+    import = 512,
 }
 
 enum Specifity {
@@ -328,7 +329,8 @@ class NameChecker {
 
 }
 
-class IdentifierNameWalker extends Lint.ScopeAwareRuleWalker<ts.Node> {
+class IdentifierNameWalker extends Lint.RuleWalker {
+    private _depth = 0;
     private _rules: NormalizedConfig[];
     private _cache: Map<string, NameChecker>;
 
@@ -336,10 +338,6 @@ class IdentifierNameWalker extends Lint.ScopeAwareRuleWalker<ts.Node> {
         super(sourceFile, options);
         this._rules = this._normalizeRules(<IRuleConfig[]> options.ruleArguments);
         this._cache = new Map<string, NameChecker>();
-    }
-
-    public createScope(node: ts.Node): ts.Node {
-        return node;
     }
 
     private _normalizeRules(rules: IRuleConfig[]): NormalizedConfig[] {
@@ -364,40 +362,34 @@ class IdentifierNameWalker extends Lint.ScopeAwareRuleWalker<ts.Node> {
             if (isIdentifier(name))
                 this._checkName(name, TypeSelector.enumMember, modifiers);
         }
-        super.visitEnumDeclaration(node);
     }
 
     public visitTypeAliasDeclaration(node: ts.TypeAliasDeclaration) {
         this._checkDeclaration(node, TypeSelector.typeAlias);
         this._checkTypeParameters(node, Modifiers.global);
-        super.visitTypeAliasDeclaration(node);
     }
 
     public visitClassExpression(node: ts.ClassExpression) {
         if (node.name !== undefined)
             this._checkDeclaration(<ts.ClassExpression & {name: ts.Identifier}>node, TypeSelector.class);
         this._checkTypeParameters(node, Modifiers.global);
-        super.visitClassExpression(node);
     }
 
     public visitClassDeclaration(node: ts.ClassDeclaration) {
         if (node.name !== undefined)
             this._checkDeclaration(<ts.ClassDeclaration & {name: ts.Identifier}>node, TypeSelector.class);
         this._checkTypeParameters(node, Modifiers.global);
-        super.visitClassDeclaration(node);
     }
 
     public visitMethodDeclaration(node: ts.MethodDeclaration) {
         if (isNameIdentifier(node))
             this._checkDeclaration(node, TypeSelector.method);
         this._checkTypeParameters(node, Modifiers.local);
-        super.visitMethodDeclaration(node);
     }
 
     public visitInterfaceDeclaration(node: ts.InterfaceDeclaration) {
         this._checkDeclaration(node, TypeSelector.interface);
         this._checkTypeParameters(node, Modifiers.global);
-        super.visitInterfaceDeclaration(node);
     }
 
     public visitParameterDeclaration(node: ts.ParameterDeclaration) {
@@ -413,25 +405,21 @@ class IdentifierNameWalker extends Lint.ScopeAwareRuleWalker<ts.Node> {
             });
         }
 
-        super.visitParameterDeclaration(node);
     }
 
     public visitPropertyDeclaration(node: ts.PropertyDeclaration) {
         if (isNameIdentifier(node))
             this._checkDeclaration(node, TypeSelector.property);
-        super.visitPropertyDeclaration(node);
     }
 
     public visitSetAccessor(node: ts.SetAccessorDeclaration) {
         if (isNameIdentifier(node))
             this._checkDeclaration(node, TypeSelector.property);
-        super.visitSetAccessor(node);
     }
 
     public visitGetAccessor(node: ts.GetAccessorDeclaration) {
         if (isNameIdentifier(node))
             this._checkDeclaration(node, TypeSelector.property);
-        super.visitGetAccessor(node);
     }
 
     private _checkVariableDeclarationList(list: ts.VariableDeclarationList, modifiers: number) {
@@ -449,28 +437,24 @@ class IdentifierNameWalker extends Lint.ScopeAwareRuleWalker<ts.Node> {
         if (node.initializer !== undefined && node.initializer.kind === ts.SyntaxKind.VariableDeclarationList)
             this._checkVariableDeclarationList(<ts.VariableDeclarationList>node.initializer, this._getModifiers(node.initializer,
                                                                                                                 TypeSelector.variable));
-        super.visitForStatement(node);
     }
 
     public visitForOfStatement(node: ts.ForOfStatement) {
         if (node.initializer.kind === ts.SyntaxKind.VariableDeclarationList)
             this._checkVariableDeclarationList(<ts.VariableDeclarationList>node.initializer, this._getModifiers(node.initializer,
                                                                                                                 TypeSelector.variable));
-        super.visitForOfStatement(node);
     }
 
     public visitForInStatement(node: ts.ForInStatement) {
         if (node.initializer.kind === ts.SyntaxKind.VariableDeclarationList)
             this._checkVariableDeclarationList(<ts.VariableDeclarationList>node.initializer, this._getModifiers(node.initializer,
                                                                                                                 TypeSelector.variable));
-        super.visitForInStatement(node);
     }
 
     public visitVariableStatement(node: ts.VariableStatement) {
         // skip 'declare' keywords
         if (!Lint.hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword)) {
             this._checkVariableDeclarationList(node.declarationList, this._getModifiers(node, TypeSelector.variable));
-            super.visitVariableStatement(node);
         }
     }
 
@@ -478,19 +462,16 @@ class IdentifierNameWalker extends Lint.ScopeAwareRuleWalker<ts.Node> {
         if (node.name !== undefined)
             this._checkDeclaration(<ts.FunctionDeclaration & {name: ts.Identifier}>node, TypeSelector.function);
         this._checkTypeParameters(node, Modifiers.local);
-        super.visitFunctionDeclaration(node);
     }
 
     public visitFuncitonExpression(node: ts.FunctionExpression) {
         if (node.name !== undefined)
             this._checkDeclaration(<ts.FunctionExpression & {name: ts.Identifier}>node, TypeSelector.function);
         this._checkTypeParameters(node, Modifiers.local);
-        super.visitFunctionExpression(node);
     }
 
     public visitArrowFunction(node: ts.ArrowFunction) {
         this._checkTypeParameters(node, Modifiers.local);
-        super.visitArrowFunction(node);
     }
 
     private _checkDeclaration(node: DeclarationWithIdentifierName, type: TypeSelector) {
@@ -580,9 +561,78 @@ class IdentifierNameWalker extends Lint.ScopeAwareRuleWalker<ts.Node> {
         }
 
         if (type !== TypeSelector.property && type !== TypeSelector.method)
-            modifiers |= this.getCurrentDepth() > 1 ? Modifiers.local : Modifiers.global;
+            modifiers |= this._depth !== 0 ? Modifiers.local : Modifiers.global;
 
         return modifiers;
+    }
+
+    public walk(sourceFile: ts.Node) {
+        const cb = (node: ts.Node) => {
+            let boundary = isScopeBoundary(node);
+            if (boundary)
+                ++this._depth;
+            this.visitNode(node);
+            ts.forEachChild(node, cb);
+            if (boundary)
+                --this._depth;
+        };
+        ts.forEachChild(sourceFile, cb);
+    }
+
+    public visitNode(node: ts.Node) {
+        switch (node.kind) {
+            case ts.SyntaxKind.VariableStatement:
+                this.visitVariableStatement(<ts.VariableStatement>node);
+                break;
+            case ts.SyntaxKind.FunctionDeclaration:
+                this.visitFunctionDeclaration(<ts.FunctionDeclaration>node);
+                break;
+            case ts.SyntaxKind.FunctionExpression:
+                this.visitFuncitonExpression(<ts.FunctionExpression>node);
+                break;
+            case ts.SyntaxKind.ForStatement:
+                this.visitForStatement(<ts.ForStatement>node);
+                break;
+            case ts.SyntaxKind.ForInStatement:
+                this.visitForInStatement(<ts.ForInStatement>node);
+                break;
+            case ts.SyntaxKind.ForOfStatement:
+                this.visitForOfStatement(<ts.ForOfStatement>node);
+                break;
+            case ts.SyntaxKind.Parameter:
+                this.visitParameterDeclaration(<ts.ParameterDeclaration>node);
+                break;
+            case ts.SyntaxKind.ClassDeclaration:
+                this.visitClassDeclaration(<ts.ClassDeclaration>node);
+                break;
+            case ts.SyntaxKind.ClassExpression:
+                this.visitClassExpression(<ts.ClassExpression>node);
+                break;
+            case ts.SyntaxKind.InterfaceDeclaration:
+                this.visitInterfaceDeclaration(<ts.InterfaceDeclaration>node);
+                break;
+            case ts.SyntaxKind.EnumDeclaration:
+                this.visitEnumDeclaration(<ts.EnumDeclaration>node);
+                break;
+            case ts.SyntaxKind.TypeAliasDeclaration:
+                this.visitTypeAliasDeclaration(<ts.TypeAliasDeclaration>node);
+                break;
+            case ts.SyntaxKind.PropertyDeclaration:
+                this.visitPropertyDeclaration(<ts.PropertyDeclaration>node);
+                break;
+            case ts.SyntaxKind.MethodDeclaration:
+                this.visitMethodDeclaration(<ts.MethodDeclaration>node);
+                break;
+            case ts.SyntaxKind.GetAccessor:
+                this.visitGetAccessor(<ts.GetAccessorDeclaration>node);
+                break;
+            case ts.SyntaxKind.SetAccessor:
+                this.visitSetAccessor(<ts.SetAccessorDeclaration>node);
+                break;
+            case ts.SyntaxKind.ArrowFunction:
+                this.visitArrowFunction(<ts.ArrowFunction>node);
+                break;
+        }
     }
 }
 

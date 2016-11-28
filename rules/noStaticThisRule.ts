@@ -1,8 +1,8 @@
+import { isScopeBoundary } from '../src/utils';
 import * as ts from 'typescript';
 import * as Lint from 'tslint';
 
 const FAIL_MESSAGE = `don't use this in static methods`;
-const RESTRICT_ACCESSOR_OPTION = 'restrict-accessor';
 
 export class Rule extends Lint.Rules.AbstractRule {
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
@@ -10,16 +10,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-class StaticMethodWalker extends Lint.ScopeAwareRuleWalker<boolean> {
-    private _restrictAccessor: boolean;
-    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
-        super(sourceFile, options);
-
-        this._restrictAccessor = options.ruleArguments !== undefined &&
-                                 options.ruleArguments.indexOf(RESTRICT_ACCESSOR_OPTION) !== -1;
-    }
-
-    public createScope(node: ts.Node): boolean {
+class StaticMethodWalker extends Lint.RuleWalker {
+    private _isStatic(node: ts.Node): boolean {
         return (node.kind === ts.SyntaxKind.MethodDeclaration ||
                 node.kind === ts.SyntaxKind.GetAccessor ||
                 node.kind === ts.SyntaxKind.SetAccessor) &&
@@ -30,9 +22,21 @@ class StaticMethodWalker extends Lint.ScopeAwareRuleWalker<boolean> {
         this.addFailure(this.createFailure(node.getStart(this.getSourceFile()), 4, FAIL_MESSAGE));
     }
 
-    public visitNode(node: ts.Node) {
-        if (node.kind === ts.SyntaxKind.ThisKeyword && this.getCurrentScope())
-            this._displayError(<ts.ThisExpression>node);
-        super.visitNode(node);
+    public walk(node: ts.Node) {
+        const stack: boolean[] = [];
+        let current = false;
+        const cb = (child: ts.Node) => {
+            let boundary = isScopeBoundary(child);
+            if (boundary) {
+                stack.push(current);
+                current = this._isStatic(child);
+            }
+            if (current && child.kind === ts.SyntaxKind.ThisKeyword)
+                this._displayError(<ts.ThisExpression>child);
+            ts.forEachChild(child, cb);
+            if (boundary)
+                current = stack.pop()!;
+        };
+        ts.forEachChild(node, cb);
     }
 }

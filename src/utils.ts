@@ -71,3 +71,13 @@ export function getKeyword(node: ts.Node, keyword: ts.SyntaxKind, sourceFile?: t
 export function isIdentifier(node: ts.Node): node is ts.Identifier {
     return node.kind === ts.SyntaxKind.Identifier;
 }
+
+class Tmp extends Lint.ScopeAwareRuleWalker<void> {
+    public createScope() {}
+    public isScopeBoundary(node: ts.Node) {
+        return super.isScopeBoundary(node);
+    }
+}
+export function isScopeBoundary(node: ts.Node) {
+    return Tmp.prototype.isScopeBoundary.call(undefined, node);
+}

@@ -16,7 +16,7 @@ class IfWalker extends IfStatementWalker {
     public visitIfStatement(node: ts.IfStatement) {
         if (node.elseStatement !== undefined && isLastStatementReturn(node.thenStatement)) {
             const sourceFile = this.getSourceFile();
-            const elseKeyword = <ts.KeywordTypeNode> getKeyword(node, ts.SyntaxKind.ElseKeyword, sourceFile);
+            const elseKeyword = getKeyword(node, ts.SyntaxKind.ElseKeyword, sourceFile)!;
             this.addFailure(this.createFailure(elseKeyword.getStart(sourceFile),
                                                4,
                                                FAIL_MESSAGE));

@@ -16,9 +16,9 @@ var trailing_ = "";
     ~~~~~~~~~   [variable name must not have trailing underscore]
 var number = 42;
 
-function foo({Bar, Baz}) {}
-              ~~~      [parameter name must be in camelCase]
-                   ~~~ [parameter name must be in camelCase]
+function foo({_Bar, Baz, _bas}) {}
+              ~~~~      [parameter name must be in camelCase]
+                    ~~~ [parameter name must be in camelCase]
 function Foo([Foo, , Bar) {}
          ~~~ [function name must be in camelCase]
               ~~~        [parameter name must be in camelCase]
@@ -103,3 +103,6 @@ for (Foo of []);
 for (Foo in []);
 
 for (I = 0;;);
+
+export let foo = 'bar';
+           ~~~ [variable name must be in UPPER_CASE]

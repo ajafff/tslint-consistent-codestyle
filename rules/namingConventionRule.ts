@@ -181,9 +181,9 @@ class NameChecker {
     constructor(private readonly _type: TypeSelector, format: IFormat) {
         if (format.format)
             this._format = format.format;
-        if (format.leadingUnderscore && format.leadingUnderscore !== 'allow')
+        if (format.leadingUnderscore)
             this._leadingUnderscore = format.leadingUnderscore;
-        if (format.trailingUnderscore && format.trailingUnderscore !== 'allow')
+        if (format.trailingUnderscore)
             this._trailingUnderscore = format.trailingUnderscore;
         if (format.prefix) {
             if (!Array.isArray(format.prefix) || format.prefix.length > 1) {
@@ -429,9 +429,8 @@ class IdentifierNameWalker extends Lint.ScopeAwareRuleWalker<ts.Node> {
         super.visitGetAccessor(node);
     }
 
-    private _checkVariableDeclarationList(list: ts.VariableDeclarationList) {
+    private _checkVariableDeclarationList(list: ts.VariableDeclarationList, modifiers: number) {
         // compute modifiers once and reuse for all declared variables
-        let modifiers = this.getCurrentDepth() === 1 ? Modifiers.global : Modifiers.local;
         if (Lint.isNodeFlagSet(list, ts.NodeFlags.Const))
             modifiers |= Modifiers.const;
         const cb = (name: ts.Identifier) => this._checkName(name, TypeSelector.variable, modifiers);
@@ -443,26 +442,29 @@ class IdentifierNameWalker extends Lint.ScopeAwareRuleWalker<ts.Node> {
 
     public visitForStatement(node: ts.ForStatement) {
         if (node.initializer !== undefined && node.initializer.kind === ts.SyntaxKind.VariableDeclarationList)
-            this._checkVariableDeclarationList(<ts.VariableDeclarationList>node.initializer);
+            this._checkVariableDeclarationList(<ts.VariableDeclarationList>node.initializer, this._getModifiers(node.initializer,
+                                                                                                                TypeSelector.variable));
         super.visitForStatement(node);
     }
 
     public visitForOfStatement(node: ts.ForOfStatement) {
         if (node.initializer.kind === ts.SyntaxKind.VariableDeclarationList)
-            this._checkVariableDeclarationList(<ts.VariableDeclarationList>node.initializer);
+            this._checkVariableDeclarationList(<ts.VariableDeclarationList>node.initializer, this._getModifiers(node.initializer,
+                                                                                                                TypeSelector.variable));
         super.visitForOfStatement(node);
     }
 
     public visitForInStatement(node: ts.ForInStatement) {
         if (node.initializer.kind === ts.SyntaxKind.VariableDeclarationList)
-            this._checkVariableDeclarationList(<ts.VariableDeclarationList>node.initializer);
+            this._checkVariableDeclarationList(<ts.VariableDeclarationList>node.initializer, this._getModifiers(node.initializer,
+                                                                                                                TypeSelector.variable));
         super.visitForInStatement(node);
     }
 
     public visitVariableStatement(node: ts.VariableStatement) {
         // skip 'declare' keywords
         if (!Lint.hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword)) {
-            this._checkVariableDeclarationList(node.declarationList);
+            this._checkVariableDeclarationList(node.declarationList, this._getModifiers(node, TypeSelector.variable));
             super.visitVariableStatement(node);
         }
     }
@@ -492,8 +494,8 @@ class IdentifierNameWalker extends Lint.ScopeAwareRuleWalker<ts.Node> {
 
     private _checkName(name: ts.Identifier, type: TypeSelector, modifiers: number) {
         const matchingChecker = this._getMatchingChecker(type, modifiers);
-            if (matchingChecker !== undefined)
-                matchingChecker.check(name, this);
+        if (matchingChecker !== undefined)
+            matchingChecker.check(name, this);
     }
 
     private _getMatchingChecker(type: TypeSelector, modifiers: number): NameChecker|undefined {
@@ -564,13 +566,14 @@ class IdentifierNameWalker extends Lint.ScopeAwareRuleWalker<ts.Node> {
                 if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.StaticKeyword))
                     modifiers |= Modifiers.static;
             }
+            if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.ConstKeyword)) // stuff like const enums
+                modifiers |= Modifiers.const;
+            if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword))
+                modifiers |= Modifiers.export;
         }
 
         if (type !== TypeSelector.property && type !== TypeSelector.method)
             modifiers |= this.getCurrentDepth() > 1 ? Modifiers.local : Modifiers.global;
-
-        if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.ConstKeyword)) // stuff like const enums
-            modifiers |= Modifiers.const;
 
         return modifiers;
     }

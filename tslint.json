@@ -101,7 +101,8 @@
       {"type": "type", "format": "PascalCase"},
       {"type": "class", "modifiers": "abstract", "prefix": "Abstract"},
       {"type": "interface", "prefix": "I"},
-      {"type": "genericTypeParameter", "prefix": "T"}
+      {"type": "genericTypeParameter", "prefix": "T"},
+      {"type": "enumMember", "format": null}
     ],
     "no-else-after-return": true,
     "no-return-undefined": true,

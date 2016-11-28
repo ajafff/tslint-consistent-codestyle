@@ -1,0 +1,21 @@
+class Foo {
+    static bar() {
+        this.foo = this.bar;
+        ~~~~ [fail]
+                   ~~~~ [fail]
+        return this;
+               ~~~~ [fail]
+    }
+
+    static get baz() {
+        return this.baz;
+               ~~~~ [fail]
+    }
+
+    static set bas(v) {
+        this.bas = v;
+        ~~~~ [fail]
+    }
+}
+
+[fail]: don't use this in static methods

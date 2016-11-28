@@ -53,9 +53,10 @@ class TestClass {
     public static Bar() {};
     public static bar() {};
                   ~~~ [method name must be in PascalCase]
-    constructor(public readonly foo, protected bar) {}
-                                ~~~ [parameterProperty name must be in UPPER_CASE]
-                                               ~~~ [parameterProperty name must have leading underscore]
+    constructor(public readonly _foo, protected bar) {}
+                                ~~~~ [parameterProperty name must not have leading underscore]
+                                ~~~~ [parameterProperty name must be in UPPER_CASE]
+                                                ~~~ [parameterProperty name must have leading underscore]
     constructor(private readonly _FOO_Bar) {}
 }
 
@@ -106,3 +107,4 @@ for (I = 0;;);
 
 export let foo = 'bar';
            ~~~ [variable name must be in UPPER_CASE]
+export function foo(){}

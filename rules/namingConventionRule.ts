@@ -42,6 +42,7 @@ type UnderscoreOption = 'allow' | 'require' | 'forbid';
 interface IRuleScope {
     type: IdentifierType;
     modifiers?: Modifier | Modifier[];
+    final?: boolean;
 }
 
 type IRuleConfig = IRuleScope & IFormat;
@@ -139,9 +140,11 @@ class NormalizedConfig {
     private _format: IFormat;
     private _modifiers: number;
     private _specifity: number;
+    private _final: boolean;
 
     constructor(raw: IRuleConfig) {
         this._type = Types[raw.type];
+        this._final = !!raw.final;
         this._specifity = Specifity[raw.type];
         this._modifiers = 0;
         if (raw.modifiers !== undefined) {
@@ -159,6 +162,8 @@ class NormalizedConfig {
     }
 
     public matches(type: TypeSelector, modifiers: number) {
+        if (this._final && type > this._type << 1) // check if TypeSelector has a higher bit set than this._type
+            return false;
         return (this._type & type) !== 0 && (this._modifiers & ~modifiers) === 0;
     }
 

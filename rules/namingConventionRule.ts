@@ -575,6 +575,8 @@ class IdentifierNameWalker extends Lint.ScopeAwareRuleWalker<ts.Node> {
                 modifiers |= Modifiers.const;
             if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword))
                 modifiers |= Modifiers.export;
+            if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.AbstractKeyword))
+                modifiers |= Modifiers.abstract;
         }
 
         if (type !== TypeSelector.property && type !== TypeSelector.method)

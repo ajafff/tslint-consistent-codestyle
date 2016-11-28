@@ -9,6 +9,7 @@
        {"type": "variable", "modifiers": "export", "format": "UPPER_CASE", "final": true},
        {"type": "parameter", "leadingUnderscore": "allow", "final": true},
        {"type": "member", "format": "camelCase"},
+       {"type": "member", "modifiers": "abstract", "suffix": "Ajaff"},
        {"type": "member", "modifiers": "private", "leadingUnderscore": "require"},
        {"type": "member", "modifiers": "protected", "leadingUnderscore": "require"},
        {"type": "member", "modifiers": "static", "format": "PascalCase"},
@@ -17,6 +18,7 @@
        {"type": "property", "modifiers": ["private", "readonly"], "format": null, "prefix": "FOO_", "suffix": "Bar"},
        {"type": "type", "format": "PascalCase"},
        {"type": "class", "prefix": ["Foo", "Bar"]},
+       {"type": "class", "modifiers": "abstract", "prefix": "Abstract"},
        {"type": "genericTypeParameter", "prefix": "T"},
        {"type": "enum", "modifiers": "const", "format": "UPPER_CASE"},
        {"type": "enumMember", "modifiers": "const", "leadingUnderscore": "require"}

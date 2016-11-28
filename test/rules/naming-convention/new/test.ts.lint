@@ -108,3 +108,15 @@ for (I = 0;;);
 export let foo = 'bar';
            ~~~ [variable name must be in UPPER_CASE]
 export function foo(){}
+
+abstract class Foo {
+               ~~~ [class name must start with Abstract]
+    abstract get foo();
+                 ~~~ [property name must end with Ajaff]
+    abstract private bar();
+                     ~~~ [method name must end with Ajaff]
+                     ~~~ [method name must have leading underscore]
+    abstract get fooAjaff();
+    abstract private _barAjaff();
+}
+abstract class AbstractFoo() {}

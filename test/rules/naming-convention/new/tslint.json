@@ -7,6 +7,7 @@
        {"type": "variable", "format": "camelCase"},
        {"type": "variable", "modifiers": ["global", "const"], "format": "UPPER_CASE"},
        {"type": "variable", "modifiers": "export", "format": "UPPER_CASE", "final": true},
+       {"type": "parameter", "modifiers": "rename", "prefix": "ajaff"},
        {"type": "parameter", "leadingUnderscore": "allow", "final": true},
        {"type": "member", "format": "camelCase"},
        {"type": "member", "modifiers": "abstract", "suffix": "Ajaff"},

@@ -23,6 +23,9 @@ function Foo([Foo, , Bar) {}
          ~~~ [function name must be in camelCase]
               ~~~        [parameter name must be in camelCase]
                      ~~~ [parameter name must be in camelCase]
+function foo({bar: _bar, baz: ajaffBaz, foo: foo}) {}
+                   ~~~~ [parameter name must start with ajaff]
+                              ~~~~~~~~ [parameter name must be in camelCase]
 
 class TestClass {
       ~~~~~~~~~ [class name must start with one of Foo,Bar]

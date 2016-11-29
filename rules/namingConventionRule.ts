@@ -91,15 +91,17 @@ enum TypeSelector {
 enum Modifiers {
     const = 1,
     readonly = Modifiers.const,
-    static = 2,
-    public = 4,
-    protected = 8,
-    private = 16,
-    global = 32,
-    local = 64,
-    abstract = 128,
-    export = 256,
-    import = 512,
+    static = 1 << 1,
+    public = 1 << 2,
+    protected = 1 << 3,
+    private = 1 << 4,
+    global = 1 << 5,
+    local = 1 << 6,
+    abstract = 1 << 7,
+    export = 1 << 8,
+    import = 1 << 9,
+    original = 1 << 10,
+    rename = 1 << 11,
 }
 
 enum Specifity {
@@ -114,16 +116,18 @@ enum Specifity {
     abstract = 1 << 3,
     export = 1 << 4,
     import = 1 << 5,
-    default = 1 << 6,
-    variable = 2 << 6,
+    original = 1 << 6,
+    rename = Specifity.original,
+    default = 1 << 7,
+    variable = 2 << 7,
     function = Specifity.variable,
-    parameter = 3 << 6,
-    member = 4 << 6,
-    property = 5 << 6,
+    parameter = 3 << 7,
+    member = 4 << 7,
+    property = 5 << 7,
     method = Specifity.property,
-    enumMember = 6 << 6,
-    type = 7 << 6,
-    class = 8 << 6,
+    enumMember = 6 << 7,
+    type = 7 << 7,
+    class = 8 << 7,
     interface = Specifity.class,
     typeAlias = Specifity.class,
     genericTypeParameter = Specifity.class,
@@ -254,7 +258,7 @@ class NameChecker {
         if (this._prefix !== undefined) {
             if (Array.isArray(this._prefix)) {
                 identifier = this._checkPrefixes(identifier, name, this._prefix, walker);
-            } else if (identifier.slice(0, this._prefix.length) === this._prefix) {
+            } else if (identifier.startsWith(this._prefix)) {
                 identifier = identifier.slice(this._prefix.length);
             } else {
                 walker.addFailure(walker.createFailure(name.getStart(sourceFile),
@@ -265,7 +269,7 @@ class NameChecker {
         if (this._suffix !== undefined) {
             if (Array.isArray(this._suffix)) {
                 identifier = this._checkSuffixes(identifier, name, this._suffix, walker);
-            } else if (identifier.indexOf(this._suffix, identifier.length - this._suffix.length) !== -1) {
+            } else if (identifier.endsWith(this._suffix)) {
                 identifier = identifier.slice(0, -this._suffix.length);
             } else {
                 walker.addFailure(walker.createFailure(name.getStart(sourceFile),
@@ -305,7 +309,7 @@ class NameChecker {
 
     private _checkPrefixes(identifier: string, name: ts.Identifier, prefixes: string[], walker: Lint.RuleWalker): string {
         for (let prefix of prefixes) {
-            if (identifier.slice(0, prefix.length) === prefix)
+            if (identifier.startsWith(prefix))
                 return identifier.slice(prefix.length);
         }
         const sourceFile = walker.getSourceFile();
@@ -317,7 +321,7 @@ class NameChecker {
 
     private _checkSuffixes(identifier: string, name: ts.Identifier, suffixes: string[], walker: Lint.RuleWalker): string {
         for (let suffix of suffixes) {
-            if (identifier.indexOf(suffix, identifier.length - suffix.length) !== -1)
+            if (identifier.endsWith(suffix))
                 return identifier.slice(-suffix.length);
         }
         const sourceFile = walker.getSourceFile();
@@ -395,13 +399,15 @@ class IdentifierNameWalker extends Lint.RuleWalker {
     public visitParameterDeclaration(node: ts.ParameterDeclaration) {
         if (isNameIdentifier(node)) {
             // param properties cannot be destructuring assignments
-            this._checkDeclaration(node,
-                                   isParameterProperty(node) ? TypeSelector.parameterProperty
-                                                             : TypeSelector.parameter);
+            const type = isParameterProperty(node) ? TypeSelector.parameterProperty
+                                                   : TypeSelector.parameter;
+            this._checkName(node.name, type, this._getModifiers(node, type) | Modifiers.original);
         } else {
             // handle destructuring
-            foreachDeclaredIdentifier(node.name, (name) => {
-                this._checkName(name, TypeSelector.parameter, Modifiers.local);
+            foreachDeclaredIdentifier(node.name, (name, original) => {
+                this._checkName(name,
+                                TypeSelector.parameter,
+                                Modifiers.local | (original ? Modifiers.original : Modifiers.rename));
             });
         }
 
@@ -426,7 +432,9 @@ class IdentifierNameWalker extends Lint.RuleWalker {
         // compute modifiers once and reuse for all declared variables
         if (Lint.isNodeFlagSet(list, ts.NodeFlags.Const))
             modifiers |= Modifiers.const;
-        const cb = (name: ts.Identifier) => this._checkName(name, TypeSelector.variable, modifiers);
+        const cb = (name: ts.Identifier, original: boolean) => {
+            this._checkName(name, TypeSelector.variable, modifiers | (original ? Modifiers.original : Modifiers.rename));
+        };
         for (let {name} of list.declarations) {
             // handle identifiers and destructuring
             foreachDeclaredIdentifier(name, cb);
@@ -656,12 +664,18 @@ function isNameIdentifier(node: ts.Declaration & {name: any}): node is Declarati
     return node.name.kind === ts.SyntaxKind.Identifier;
 }
 
-function foreachDeclaredIdentifier(bindingName: ts.BindingName, cb: (name: ts.Identifier) => void) {
+function foreachDeclaredIdentifier(bindingName: ts.BindingName,
+                                   cb: (name: ts.Identifier, original: boolean) => void,
+                                   propertyName?: ts.PropertyName,
+                                   ) {
     if (isIdentifier(bindingName))
-        return cb(bindingName);
+        return cb(bindingName,
+                  propertyName === undefined ||
+                  propertyName.kind === ts.SyntaxKind.Identifier &&
+                  (<ts.Identifier>propertyName).text === bindingName.text);
 
     for (let element of bindingName.elements) {
         if (element.kind === ts.SyntaxKind.BindingElement)
-            foreachDeclaredIdentifier((<ts.BindingElement>element).name, cb);
+            foreachDeclaredIdentifier((<ts.BindingElement>element).name, cb, (<ts.BindingElement>element).propertyName);
     }
 }

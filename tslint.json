@@ -111,6 +111,7 @@
       true,
       "leading",
       "member-access"
-    ]
+    ],
+    "prefer-const-enum": true
   }
 }

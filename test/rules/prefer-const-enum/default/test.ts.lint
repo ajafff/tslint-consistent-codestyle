@@ -1,0 +1,44 @@
+enum Foo {
+~~~~~~~~ [enum can be declared const]
+    bar,
+    baz,
+}
+bar = Foo.bar;
+baz = Foo['baz'];
+
+enum Foo {
+~~~~~~~~ [enum can be declared const]
+    foo = 2,
+}
+
+enum Foo2 {
+    bar,
+    baz = foo,
+}
+
+enum Foo2 {
+    foo = 3,
+}
+
+enum Bar {
+~~~~~~~~ [enum can be declared const]
+    foo = 1,
+    bar = 1 + 1,
+    baz = 1 << 1,
+}
+
+const enum ConstBar {
+}
+
+enum Baz {
+~~~~~~~~ [enum can be declared const]
+    'foo',
+    `bar` = foo,
+    ['baz'] = Baz.bar,
+    bas = Baz['baz'],
+    quux = bas + Baz.baz | Baz['foo'] + ~~bar & Foo.bar - Foo2.bar,
+}
+
+enum Baz2 {
+    foo = Foo2.baz,
+}

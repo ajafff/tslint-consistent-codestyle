@@ -58,3 +58,11 @@ Usage:
 ```
 
 All rule options are optional, but without any option this rule does nothing.
+
+## prefer-const-enum [WIP]
+Flags all enum declarations, if enum can be declared as constant. That is: there is no dynamic member access and the enum object is never assigned or passed to anything.
+
+__Current limitations:__
+* no support for scopes
+* doesn't ignore exported enums (maybe add option)
+* doesn't detect if enum is assigned to variable or passed as function parameter

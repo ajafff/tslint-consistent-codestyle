@@ -100,8 +100,7 @@ enum Modifiers {
     abstract = 1 << 7,
     export = 1 << 8,
     import = 1 << 9,
-    original = 1 << 10,
-    rename = 1 << 11,
+    rename = 1 << 10,
 }
 
 enum Specifity {
@@ -116,8 +115,7 @@ enum Specifity {
     abstract = 1 << 3,
     export = 1 << 4,
     import = 1 << 5,
-    original = 1 << 6,
-    rename = Specifity.original,
+    rename = 1 << 6,
     default = 1 << 7,
     variable = 2 << 7,
     function = Specifity.variable,
@@ -361,7 +359,7 @@ class IdentifierNameWalker extends Lint.RuleWalker {
     public visitEnumDeclaration(node: ts.EnumDeclaration) {
         let modifiers = this._getModifiers(node, TypeSelector.enum);
         this._checkName(node.name, TypeSelector.enum, modifiers);
-        modifiers |= Modifiers.static | Modifiers.public; // treat enum members as static properties
+        modifiers |= Modifiers.static | Modifiers.public | Modifiers.readonly; // treat enum members as public static readonly properties
         for (let {name} of node.members) {
             if (isIdentifier(name))
                 this._checkName(name, TypeSelector.enumMember, modifiers);
@@ -399,15 +397,14 @@ class IdentifierNameWalker extends Lint.RuleWalker {
     public visitParameterDeclaration(node: ts.ParameterDeclaration) {
         if (isNameIdentifier(node)) {
             // param properties cannot be destructuring assignments
-            const type = isParameterProperty(node) ? TypeSelector.parameterProperty
-                                                   : TypeSelector.parameter;
-            this._checkName(node.name, type, this._getModifiers(node, type) | Modifiers.original);
+            this._checkDeclaration(node, isParameterProperty(node) ? TypeSelector.parameterProperty
+                                                                   : TypeSelector.parameter);
         } else {
             // handle destructuring
             foreachDeclaredIdentifier(node.name, (name, original) => {
                 this._checkName(name,
                                 TypeSelector.parameter,
-                                Modifiers.local | (original ? Modifiers.original : Modifiers.rename));
+                                Modifiers.local | (original ? 0 : Modifiers.rename));
             });
         }
 
@@ -433,7 +430,7 @@ class IdentifierNameWalker extends Lint.RuleWalker {
         if (Lint.isNodeFlagSet(list, ts.NodeFlags.Const))
             modifiers |= Modifiers.const;
         const cb = (name: ts.Identifier, original: boolean) => {
-            this._checkName(name, TypeSelector.variable, modifiers | (original ? Modifiers.original : Modifiers.rename));
+            this._checkName(name, TypeSelector.variable, modifiers | (original ? 0 : Modifiers.rename));
         };
         for (let {name} of list.declarations) {
             // handle identifiers and destructuring

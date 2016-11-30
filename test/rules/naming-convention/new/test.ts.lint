@@ -82,12 +82,6 @@ enum foo {
 }
 const enum foo {
            ~~~ [enum name must be in UPPER_CASE]
-    bar,
-    ~~~ [enumMember name must be in UPPER_CASE]
-    ~~~ [enumMember name must have leading underscore]
-    BAZ,
-    ~~~ [enumMember name must have leading underscore]
-    _BAS,
 }
 
 type foo = "bar";

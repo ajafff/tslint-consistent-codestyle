@@ -63,4 +63,35 @@ if (true) {
     }
 } else {}
 
+if (true) {
+    switch (foo) {
+        case 'a':
+            return;
+        case 'b':
+            return;
+        default:
+            return;
+    }
+} else {}
+  ~~~~ [fail]
+
+if (true) {
+    switch (foo) {
+        default:
+            return;
+        case 'a':
+            return;
+    }
+} else {}
+  ~~~~ [fail]
+
+if (true) {
+    switch (foo) {
+        case 'a':
+            return;
+        case 'b':
+            return;
+    }
+} else {}
+
 [fail]: unnecessary else after return

@@ -25,7 +25,7 @@ class IfWalker extends IfStatementWalker {
     }
 }
 
-function isLastStatementReturn(statement: ts.Statement): boolean {
+function isLastStatementReturn(statement: ts.Statement | ts.BlockLike | ts.DefaultClause): boolean {
     // recurse into nested blocks
     while (isBlockLike(statement)) {
         if (statement.statements.length === 0)
@@ -34,18 +34,30 @@ function isLastStatementReturn(statement: ts.Statement): boolean {
         statement = statement.statements[statement.statements.length - 1];
     }
 
-    return isDefinitelyReturned(statement);
+    return isDefinitelyReturned(<ts.Statement>statement);
 }
 
 function isDefinitelyReturned(statement: ts.Statement): boolean {
     if (statement.kind === ts.SyntaxKind.ReturnStatement)
         return true;
 
-    if (isIfStatement(statement)) {
+    if (isIfStatement(statement))
         return statement.elseStatement !== undefined &&
             isLastStatementReturn(statement.thenStatement) &&
             isLastStatementReturn(statement.elseStatement);
+
+    if (isSwitchStatement(statement)) {
+        let hasDefault = false;
+        for (let clause of statement.caseBlock.clauses) {
+            if (!isLastStatementReturn(clause))
+                return false;
+            hasDefault = hasDefault || clause.kind === ts.SyntaxKind.DefaultClause;
+        }
+        return hasDefault;
     }
-    // TODO add checks for switch, etc.
     return false;
+}
+
+function isSwitchStatement(node: ts.Node): node is ts.SwitchStatement {
+    return node.kind === ts.SyntaxKind.SwitchStatement;
 }

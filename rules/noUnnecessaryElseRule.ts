@@ -34,13 +34,14 @@ function endsControlFlow(statement: ts.Statement|ts.BlockLike|ts.DefaultClause, 
         statement = statement.statements[statement.statements.length - 1];
     }
 
-    return hasReturnBreakContinue(<ts.Statement>statement, isSwitch);
+    return hasReturnBreakContinueThrow(<ts.Statement>statement, isSwitch);
 }
 
-function hasReturnBreakContinue(statement: ts.Statement, isSwitch: boolean): boolean {
+function hasReturnBreakContinueThrow(statement: ts.Statement, isSwitch: boolean): boolean {
     if (statement.kind === ts.SyntaxKind.ReturnStatement ||
         statement.kind === ts.SyntaxKind.ContinueStatement ||
-        !isSwitch && statement.kind === ts.SyntaxKind.BreakStatement)
+        !isSwitch && statement.kind === ts.SyntaxKind.BreakStatement ||
+        statement.kind === ts.SyntaxKind.ThrowStatement)
         return true;
 
     if (isIfStatement(statement))

@@ -140,4 +140,14 @@ for (;;) {
     } else {}
 }
 
+if (true) {
+    throw 'foo';
+} else {}
+  ~~~~ [fail]
+
+if (true)
+    throw 'foo';
+else;
+~~~~ [fail]
+
 [fail]: unnecessary else

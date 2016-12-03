@@ -89,20 +89,22 @@ class ReturnWalker extends Lint.RuleWalker {
     }
 
     public visitNode(node: ts.Node) {
-        if (node.kind === ts.SyntaxKind.ElementAccessExpression)
-            this._checkAccess(<ts.ElementAccessExpression>node);
+        if (isElementAccessExpression(node))
+            this._checkAccess(node);
 
         super.visitNode(node);
     }
 }
 
-function getPropertyName(propertyName: ts.Node): string|undefined {
+function getPropertyName(propertyName: ts.PropertyName): string|undefined {
     if (isIdentifier(propertyName))
         return propertyName.text;
-    if (propertyName.kind === ts.SyntaxKind.ComputedPropertyName)
-        propertyName = (<ts.ComputedPropertyName>propertyName).expression;
-    if (isLiteralExpression(propertyName))
-        return propertyName.text;
+    if (isComputedPropertyName(propertyName)) {
+        if (!isLiteralExpression(propertyName.expression))
+            return;
+        propertyName = propertyName.expression;
+    }
+    return propertyName.text;
 }
 
 function isConstInitializer(initializer: ts.Expression, members: IMember[], enums: () => IterableIterator<IEnum>): boolean {
@@ -129,15 +131,12 @@ function isConstInitializer(initializer: ts.Expression, members: IMember[], enum
             return retVal = false;
         }
         if (isElementAccessExpression(current)) {
-            if (current.argumentExpression === undefined || current.argumentExpression.kind === ts.SyntaxKind.Identifier)
-                return retVal = false;
-            const propertyName = getPropertyName(current.argumentExpression);
-            if (propertyName === undefined)
+            if (current.argumentExpression === undefined || !isLiteralExpression(current.argumentExpression))
                 return retVal = false;
             for (let track of enums()) {
                 if (track.name === (<ts.Identifier>current.expression).text) {
                     for (let member of track.members) {
-                        if (member.name === propertyName)
+                        if (member.name === current.argumentExpression.text)
                             return retVal = member.const;
                     }
                 }
@@ -164,4 +163,8 @@ function isPropertyAccessExpression(node: ts.Node): node is ts.PropertyAccessExp
 
 function isElementAccessExpression(node: ts.Node): node is ts.ElementAccessExpression {
     return node.kind === ts.SyntaxKind.ElementAccessExpression;
+}
+
+function isComputedPropertyName(node: ts.Node): node is ts.ComputedPropertyName {
+    return node.kind === ts.SyntaxKind.ComputedPropertyName;
 }

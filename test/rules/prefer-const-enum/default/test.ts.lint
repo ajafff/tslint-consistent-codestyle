@@ -42,3 +42,11 @@ enum Baz {
 enum Baz2 {
     foo = Foo2.baz,
 }
+
+enum Bas {
+    foo,
+}
+
+enum Bas2 {
+    foo = Bas[foo],
+}

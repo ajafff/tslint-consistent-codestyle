@@ -73,6 +73,7 @@ class ReturnWalker extends Lint.RuleWalker {
                 const: isConstMember,
             });
         }
+        super.visitEnumDeclaration(node);
     }
 
     private _checkAccess(node: ts.ElementAccessExpression) {
@@ -128,7 +129,7 @@ function isConstInitializer(initializer: ts.Expression, members: IMember[], enum
             return retVal = false;
         }
         if (isElementAccessExpression(current)) {
-            if (current.argumentExpression === undefined)
+            if (current.argumentExpression === undefined || current.argumentExpression.kind === ts.SyntaxKind.Identifier)
                 return retVal = false;
             const propertyName = getPropertyName(current.argumentExpression);
             if (propertyName === undefined)

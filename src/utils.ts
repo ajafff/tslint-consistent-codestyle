@@ -1,4 +1,4 @@
-import { isBlockLike, isComputedPropertyName, isIdentifier, isLiteralExpression } from './typeguard';
+import { isBlockLike, isComputedPropertyName, isIdentifier, isIfStatement, isLiteralExpression } from './typeguard';
 import * as ts from 'typescript';
 import * as Lint from 'tslint';
 
@@ -71,6 +71,21 @@ export function getPropertyName(propertyName: ts.PropertyName): string|undefined
         propertyName = propertyName.expression;
     }
     return propertyName.text;
+}
+
+export function isElseIf(node: ts.IfStatement): boolean {
+    let last: ts.Node = node;
+    let parent = node.parent!;
+    while (isBlockLike(parent)) {
+        if (parent.statements.length > 1)
+            return false;
+        last = parent;
+        parent = parent.parent!;
+    }
+    return parent !== undefined &&
+         isIfStatement(parent) &&
+         parent.elseStatement !== undefined &&
+         parent.elseStatement === last;
 }
 
 export let isScopeBoundary = (class extends Lint.ScopeAwareRuleWalker<void> {

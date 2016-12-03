@@ -123,6 +123,8 @@ for (;;) {
             case 1:
                 continue;
             default:
+                console.log('foo');
+                // fallthrough
             case 2:
                 return;
         }
@@ -149,5 +151,10 @@ if (true)
     throw 'foo';
 else;
 ~~~~ [fail]
+
+if (true) {
+}else if (true) {
+    return;
+} else {}
 
 [fail]: unnecessary else

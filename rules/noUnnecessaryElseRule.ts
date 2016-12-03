@@ -1,11 +1,17 @@
 import * as ts from 'typescript';
 import * as Lint from 'tslint';
 
-import { getChildOfKind } from '../src/utils';
+import { getChildOfKind, isElseIf } from '../src/utils';
 import { isBlockLike, isIfStatement, isSwitchStatement } from '../src/typeguard';
 import { IfStatementWalker } from '../src/walker';
 
 const FAIL_MESSAGE = `unnecessary else`;
+
+const enum StatementType {
+    None,
+    Break,
+    Other,
+}
 
 export class Rule extends Lint.Rules.AbstractRule {
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
@@ -15,7 +21,9 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class IfWalker extends IfStatementWalker {
     public visitIfStatement(node: ts.IfStatement) {
-        if (node.elseStatement !== undefined && endsControlFlow(node.thenStatement)) {
+        if (node.elseStatement !== undefined &&
+            !isElseIf(node) &&
+            endsControlFlow(node.thenStatement)) {
             const sourceFile = this.getSourceFile();
             const elseKeyword = getChildOfKind(node, ts.SyntaxKind.ElseKeyword, sourceFile)!;
             this.addFailure(this.createFailure(elseKeyword.getStart(sourceFile),
@@ -25,40 +33,53 @@ class IfWalker extends IfStatementWalker {
     }
 }
 
-function endsControlFlow(statement: ts.Statement|ts.BlockLike|ts.DefaultClause, isSwitch: boolean = false): boolean {
+function endsControlFlow(statement: ts.Statement|ts.BlockLike|ts.DefaultClause): StatementType {
     // recurse into nested blocks
     while (isBlockLike(statement)) {
         if (statement.statements.length === 0)
-            return false;
+            return StatementType.None;
 
         statement = statement.statements[statement.statements.length - 1];
     }
 
-    return hasReturnBreakContinueThrow(<ts.Statement>statement, isSwitch);
+    return hasReturnBreakContinueThrow(<ts.Statement>statement);
 }
 
-function hasReturnBreakContinueThrow(statement: ts.Statement, isSwitch: boolean): boolean {
+function hasReturnBreakContinueThrow(statement: ts.Statement): StatementType {
     if (statement.kind === ts.SyntaxKind.ReturnStatement ||
         statement.kind === ts.SyntaxKind.ContinueStatement ||
-        !isSwitch && statement.kind === ts.SyntaxKind.BreakStatement ||
         statement.kind === ts.SyntaxKind.ThrowStatement)
-        return true;
+        return StatementType.Other;
+    if (statement.kind === ts.SyntaxKind.BreakStatement)
+        return StatementType.Break;
 
-    if (isIfStatement(statement))
-        return statement.elseStatement !== undefined &&
-            endsControlFlow(statement.thenStatement, isSwitch) &&
-            endsControlFlow(statement.elseStatement, isSwitch);
+    if (isIfStatement(statement)) {
+        if (statement.elseStatement === undefined)
+            return StatementType.None;
+        const then = endsControlFlow(statement.thenStatement);
+        if (!then)
+            return then;
+        return Math.min(
+            then,
+            endsControlFlow(statement.elseStatement),
+        );
+    }
 
     if (isSwitchStatement(statement)) {
         let hasDefault = false;
-        let isEmpty = false;
+        let fallthrough = false;
         for (let clause of statement.caseBlock.clauses) {
-            isEmpty = clause.statements.length === 0;
-            if (!isEmpty && !endsControlFlow(clause, true))
-                return false;
+            const retVal = endsControlFlow(clause);
+            if (retVal === StatementType.None) {
+                fallthrough = true;
+            } else if (retVal === StatementType.Break) {
+                return StatementType.None;
+            } else {
+                fallthrough = false;
+            }
             hasDefault = hasDefault || clause.kind === ts.SyntaxKind.DefaultClause;
         }
-        return !isEmpty && hasDefault;
+        return !fallthrough && hasDefault ? StatementType.Other : StatementType.None;
     }
-    return false;
+    return StatementType.None;
 }

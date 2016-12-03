@@ -110,9 +110,27 @@ if (true) {
         case 'a':
             return;
         case 'b':
+            console.log(foo);
+            // fallthrough
+        default:
+            return;
+    }
+} else {}
+  ~~~~ [fail]
+
+if (true) {
+    switch (foo) {
+        case 'a':
+            return;
+        case 'b':
             return;
         default:
     }
+} else {}
+
+if (true) {
+}else if (true) {
+    return;
 } else {}
 
 [fail]: unnecessary else after return

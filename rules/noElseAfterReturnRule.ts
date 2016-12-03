@@ -1,11 +1,17 @@
 import * as ts from 'typescript';
 import * as Lint from 'tslint';
 
-import { getChildOfKind } from '../src/utils';
+import { getChildOfKind, isElseIf } from '../src/utils';
 import { isBlockLike, isIfStatement, isSwitchStatement } from '../src/typeguard';
 import { IfStatementWalker } from '../src/walker';
 
 const FAIL_MESSAGE = `unnecessary else after return`;
+
+const enum StatementType {
+    None,
+    Break,
+    Return,
+}
 
 export class Rule extends Lint.Rules.AbstractRule {
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
@@ -15,7 +21,9 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class IfWalker extends IfStatementWalker {
     public visitIfStatement(node: ts.IfStatement) {
-        if (node.elseStatement !== undefined && isLastStatementReturn(node.thenStatement)) {
+        if (node.elseStatement !== undefined &&
+            !isElseIf(node) &&
+            isLastStatementReturn(node.thenStatement)) {
             const sourceFile = this.getSourceFile();
             const elseKeyword = getChildOfKind(node, ts.SyntaxKind.ElseKeyword, sourceFile)!;
             this.addFailure(this.createFailure(elseKeyword.getStart(sourceFile),
@@ -26,10 +34,14 @@ class IfWalker extends IfStatementWalker {
 }
 
 function isLastStatementReturn(statement: ts.Statement | ts.BlockLike | ts.DefaultClause): boolean {
+    return endsControlFlow(statement) === StatementType.Return;
+}
+
+function endsControlFlow(statement: ts.Statement|ts.BlockLike|ts.DefaultClause): StatementType {
     // recurse into nested blocks
     while (isBlockLike(statement)) {
         if (statement.statements.length === 0)
-            return false;
+            return StatementType.None;
 
         statement = statement.statements[statement.statements.length - 1];
     }
@@ -37,25 +49,39 @@ function isLastStatementReturn(statement: ts.Statement | ts.BlockLike | ts.Defau
     return isDefinitelyReturned(<ts.Statement>statement);
 }
 
-function isDefinitelyReturned(statement: ts.Statement): boolean {
+function isDefinitelyReturned(statement: ts.Statement): StatementType {
     if (statement.kind === ts.SyntaxKind.ReturnStatement)
-        return true;
+        return StatementType.Return;
+    if (statement.kind === ts.SyntaxKind.BreakStatement)
+        return StatementType.Break;
 
-    if (isIfStatement(statement))
-        return statement.elseStatement !== undefined &&
-            isLastStatementReturn(statement.thenStatement) &&
-            isLastStatementReturn(statement.elseStatement);
+    if (isIfStatement(statement)) {
+        if (statement.elseStatement === undefined)
+            return StatementType.None;
+        const then = endsControlFlow(statement.thenStatement);
+        if (!then)
+            return then;
+        return Math.min(
+            then,
+            endsControlFlow(statement.elseStatement),
+        );
+    }
 
     if (isSwitchStatement(statement)) {
         let hasDefault = false;
-        let isEmpty = false;
+        let fallthrough = false;
         for (let clause of statement.caseBlock.clauses) {
-            isEmpty = clause.statements.length === 0;
-            if (!isEmpty && !isLastStatementReturn(clause))
-                return false;
+            const retVal = endsControlFlow(clause);
+            if (retVal === StatementType.None) {
+                fallthrough = true;
+            } else if (retVal === StatementType.Break) {
+                return StatementType.None;
+            } else {
+                fallthrough = false;
+            }
             hasDefault = hasDefault || clause.kind === ts.SyntaxKind.DefaultClause;
         }
-        return !isEmpty && hasDefault;
+        return !fallthrough && hasDefault ? StatementType.Return : StatementType.None;
     }
-    return false;
+    return StatementType.None;
 }

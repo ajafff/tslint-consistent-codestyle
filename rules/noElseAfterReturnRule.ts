@@ -2,7 +2,7 @@ import * as ts from 'typescript';
 import * as Lint from 'tslint';
 
 import { getChildOfKind } from '../src/utils';
-import { isBlockLike, isIfStatement } from '../src/typeguard';
+import { isBlockLike, isIfStatement, isSwitchStatement } from '../src/typeguard';
 import { IfStatementWalker } from '../src/walker';
 
 const FAIL_MESSAGE = `unnecessary else after return`;
@@ -48,16 +48,14 @@ function isDefinitelyReturned(statement: ts.Statement): boolean {
 
     if (isSwitchStatement(statement)) {
         let hasDefault = false;
+        let isEmpty = false;
         for (let clause of statement.caseBlock.clauses) {
-            if (!isLastStatementReturn(clause))
+            isEmpty = clause.statements.length === 0;
+            if (!isEmpty && !isLastStatementReturn(clause))
                 return false;
             hasDefault = hasDefault || clause.kind === ts.SyntaxKind.DefaultClause;
         }
-        return hasDefault;
+        return !isEmpty && hasDefault;
     }
     return false;
-}
-
-function isSwitchStatement(node: ts.Node): node is ts.SwitchStatement {
-    return node.kind === ts.SyntaxKind.SwitchStatement;
 }

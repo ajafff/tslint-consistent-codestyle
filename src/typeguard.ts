@@ -28,3 +28,7 @@ export function isLiteralExpression(node: ts.Node): node is ts.LiteralExpression
 export function isPropertyAccessExpression(node: ts.Node): node is ts.PropertyAccessExpression {
     return node.kind === ts.SyntaxKind.PropertyAccessExpression;
 }
+
+export function isSwitchStatement(node: ts.Node): node is ts.SwitchStatement {
+    return node.kind === ts.SyntaxKind.SwitchStatement;
+}

@@ -1,0 +1,49 @@
+if (foo) {
+~~~~~~~~~~
+    if (bar) {
+~~~~~~~~~~~~ [if]
+    }
+}
+
+if (foo)
+~~~~~~~~
+    if (bar) {
+~~~~~~~~~~~~ [if]
+    }
+
+if (foo) {
+    if (bar) {
+    } else {}
+}
+
+if (foo) {
+    if (bar) {
+    }
+} else {}
+
+if (foo) {
+} else {
+  ~~~~~~
+    if (bar) {}
+~~~~~~~~~~~~ [else]
+}
+
+if (foo) {
+} else {
+  ~~~~~~
+    if (bar) {
+~~~~~~~~~~~~ [else]
+    } else {}
+}
+
+if (foo) {
+} else if (bar) {
+}
+
+if (foo) {
+} else if (bar) {
+} else {
+}
+
+[if]: if statements can be merged
+[else]: if statement can be merged with previous else

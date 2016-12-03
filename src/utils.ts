@@ -72,6 +72,10 @@ export function isIdentifier(node: ts.Node): node is ts.Identifier {
     return node.kind === ts.SyntaxKind.Identifier;
 }
 
+export function isIfStatement(node: ts.Node): node is ts.IfStatement {
+    return node.kind === ts.SyntaxKind.IfStatement;
+}
+
 export let isScopeBoundary = (class extends Lint.ScopeAwareRuleWalker<void> {
     public createScope() {}
     public static getFn() {

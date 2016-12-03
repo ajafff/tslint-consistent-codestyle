@@ -1,0 +1,6 @@
+{
+  "rulesDirectory": "../../../../rules",
+  "rules": {
+    "no-collapsible-if": true
+  }
+}

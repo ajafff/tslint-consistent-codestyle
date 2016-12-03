@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 import * as Lint from 'tslint';
 
-import { getKeyword, isBlockLike } from '../src/utils';
+import { getKeyword, isBlockLike, isIfStatement } from '../src/utils';
 import { IfStatementWalker } from '../src/walker';
 
 const FAIL_MESSAGE = `unnecessary else after return`;
@@ -40,11 +40,10 @@ function isDefinitelyReturned(statement: ts.Statement): boolean {
     if (statement.kind === ts.SyntaxKind.ReturnStatement)
         return true;
 
-    if (statement.kind === ts.SyntaxKind.IfStatement) {
-        const ifStatement = <ts.IfStatement>statement;
-        return ifStatement.elseStatement !== undefined &&
-            isLastStatementReturn(ifStatement.thenStatement) &&
-            isLastStatementReturn(ifStatement.elseStatement);
+    if (isIfStatement(statement)) {
+        return statement.elseStatement !== undefined &&
+            isLastStatementReturn(statement.thenStatement) &&
+            isLastStatementReturn(statement.elseStatement);
     }
     // TODO add checks for switch, etc.
     return false;

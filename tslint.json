@@ -104,6 +104,7 @@
       {"type": "genericTypeParameter", "prefix": "T"},
       {"type": "enumMember", "format": null}
     ],
+    "no-collapsible-if": true,
     "no-else-after-return": true,
     "no-return-undefined": true,
     "no-var-before-return": true,

@@ -1,0 +1,14 @@
+while (true);
+
+while (true);
+
+while (false);
+
+while (false);
+
+for (;false;++i);
+
+for (i = 1; --i;);
+
+for (i = 1; i, --i);
+

@@ -1,0 +1,19 @@
+for (;;);
+~~~~~~~~ [fail]
+
+for ( ; ; );
+~~~~~~~~~~~ [fail]
+
+for (;false;);
+~~~~~~~~~~~~~ [fail]
+
+for ( ; false ; );
+~~~~~~~~~~~~~~~~~ [fail]
+
+for (;false;++i);
+
+for (i = 1; --i;);
+
+for (i = 1; i, --i);
+
+[fail]: use while loop instead

@@ -1,0 +1,42 @@
+import { getChildOfKind } from '../src/utils';
+import * as ts from 'typescript';
+import * as Lint from 'tslint';
+
+import { ForStatementWalker } from '../src/walker';
+
+const FAIL_MESSAGE = `use while loop instead`;
+
+export class Rule extends Lint.Rules.AbstractRule {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+        return this.applyWithWalker(new ForWalker(sourceFile, this.getOptions()));
+    }
+}
+
+class ForWalker extends ForStatementWalker {
+    public visitForStatement(node: ts.ForStatement) {
+        if (node.initializer === undefined && node.incrementor === undefined) {
+            const sourceFile = this.getSourceFile();
+            const start = node.getStart(sourceFile);
+            const closeParenEnd = getChildOfKind(node, ts.SyntaxKind.CloseParenToken)!.getEnd();
+            const width = closeParenEnd - start;
+            let fix: Lint.Fix;
+            if (node.condition === undefined) {
+                fix = new Lint.Fix('prefer-while', [
+                    this.createReplacement(start, width, 'while (true)'),
+                ]);
+            } else {
+                const conditionEnd = node.condition.getEnd();
+                fix = new Lint.Fix('prefer-while', [
+                    this.createReplacement(start,
+                                           node.condition.getStart(sourceFile) - start,
+                                           'while ('),
+                    this.createReplacement(conditionEnd,
+                                           closeParenEnd - conditionEnd - 1,
+                                           ''),
+                ]);
+            }
+
+            this.addFailure(this.createFailure(start, width, FAIL_MESSAGE, fix));
+        }
+    }
+}

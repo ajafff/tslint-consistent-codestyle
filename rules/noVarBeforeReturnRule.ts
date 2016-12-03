@@ -1,8 +1,9 @@
 import * as ts from 'typescript';
 import * as Lint from 'tslint';
 
-import { bindingNameContains, getPreviousStatement, isIdentifier } from '../src/utils';
-import {ReturnStatementWalker} from '../src/walker';
+import { bindingNameContains, getPreviousStatement } from '../src/utils';
+import { isIdentifier } from '../src/typeguard';
+import { ReturnStatementWalker } from '../src/walker';
 
 export class Rule extends Lint.Rules.AbstractRule {
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {

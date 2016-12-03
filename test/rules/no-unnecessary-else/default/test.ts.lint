@@ -1,0 +1,143 @@
+if (true) {
+    return;
+} else {}
+  ~~~~ [fail]
+
+if (true) return;
+else ;
+~~~~ [fail]
+
+if (true) {
+    {
+        return;
+    }
+} else {}
+  ~~~~ [fail]
+
+if (true) {
+    if (true) {
+        return;
+    } else {
+      ~~~~ [fail]
+        return;
+    }
+} else {}
+  ~~~~ [fail]
+
+if (true) {
+    if (true) {
+        return;
+    }
+} else {}
+
+if (true) return;
+
+if (true) foo();
+else bar();
+
+if (true) {
+    return;
+}
+
+if (true) {
+    foo();
+} else {
+    bar();
+}
+
+if (true) {
+    {
+    }
+} else {}
+
+if (true) {
+    if (true) {
+        return;
+    } else {
+      ~~~~ [fail]
+    }
+} else {}
+
+if (true) {
+    if (true) {
+    }
+} else {}
+
+if (true) {
+    switch (foo) {
+        case 'a':
+            return;
+        case 'b':
+            return;
+        default:
+            return;
+    }
+} else {}
+  ~~~~ [fail]
+
+if (true) {
+    switch (foo) {
+        default:
+            return;
+        case 'a':
+            return;
+    }
+} else {}
+  ~~~~ [fail]
+
+if (true) {
+    switch (foo) {
+        case 'a':
+            return;
+        case 'b':
+            return;
+    }
+} else {}
+
+for (;;) {
+    if (true) {
+        continue;
+    } else {}
+      ~~~~ [fail]
+
+    if (true) {
+        break;
+    } else {}
+      ~~~~ [fail]
+
+    switch (foo) {
+        case 1:
+            if (foo) {
+                continue;
+            } else {}
+              ~~~~ [fail]
+            
+            if (foo) {
+                break;
+            } else {}
+              ~~~~ [fail]
+    }
+
+    if (true) {
+        switch (foo) {
+            case 1:
+                continue;
+            default:
+            case 2:
+                return;
+        }
+    } else {}
+      ~~~~ [fail]
+
+    if (true) {
+        switch (foo) {
+            case 1:
+                break;
+            default:
+            case 2:
+                return;
+        }
+    } else {}
+}
+
+[fail]: unnecessary else

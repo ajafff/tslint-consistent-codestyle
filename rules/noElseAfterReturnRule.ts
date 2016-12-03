@@ -1,7 +1,8 @@
 import * as ts from 'typescript';
 import * as Lint from 'tslint';
 
-import { getKeyword, isBlockLike, isIfStatement } from '../src/utils';
+import { getChildOfKind } from '../src/utils';
+import { isBlockLike, isIfStatement } from '../src/typeguard';
 import { IfStatementWalker } from '../src/walker';
 
 const FAIL_MESSAGE = `unnecessary else after return`;
@@ -16,7 +17,7 @@ class IfWalker extends IfStatementWalker {
     public visitIfStatement(node: ts.IfStatement) {
         if (node.elseStatement !== undefined && isLastStatementReturn(node.thenStatement)) {
             const sourceFile = this.getSourceFile();
-            const elseKeyword = getKeyword(node, ts.SyntaxKind.ElseKeyword, sourceFile)!;
+            const elseKeyword = getChildOfKind(node, ts.SyntaxKind.ElseKeyword, sourceFile)!;
             this.addFailure(this.createFailure(elseKeyword.getStart(sourceFile),
                                                4,
                                                FAIL_MESSAGE));

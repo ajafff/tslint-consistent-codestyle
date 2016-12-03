@@ -1,7 +1,8 @@
 import * as ts from 'typescript';
 import * as Lint from 'tslint';
 
-import { getKeyword, isBlockLike, isIfStatement } from '../src/utils';
+import { getChildOfKind } from '../src/utils';
+import { isBlockLike, isIfStatement } from '../src/typeguard';
 import { IfStatementWalker } from '../src/walker';
 
 const FAIL_MERGE_IF = `if statements can be merged`;
@@ -29,17 +30,9 @@ class CollapsibleIfWalker extends IfStatementWalker {
             node.elseStatement.statements.length === 1 &&
             isIfStatement(node.elseStatement.statements[0])) {
             const sourceFile = this.getSourceFile();
-            const start = getKeyword(node, ts.SyntaxKind.ElseKeyword, sourceFile)!.getStart(sourceFile);
+            const start = getChildOfKind(node, ts.SyntaxKind.ElseKeyword, sourceFile)!.getStart(sourceFile);
             const width = getChildOfKind(node.elseStatement.statements[0], ts.SyntaxKind.CloseParenToken, sourceFile)!.getEnd() - start;
             this.addFailure(this.createFailure(start, width, FAIL_MERGE_ELSE_IF));
         }
-    }
-}
-
-function getChildOfKind(node: ts.Node, kind: ts.SyntaxKind, sourceFile?: ts.SourceFile): ts.Node|undefined {
-    const children = node.getChildren(sourceFile);
-    for (let child of children) {
-        if (child.kind === kind)
-            return child;
     }
 }

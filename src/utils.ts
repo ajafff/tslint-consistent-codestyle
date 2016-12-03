@@ -1,3 +1,4 @@
+import { isBlockLike, isComputedPropertyName, isIdentifier, isLiteralExpression } from './typeguard';
 import * as ts from 'typescript';
 import * as Lint from 'tslint';
 
@@ -53,27 +54,23 @@ export function getPreviousStatement(statement: ts.Statement): ts.Statement|unde
     return;
 }
 
-export function isBlockLike(node: ts.Node): node is ts.BlockLike {
-    return 'statements' in node;
-}
-
-export function getKeyword(node: ts.Node, keyword: ts.SyntaxKind, sourceFile?: ts.SourceFile): ts.Node|undefined {
-    if (keyword < ts.SyntaxKind.FirstKeyword || keyword > ts.SyntaxKind.LastKeyword)
-        return;
-
+export function getChildOfKind(node: ts.Node, kind: ts.SyntaxKind, sourceFile?: ts.SourceFile): ts.Node|undefined {
     const children = node.getChildren(sourceFile);
     for (let child of children) {
-        if (child.kind === keyword)
+        if (child.kind === kind)
             return child;
     }
 }
 
-export function isIdentifier(node: ts.Node): node is ts.Identifier {
-    return node.kind === ts.SyntaxKind.Identifier;
-}
-
-export function isIfStatement(node: ts.Node): node is ts.IfStatement {
-    return node.kind === ts.SyntaxKind.IfStatement;
+export function getPropertyName(propertyName: ts.PropertyName): string|undefined {
+    if (isIdentifier(propertyName))
+        return propertyName.text;
+    if (isComputedPropertyName(propertyName)) {
+        if (!isLiteralExpression(propertyName.expression))
+            return;
+        propertyName = propertyName.expression;
+    }
+    return propertyName.text;
 }
 
 export let isScopeBoundary = (class extends Lint.ScopeAwareRuleWalker<void> {

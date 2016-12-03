@@ -1,4 +1,5 @@
-import { isIdentifier } from '../src/utils';
+import { isElementAccessExpression, isIdentifier, isLiteralExpression, isPropertyAccessExpression } from '../src/typeguard';
+import { getPropertyName } from '../src/utils';
 import * as ts from 'typescript';
 import * as Lint from 'tslint';
 
@@ -96,17 +97,6 @@ class ReturnWalker extends Lint.RuleWalker {
     }
 }
 
-function getPropertyName(propertyName: ts.PropertyName): string|undefined {
-    if (isIdentifier(propertyName))
-        return propertyName.text;
-    if (isComputedPropertyName(propertyName)) {
-        if (!isLiteralExpression(propertyName.expression))
-            return;
-        propertyName = propertyName.expression;
-    }
-    return propertyName.text;
-}
-
 function isConstInitializer(initializer: ts.Expression, members: IMember[], enums: () => IterableIterator<IEnum>): boolean {
     let retVal = true;
     const checkFn = (current: ts.Expression) => {
@@ -150,21 +140,4 @@ function isConstInitializer(initializer: ts.Expression, members: IMember[], enum
     checkFn(initializer);
 
     return retVal;
-}
-
-function isLiteralExpression(node: ts.Node): node is ts.LiteralExpression {
-    return node.kind >= ts.SyntaxKind.FirstLiteralToken &&
-           node.kind <= ts.SyntaxKind.LastLiteralToken;
-}
-
-function isPropertyAccessExpression(node: ts.Node): node is ts.PropertyAccessExpression {
-    return node.kind === ts.SyntaxKind.PropertyAccessExpression;
-}
-
-function isElementAccessExpression(node: ts.Node): node is ts.ElementAccessExpression {
-    return node.kind === ts.SyntaxKind.ElementAccessExpression;
-}
-
-function isComputedPropertyName(node: ts.Node): node is ts.ComputedPropertyName {
-    return node.kind === ts.SyntaxKind.ComputedPropertyName;
 }

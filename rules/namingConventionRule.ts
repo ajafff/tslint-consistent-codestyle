@@ -1,8 +1,9 @@
 import * as ts from 'typescript';
 import * as Lint from 'tslint';
 
-import { isIdentifier, isParameterProperty, isScopeBoundary } from '../src/utils';
-import {AbstractConfigDependentRule} from '../src/rules';
+import { isParameterProperty, isScopeBoundary } from '../src/utils';
+import { isIdentifier } from '../src/typeguard';
+import { AbstractConfigDependentRule } from '../src/rules';
 
 // TODO don't flag inherited members
 // TODO check renamed imports
@@ -427,7 +428,7 @@ class IdentifierNameWalker extends Lint.RuleWalker {
 
     private _checkVariableDeclarationList(list: ts.VariableDeclarationList, modifiers: number) {
         // compute modifiers once and reuse for all declared variables
-        if (Lint.isNodeFlagSet(list, ts.NodeFlags.Const))
+        if ((list.flags & ts.NodeFlags.Const) !== 0)
             modifiers |= Modifiers.const;
         const cb = (name: ts.Identifier, original: boolean) => {
             this._checkName(name, TypeSelector.variable, modifiers | (original ? 0 : Modifiers.rename));

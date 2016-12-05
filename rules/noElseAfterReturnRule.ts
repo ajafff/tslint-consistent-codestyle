@@ -7,6 +7,8 @@ import { IfStatementWalker } from '../src/walker';
 
 const FAIL_MESSAGE = `unnecessary else after return`;
 
+// TODO respect break label in switch
+
 const enum StatementType {
     None,
     Break,

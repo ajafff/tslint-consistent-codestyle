@@ -58,6 +58,7 @@ interface IFormat {
 }
 
 enum Types {
+    // tslint:disable:naming-convention
     default = -1,
     variable = 1,
     function = 1 << 1,
@@ -72,9 +73,11 @@ enum Types {
     genericTypeParameter = 1 << 10,
     enum = 1 << 11,
     enumMember = 1 << 12,
+    // tslint:enable:naming-convention
 }
 
 enum TypeSelector {
+    // tslint:disable:naming-convention
     variable = Types.variable,
     function = variable | Types.function,
     parameter = variable | Types.parameter,
@@ -87,9 +90,11 @@ enum TypeSelector {
     genericTypeParameter = Types.type | Types.genericTypeParameter,
     enum = Types.type | Types.enum,
     enumMember = property | Types.enumMember,
+    // tslint:enable:naming-convention
 }
 
 enum Modifiers {
+    // tslint:disable:naming-convention
     const = 1,
     readonly = Modifiers.const,
     static = 1 << 1,
@@ -102,9 +107,11 @@ enum Modifiers {
     export = 1 << 8,
     import = 1 << 9,
     rename = 1 << 10,
+    // tslint:enable:naming-convention
 }
 
 enum Specifity {
+    // tslint:disable:naming-convention
     const = 1,
     readonly = Specifity.const,
     static = 1 << 1,
@@ -131,6 +138,7 @@ enum Specifity {
     typeAlias = Specifity.class,
     genericTypeParameter = Specifity.class,
     enum = Specifity.class,
+    // tslint:enable:naming-convention
 }
 
 export class Rule extends AbstractConfigDependentRule {

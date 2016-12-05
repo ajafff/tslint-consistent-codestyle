@@ -157,4 +157,12 @@ if (true) {
     return;
 } else {}
 
+if (true) {
+}else{
+    if (true) {
+        return;
+    } else {}
+      ~~~~ [fail]
+}
+
 [fail]: unnecessary else

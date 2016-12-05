@@ -74,18 +74,10 @@ export function getPropertyName(propertyName: ts.PropertyName): string|undefined
 }
 
 export function isElseIf(node: ts.IfStatement): boolean {
-    let last: ts.Node = node;
-    let parent = node.parent!;
-    while (isBlockLike(parent)) {
-        if (parent.statements.length > 1)
-            return false;
-        last = parent;
-        parent = parent.parent!;
-    }
-    return parent !== undefined &&
-         isIfStatement(parent) &&
+    const parent = node.parent!;
+    return isIfStatement(parent) &&
          parent.elseStatement !== undefined &&
-         parent.elseStatement === last;
+         parent.elseStatement === node;
 }
 
 export let isScopeBoundary = (class extends Lint.ScopeAwareRuleWalker<void> {

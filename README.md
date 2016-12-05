@@ -14,7 +14,7 @@ Configure tslint to use the tslint-consistent-codestyle folder:
 
 Add the following path to the `rulesDirectory` setting in your `tslint.json` file:
 
-```json
+```javascript
 {
    "rulesDirectory": ["node_modules/tslint-consistent-codestyle/rules"]
    "rules": {
@@ -40,14 +40,15 @@ This rule comes to rescue you.
 
 Not passing:
 ```javascript
+/* 1 */
 if (foo)
   if (bar);
-
+/* 2 */
 if (foo) {
   if (bar) {
   }
 }
-
+/* 3 */
 if (foo) {
 } else {
   if (bar) {
@@ -57,11 +58,12 @@ if (foo) {
 ```
 Passing:
 ```javascript
+/* 1 */
 if (foo && bar);
-
+/* 2 */
 if (foo && bar) {
 }
-
+/* 3 */
 if (foo) {
 } else if (bar) {
 } else {
@@ -73,7 +75,7 @@ if (foo) {
   }
 }
 ```
-I recommend you use this rule together with one of [no-else-after-return](#no-else-after-return) or [no-unnecessary-else](#no-unnecessary-else) to further reduce block nesting.
+I recommend you use this rule together with [no-else-after-return](#no-else-after-return) or [no-unnecessary-else](#no-unnecessary-else) to further reduce block nesting.
 
 ## no-else-after-return
 Works like [no-else-return from eslint](http://eslint.org/docs/rules/no-else-return).
@@ -102,7 +104,7 @@ But if the destructuring assignment for this variable contains a default value o
 
 ## parameter-properties
 Usage:
-```json
+```javascript
 "parameter-properties": [
   true,
   "all-or-none",   // forces all or none of a constructors parameters to be parameter properties

@@ -92,7 +92,7 @@
     /* custom rules */
     "naming-convention": [
       true,
-      {"type": "default", "format": "camelCase", "leadingWhitespace": "forbid", "trailingWhitespace": "forbid"},
+      {"type": "default", "format": "camelCase", "leadingUnderscore": "forbid", "trailingUnderscore": "forbid"},
       {"type": "variable", "modifiers": ["global", "const"], "format": "UPPER_CASE"},
       {"type": "parameter", "leadingUnderscore": "allow", "final": true},
       {"type": "member", "modifiers": "private", "leadingUnderscore": "require"},

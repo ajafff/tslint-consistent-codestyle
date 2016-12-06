@@ -8,7 +8,7 @@ import { AbstractConfigDependentRule } from '../src/rules';
 // TODO don't flag inherited members
 // TODO check renamed imports
 // TODO skip all ambient declarations
-// TODO use startsWith and endsWith
+// TODO async modifier
 
 const PASCAL_OPTION = 'PascalCase';
 const CAMEL_OPTION  = 'camelCase';

@@ -30,9 +30,170 @@ Now configure some of the new rules.
 ## naming-convention
 Enforce consistent names for almost everything.
 
-Docs are comming soon, sorry.
+This rule is configured with an array of configuration objects. All of those objects are made up of 2 parts. The first could be called the "selector", because it describes, *what* is affected by this config. The second part consists of one or more formatting rules.
 
-Meanwhile you can have a look at the [configuration I use in this project](https://github.com/ajafff/tslint-consistent-codestyle/blob/master/tslint.json#L93-L106).
+So for example, if you want to force every local variable to be in camelCase, you simply write the config as shown below:
+```javascript
+{
+  "type": "variable",
+  "modifiers": "local",
+  "format": "camelCase"
+}
+```
+
+__Selector__:
+
+* `type: string`: The selector consists of a required field `type`, which identifies the type of thing this configuration applies to.
+* `modifiers?: string|string[]`: To further specify your selection you can provide one or more `modifiers`. All of those modifiers must match an identifier, to activate this config. That means `["global", "const"]` will match every constant in global scope. It will not match any not-const global. Some of those modifiers are mutually exclusive, so you will never match anything if you specify more than one of them, for example `global` and `local` or the access modifiers `private`, `protected` and `public`.
+* `final?: boolean`: If set to true, this configuration will not contribute to the composition of any subtype's configuration.
+
+__Formatting rules__:
+
+All formatting rules are optional. Formatting rules are inherited by the `type`'s parent type. You can shadow the parent config by setting a new rule for the desired check or even disable the check by setting any falsy value other than `undefined`.
+
+* `regex: string`: A regular expression, which is applied to the name. (without any regex flags)
+* `leadingUnderscore: string, trailingUnderscore: string`: Options `forbid`, `allow` and `require` can be used to forbid, allow or require _one_ leading or trailing underscore in the name. **If one option is specified, the leading or trailing underscore will be sliced off the name before any further checks are performed.**
+* `prefix: string|string[], suffix: string|string[]`: Specify one or more prefixes or suffixes. When given a single string, that string must match in the specified position. When given an array, one of the strings must match in the specified position. Matching is done in the given order. **If a prefix or suffix is specified, the matching portion of the name is sliced off before any further checks are performed:** If you enforce `cascalCase` and a prefix `has`, the name `hasFoo` will not match. That's because the prefix `has` is removed and the remaining `Foo` is not valid `camelCase`  
+* `format: string`: Valid options are `camelCase`, `PascalCase`, `UPPER_CASE` and `snake_case`.
+
+__"Inheritance" / Extending configurations:__
+
+As mentioned above, a type's configuration is used as a base for the configuration of all of it's subtypes. Of course the subtype can override any inherited configuration option by providing a new value or disable it by setting a falsy value other than `undefined`.
+
+For example there is a base type `default` that applies to every other type, if it is not declared as `final`.
+We will cover that concept later in the examples section.
+
+### Types
+___default___
+
+* Scope: is the base for everything
+* Valid modifiers: refer to subtypes
+
+
+___variable___
+
+* Scope: every variable declared with `var`, `let` and `const`
+* Extends: `default`
+* Valid modifiers:
+  * `global` or `local`
+  * `const`
+  * `export`
+  * `rename` // if you rename a property in a destructuring assignment, e.g. `let {foo: myFoo} = bar`
+
+
+___function___
+
+* Scope: every function and named function expression
+* Extends: `variable`
+* Valid modifiers:
+  * `global` or `local`
+  * `export`
+
+
+___parameter___
+
+* Scope: parameters
+* Extends: `variable`, always has `local` modifier
+* Valid modifiers:
+  * `rename`
+
+
+___member___
+
+* Scope: used as superclass for `property`, `method`, ...
+* Extends: `default`, always has `local` modifier
+* Valid modifiers: refer to subtypes
+
+
+___property___
+
+* Scope: class properties (static and instance)
+* Extends: `member`
+* Valid modifiers:
+  * `private`, `protected` or `public`
+  * `static`
+  * `const` == `readonly` // can be used interchangably. internally both are handled as `const`
+  * `abstract` // for abstract property accessors
+
+
+___parameterProperty___
+
+* Scope: class constructor's parameter properties
+* Extends: `property` and `parameter`
+* Valid modifiers:
+  * `private`, `protected` or `public`
+  * `const` == `readonly`
+
+
+___enumMember___
+
+* Scope: all members of enums
+* Extends: `property`, always has `public`, `static`, `const`/`readonly` modifiers
+* Valid modifiers:
+  * everything from type `enum`
+
+
+___method___
+
+* Scope: class methods (static and instance)
+* Extends: `member`
+* Valid modifiers:
+  * `private`, `protected` or `public`
+  * `static`
+  * `abstract`
+
+
+___type___
+
+* Scope: used as superclass for `class`, `interface`, ...
+* Extends: `default`
+* Valid modifiers: refer to subtypes
+
+
+___class___
+
+* Scope: all classes and named class expressions
+* Extends: `type`
+* Valid modifiers:
+  * `global` or `local`
+  * `abstract`
+  * `export`
+
+
+___interface___
+
+* Scope: all interfaces
+* Extends: `type`
+* Valid modifiers:
+  * `global` or `local`
+  * `export`
+
+
+___typeAlias___
+
+* Scope: all type aliases, e.g. `type Foo = "a" | "b"`
+* Extends: `type`
+* Valid modifiers:
+  * `global` or `local`
+  * `export`
+
+
+___genericTypeParameter___
+
+* Scope: all generic type parameters, e.g. `class Foo<T, U> {}` or `function<T>(v: T): T {}`
+* Extends: `type`
+* Valid modifiers:
+  * `global` _if found on a class_ or `local` _if found on a function_
+
+
+___enum___
+
+* Scope: all enums
+* Extends: `type`
+* Valid modifiers:
+  * `global` or `local`
+  * `const`
+  * `export`
 
 ## no-collapsible-if
 *Tired of unnecessarily deep nested if blocks?*

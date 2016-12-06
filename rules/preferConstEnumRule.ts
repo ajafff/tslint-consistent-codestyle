@@ -98,46 +98,46 @@ class ReturnWalker extends Lint.RuleWalker {
 }
 
 function isConstInitializer(initializer: ts.Expression, members: IMember[], enums: () => IterableIterator<IEnum>): boolean {
-    let retVal = true;
-    const checkFn = (current: ts.Expression) => {
-        if (!retVal)
-            return;
+    // brainfuck: ts.forEachChild stops when truthy value is returned, so we need to invert every boolean
+    const isNotConst = (current: ts.Expression): boolean => {
         if (isIdentifier(current)) {
             for (let member of members) {
                 if (current.text === member.name)
-                    return retVal = member.const;
+                    return !member.const;
             }
-            return retVal = false;
+            return true;
         }
         if (isPropertyAccessExpression(current)) {
+            if (!isIdentifier(current.expression))
+                return true;
             for (let track of enums()) {
-                if (track.name === (<ts.Identifier>current.expression).text) {
+                if (track.name === current.expression.text) {
                     for (let member of track.members) {
                         if (member.name === current.name.text)
-                            return retVal = member.const;
+                            return !member.const;
                     }
                 }
             }
-            return retVal = false;
+            return true;
         }
         if (isElementAccessExpression(current)) {
-            if (current.argumentExpression === undefined || !isLiteralExpression(current.argumentExpression))
-                return retVal = false;
+            if (current.argumentExpression === undefined ||
+                !isLiteralExpression(current.argumentExpression) ||
+                !isIdentifier(current.expression))
+                return true;
             for (let track of enums()) {
-                if (track.name === (<ts.Identifier>current.expression).text) {
+                if (track.name === current.expression.text) {
                     for (let member of track.members) {
                         if (member.name === current.argumentExpression.text)
-                            return retVal = member.const;
+                            return !member.const;
                     }
                 }
             }
-            return retVal = false;
+            return true;
         }
 
-        ts.forEachChild(current, checkFn);
+        return ts.forEachChild(current, isNotConst);
     };
 
-    checkFn(initializer);
-
-    return retVal;
+    return !isNotConst(initializer);
 }

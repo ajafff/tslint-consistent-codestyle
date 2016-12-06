@@ -58,10 +58,36 @@ All formatting rules are optional. Formatting rules are inherited by the `type`'
 
 __"Inheritance" / Extending configurations:__
 
-As mentioned above, a type's configuration is used as a base for the configuration of all of it's subtypes. Of course the subtype can override any inherited configuration option by providing a new value or disable it by setting a falsy value other than `undefined`.
+As mentioned above, a type's configuration is used as base for the configuration of all of it's subtypes. Of course the subtype can override any inherited configuration option by providing a new value or disable it by setting a falsy value other than `undefined`.
 
 For example there is a base type `default` that applies to every other type, if it is not declared as `final`.
 We will cover that concept later in the examples section.
+
+__Ordering__
+
+You do not have to order your configurations. In fact the order is completely irrelevant, since everything is sorted internally.
+
+The first sort criteria is the type. They are sorted base first, subclass last, as presented in section [Types](#types).
+In the second pass, rules with equal type are sorted by "modifier specifity".
+This means, every modifier has a specify associated with it. All modifiers for one configuration are added to get the second sort criteria.
+
+Specifity:
+
+* `const` = `readonly` = 1,
+* `static` = `global` = `local` = 2,
+* `public` = `protected` = `private` = 4,
+* `abstract` = 8,
+* `export` = 16,
+* `rename` = 64,
+
+__Configuration composition__
+
+Now that we covered the sorting of configurations, we will see how they will contribute to the final config for an identifier.
+
+First, we filter by type. That leaves us with all configs for the current type and all of its base types (if their config is not `final`).
+Second, we filter by modifiers. All configs match, that have no excess modifiers specified match (less is ok, more is not ok).
+
+After filtering the formatting rules are reduced from the first to the last. Remember, the most generic base type config is first and the most specific subtype config is last. After that, all formatting rules, that have no falsy values, are applied to the identifier name.
 
 ### Types
 ___default___
@@ -194,6 +220,42 @@ ___enum___
   * `global` or `local`
   * `const`
   * `export`
+
+### Examples
+Here I explain how everything explained above works together. As example I use the configuration I use in this project.
+
+```javascript
+"naming-convention": [
+  true,
+  // forbid leading and trailing underscores and enforce camelCase on EVERY name. will be overridden by subtypes if needed
+  {"type": "default", "format": "camelCase", "leadingUnderscore": "forbid", "trailingUnderscore": "forbid"},
+  // require all global constants to be UPPER_CASE
+  // all other variables and functions still need to be camelCase
+  {"type": "variable", "modifiers": ["global", "const"], "format": "UPPER_CASE"},
+  // allow leading underscores for parameters, because `tsc --noUnusedParameters` will not flag underscore prefixed parameters
+  // all other rules (trailingUnderscore: forbid, format: camelCase) still apply
+  // since we don't want to inherit this config to `parameterProperties`, we set `final = true`
+  {"type": "parameter", "leadingUnderscore": "allow", "final": true},
+  // require leading underscores for private properties and methods, all other rules still apply
+  {"type": "member", "modifiers": "private", "leadingUnderscore": "require"},
+  // same for protected
+  {"type": "member", "modifiers": "protected", "leadingUnderscore": "require"},
+  // enforce UPPER_CASE for all public static readonly(!) properties
+  {"type": "property", "modifiers": ["public", "static", "const"], "format": "UPPER_CASE"},
+  // enforce PascalCase for classes, interfaces, enums, etc. Remember, there are still no underscores allowed.
+  {"type": "type", "format": "PascalCase"},
+  // abstract classes must have the prefix "Abstract". The following part of the name must be valid PascalCase 
+  {"type": "class", "modifiers": "abstract", "prefix": "Abstract"},
+  // interface names must start with "I". The following part of the name must be valid PascalCase
+  {"type": "interface", "prefix": "I"},
+  // generic type parameters must start with "T"
+  // most of the time it will only be T, which is totally valid, because an empty string conforms to the PascalCase check
+  // By convention T, U and V are used for generics. You could enforce that with "regex": "^[TUV]$" and if you are care that much for performance, you could disable every other check by setting a falsy value
+  {"type": "genericTypeParameter", "prefix": "T"},
+  // enum members must be in PascalCase. Without this config, enumMember would inherit UPPER_CASE from public static const property
+  {"type": "enumMember", "format": "PascalCase"}
+]
+```
 
 ## no-collapsible-if
 *Tired of unnecessarily deep nested if blocks?*

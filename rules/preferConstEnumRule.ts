@@ -15,13 +15,8 @@ interface IEnum {
     name: string;
     isConst: boolean;
     occurences: ts.EnumDeclaration[];
-    members: IMember[];
+    members: Map<string, boolean>;
     canBeConst: boolean;
-}
-
-interface IMember {
-    name: string;
-    const: boolean;
 }
 
 class ReturnWalker extends Lint.RuleWalker {
@@ -34,7 +29,7 @@ class ReturnWalker extends Lint.RuleWalker {
                 name: node.name.text,
                 isConst: Lint.hasModifier(node.modifiers, ts.SyntaxKind.ConstKeyword),
                 occurences: [],
-                members: [],
+                members: new Map<string, boolean>(),
                 canBeConst: true,
             };
             this._enums.set(node.name.text, trackingStructure);
@@ -69,10 +64,7 @@ class ReturnWalker extends Lint.RuleWalker {
                     member.initializer === undefined ||
                     isConstInitializer(member.initializer, track.members, getEnums);
             track.canBeConst = track.canBeConst && isConstMember;
-            track.members.push({
-                name: getPropertyName(member.name)!,
-                const: isConstMember,
-            });
+            track.members.set(getPropertyName(member.name)!, isConstMember);
         }
         super.visitEnumDeclaration(node);
     }
@@ -97,26 +89,17 @@ class ReturnWalker extends Lint.RuleWalker {
     }
 }
 
-function isConstInitializer(initializer: ts.Expression, members: IMember[], enums: () => IterableIterator<IEnum>): boolean {
+function isConstInitializer(initializer: ts.Expression, members: Map<string, boolean>, enums: () => IterableIterator<IEnum>): boolean {
     // brainfuck: ts.forEachChild stops when truthy value is returned, so we need to invert every boolean
-    const isNotConst = (current: ts.Expression): boolean => {
-        if (isIdentifier(current)) {
-            for (let member of members) {
-                if (current.text === member.name)
-                    return !member.const;
-            }
-            return true;
-        }
+    const checkNotConst = (current: ts.Expression): boolean => {
+        if (isIdentifier(current))
+            return !members.get(current.text);
         if (isPropertyAccessExpression(current)) {
             if (!isIdentifier(current.expression))
                 return true;
             for (let track of enums()) {
-                if (track.name === current.expression.text) {
-                    for (let member of track.members) {
-                        if (member.name === current.name.text)
-                            return !member.const;
-                    }
-                }
+                if (track.name === current.expression.text)
+                    return !track.members.get(current.name.text);
             }
             return true;
         }
@@ -126,18 +109,14 @@ function isConstInitializer(initializer: ts.Expression, members: IMember[], enum
                 !isIdentifier(current.expression))
                 return true;
             for (let track of enums()) {
-                if (track.name === current.expression.text) {
-                    for (let member of track.members) {
-                        if (member.name === current.argumentExpression.text)
-                            return !member.const;
-                    }
-                }
+                if (track.name === current.expression.text)
+                    return !track.members.get(current.argumentExpression.text);
             }
             return true;
         }
 
-        return ts.forEachChild(current, isNotConst);
+        return ts.forEachChild(current, checkNotConst);
     };
 
-    return !isNotConst(initializer);
+    return !checkNotConst(initializer);
 }

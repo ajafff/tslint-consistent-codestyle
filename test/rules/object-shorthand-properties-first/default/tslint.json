@@ -1,0 +1,6 @@
+{
+  "rulesDirectory": "../../../../rules",
+  "rules": {
+    "object-shorthand-properties-first": true
+  }
+}

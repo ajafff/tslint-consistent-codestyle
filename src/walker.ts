@@ -44,3 +44,14 @@ export class ForStatementWalker extends Lint.RuleWalker {
         ts.forEachChild(node, cb);
     }
 }
+
+export class ObjectLiteralWalker extends Lint.RuleWalker {
+    public walk(node: ts.Node) {
+        const cb = (child: ts.Node) => {
+            if (child.kind === ts.SyntaxKind.ObjectLiteralExpression)
+                this.visitObjectLiteralExpression(<ts.ObjectLiteralExpression>child);
+            ts.forEachChild(child, cb);
+        };
+        ts.forEachChild(node, cb);
+    }
+}

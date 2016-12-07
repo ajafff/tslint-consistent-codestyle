@@ -41,13 +41,13 @@ So for example, if you want to force every local variable to be in camelCase, yo
 }
 ```
 
-__Selector__:
+### Selector:
 
 * `type: string`: The selector consists of a required field `type`, which identifies the type of thing this configuration applies to.
 * `modifiers?: string|string[]`: To further specify your selection you can provide one or more `modifiers`. All of those modifiers must match an identifier, to activate this config. That means `["global", "const"]` will match every constant in global scope. It will not match any not-const global. Some of those modifiers are mutually exclusive, so you will never match anything if you specify more than one of them, for example `global` and `local` or the access modifiers `private`, `protected` and `public`.
 * `final?: boolean`: If set to true, this configuration will not contribute to the composition of any subtype's configuration.
 
-__Formatting rules__:
+### Formatting rules:
 
 All formatting rules are optional. Formatting rules are inherited by the `type`'s parent type. You can shadow the parent config by setting a new rule for the desired check or even disable the check by setting any falsy value other than `undefined`.
 
@@ -56,14 +56,14 @@ All formatting rules are optional. Formatting rules are inherited by the `type`'
 * `prefix: string|string[], suffix: string|string[]`: Specify one or more prefixes or suffixes. When given a single string, that string must match in the specified position. When given an array, one of the strings must match in the specified position. Matching is done in the given order. **If a prefix or suffix is specified, the matching portion of the name is sliced off before any further checks are performed:** If you enforce `cascalCase` and a prefix `has`, the name `hasFoo` will not match. That's because the prefix `has` is removed and the remaining `Foo` is not valid `camelCase`  
 * `format: string`: Valid options are `camelCase`, `PascalCase`, `UPPER_CASE` and `snake_case`.
 
-__"Inheritance" / Extending configurations:__
+### "Inheritance" / Extending configurations:
 
 As mentioned above, a type's configuration is used as base for the configuration of all of it's subtypes. Of course the subtype can override any inherited configuration option by providing a new value or disable it by setting a falsy value other than `undefined`.
 
 For example there is a base type `default` that applies to every other type, if it is not declared as `final`.
 We will cover that concept later in the examples section.
 
-__Ordering__
+### Ordering
 
 You do not have to order your configurations. In fact the order is completely irrelevant, since everything is sorted internally.
 
@@ -80,7 +80,7 @@ Specifity:
 * `export` = 16,
 * `rename` = 64,
 
-__Configuration composition__
+### Configuration composition
 
 Now that we covered the sorting of configurations, we will see how they will contribute to the final config for an identifier.
 
@@ -90,13 +90,13 @@ Second, we filter by modifiers. All configs match, that have no excess modifiers
 After filtering the formatting rules are reduced from the first to the last. Remember, the most generic base type config is first and the most specific subtype config is last. After that, all formatting rules, that have no falsy values, are applied to the identifier name.
 
 ### Types
-___default___
+#### default
 
 * Scope: is the base for everything
 * Valid modifiers: refer to subtypes
 
 
-___variable___
+#### variable
 
 * Scope: every variable declared with `var`, `let` and `const`
 * Extends: `default`
@@ -107,7 +107,7 @@ ___variable___
   * `rename` // if you rename a property in a destructuring assignment, e.g. `let {foo: myFoo} = bar`
 
 
-___function___
+#### function
 
 * Scope: every function and named function expression
 * Extends: `variable`
@@ -116,7 +116,7 @@ ___function___
   * `export`
 
 
-___parameter___
+#### parameter
 
 * Scope: parameters
 * Extends: `variable`, always has `local` modifier
@@ -124,14 +124,14 @@ ___parameter___
   * `rename`
 
 
-___member___
+#### member
 
 * Scope: used as superclass for `property`, `method`, ...
 * Extends: `default`, always has `local` modifier
 * Valid modifiers: refer to subtypes
 
 
-___property___
+#### property
 
 * Scope: class properties (static and instance)
 * Extends: `member`
@@ -142,7 +142,7 @@ ___property___
   * `abstract` // for abstract property accessors
 
 
-___parameterProperty___
+#### parameterProperty
 
 * Scope: class constructor's parameter properties
 * Extends: `property` and `parameter`
@@ -151,7 +151,7 @@ ___parameterProperty___
   * `const` == `readonly`
 
 
-___enumMember___
+#### enumMember
 
 * Scope: all members of enums
 * Extends: `property`, always has `public`, `static`, `const`/`readonly` modifiers
@@ -159,7 +159,7 @@ ___enumMember___
   * everything from type `enum`
 
 
-___method___
+#### method
 
 * Scope: class methods (static and instance)
 * Extends: `member`
@@ -169,14 +169,14 @@ ___method___
   * `abstract`
 
 
-___type___
+#### type
 
 * Scope: used as superclass for `class`, `interface`, ...
 * Extends: `default`
 * Valid modifiers: refer to subtypes
 
 
-___class___
+#### class
 
 * Scope: all classes and named class expressions
 * Extends: `type`
@@ -186,7 +186,7 @@ ___class___
   * `export`
 
 
-___interface___
+#### interface
 
 * Scope: all interfaces
 * Extends: `type`
@@ -195,7 +195,7 @@ ___interface___
   * `export`
 
 
-___typeAlias___
+#### typeAlias
 
 * Scope: all type aliases, e.g. `type Foo = "a" | "b"`
 * Extends: `type`
@@ -204,7 +204,7 @@ ___typeAlias___
   * `export`
 
 
-___genericTypeParameter___
+#### genericTypeParameter
 
 * Scope: all generic type parameters, e.g. `class Foo<T, U> {}` or `function<T>(v: T): T {}`
 * Extends: `type`
@@ -212,7 +212,7 @@ ___genericTypeParameter___
   * `global` _if found on a class_ or `local` _if found on a function_
 
 
-___enum___
+#### enum
 
 * Scope: all enums
 * Extends: `type`
@@ -324,6 +324,27 @@ Works like [no-else-after-return](#no-else-after-return) with additional checks.
 This rule checks, if the last variable declared in a variable declaration right before the return statement contains the returned variable.
 Destructuring assignments are also checked because `let {foo} = bar; return foo;` can also be written as `return bar.foo;`.
 But if the destructuring assignment for this variable contains a default value other than `undefined` or `void`, there will be no error.
+
+## object-shorthand-properties-first
+By convention and for better readability, shorthand properties should precede regular property declarations.
+
+Not passing:
+```javascript
+let foo = {
+  foo: foo,
+  bar,
+  baz: baz,
+};
+```
+
+Passing: 
+```javascript
+let foo = {
+  bar,
+  foo: foo,
+  baz: baz,
+};
+```
 
 ## parameter-properties
 Usage:

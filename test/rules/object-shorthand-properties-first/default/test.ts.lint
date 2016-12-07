@@ -1,0 +1,16 @@
+foo = {foo, bar};
+foo = {foo, bar: baz};
+foo = {foo: bar, baz};
+                 ~~~ [fail]
+foo = {foo: foo, bar, baz: baz, bas};
+                 ~~~ [fail]
+                                ~~~ [fail]
+foo = {
+    foo,
+    bar: bar,
+    baz,
+    ~~~ [fail]
+    bas: bas,
+}
+
+[fail]: shorthand properties should come first

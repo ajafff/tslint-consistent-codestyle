@@ -80,6 +80,13 @@ export function isElseIf(node: ts.IfStatement): boolean {
          parent.elseStatement === node;
 }
 
+export function endsThisContext(node: ts.Node): boolean {
+    return node.kind === ts.SyntaxKind.FunctionDeclaration ||
+           node.kind === ts.SyntaxKind.FunctionExpression ||
+           node.kind === ts.SyntaxKind.ClassDeclaration ||
+           node.kind === ts.SyntaxKind.ClassExpression;
+}
+
 export let isScopeBoundary = (class extends Lint.ScopeAwareRuleWalker<void> {
     public createScope() {}
     public static getFn() {

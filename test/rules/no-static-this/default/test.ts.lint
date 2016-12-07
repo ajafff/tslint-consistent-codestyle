@@ -16,6 +16,14 @@ class Foo {
         this.bas = v;
         ~~~~ [fail]
     }
+
+    static ajaff() {
+        function moar() {
+            return this;
+        }
+        return () => this;
+                     ~~~~ [fail]
+    }
 }
 
 [fail]: don't use this in static methods

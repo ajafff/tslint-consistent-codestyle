@@ -1,0 +1,35 @@
+abstract class Foo {
+    abstract test();
+
+    static alreadyStatic() {}
+
+    foo() {
+        return this;
+    }
+
+    bar() {
+        return () => super.bar();
+    }
+
+    baz(v = this) {
+        return v;
+    }
+
+    bas() {
+    ~~~ [fail]
+        return function() {
+            return this;
+        };
+    }
+
+    public ajaff() {}
+    ~~~~~~~~~~~~ [fail]
+
+    private moar() {}
+    ~~~~~~~~~~~~ [fail]
+
+    protected meep() {}
+    ~~~~~~~~~~~~~~ [fail]
+}
+
+[fail]: method can be static or function

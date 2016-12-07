@@ -373,6 +373,11 @@ __Current limitations:__
 * doesn't ignore exported enums (maybe add option or use `preserveConstEnums` compiler flag)
 * doesn't detect if enum is assigned to variable or passed as function parameter
 
+## pefer-static-method
+If you don't reference `this` or `super` within a method, it could also be declared as static method or (global/local) function.
+
+To be honest, I don't this is always feasible and you should get an achievement, if all of your code conforms to this rule.
+
 ## prefer-while
 A `for`-loop without initializer and incrementer can also be rewritten as `while`-loop. That's what this rule does.
 It can also automatically fix any finding, if you set the `--fix` command line switch for `tslint`.

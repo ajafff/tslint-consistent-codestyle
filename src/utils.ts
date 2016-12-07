@@ -88,7 +88,7 @@ export function endsThisContext(node: ts.Node): boolean {
 }
 
 export let isScopeBoundary = (class extends Lint.ScopeAwareRuleWalker<void> {
-    public createScope() {}
+    public createScope() { return this; }
     public static getFn() {
         return this.prototype.isScopeBoundary;
     }

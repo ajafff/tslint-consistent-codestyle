@@ -115,6 +115,8 @@
       "leading",
       "member-access"
     ],
-    "prefer-const-enum": true
+    "prefer-const-enum": true,
+    "prefer-static-method": true,
+    "prefer-while": true
   }
 }

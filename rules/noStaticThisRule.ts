@@ -11,13 +11,6 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class StaticMethodWalker extends Lint.RuleWalker {
-    private _isStatic(node: ts.Node): boolean {
-        return (node.kind === ts.SyntaxKind.MethodDeclaration ||
-                node.kind === ts.SyntaxKind.GetAccessor ||
-                node.kind === ts.SyntaxKind.SetAccessor) &&
-               Lint.hasModifier(node.modifiers, ts.SyntaxKind.StaticKeyword);
-    }
-
     private _displayError(node: ts.ThisExpression) {
         this.addFailure(this.createFailure(node.getStart(this.getSourceFile()), 4, FAIL_MESSAGE));
     }
@@ -30,7 +23,7 @@ class StaticMethodWalker extends Lint.RuleWalker {
             if (boundary) {
                 stack.push(current);
                 if (!current || endsThisContext(child))
-                    current = this._isStatic(child);
+                    current = isStatic(child);
             }
             if (current && child.kind === ts.SyntaxKind.ThisKeyword)
                 this._displayError(<ts.ThisExpression>child);
@@ -40,4 +33,11 @@ class StaticMethodWalker extends Lint.RuleWalker {
         };
         ts.forEachChild(node, cb);
     }
+}
+
+function isStatic(node: ts.Node): boolean {
+    return (node.kind === ts.SyntaxKind.MethodDeclaration ||
+            node.kind === ts.SyntaxKind.GetAccessor ||
+            node.kind === ts.SyntaxKind.SetAccessor) &&
+            Lint.hasModifier(node.modifiers, ts.SyntaxKind.StaticKeyword);
 }

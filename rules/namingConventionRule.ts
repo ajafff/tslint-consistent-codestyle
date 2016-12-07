@@ -343,16 +343,15 @@ class NameChecker {
 class IdentifierNameWalker extends Lint.RuleWalker {
     private _depth = 0;
     private _rules: NormalizedConfig[];
-    private _cache: Map<string, NameChecker>;
+    private _cache = new Map<string, NameChecker>();
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
-        this._rules = this._normalizeRules(<IRuleConfig[]> options.ruleArguments);
-        this._cache = new Map<string, NameChecker>();
+        this._normalizeRules(<IRuleConfig[]> options.ruleArguments);
     }
 
-    private _normalizeRules(rules: IRuleConfig[]): NormalizedConfig[] {
-        return rules.map((rule) => {
+    private _normalizeRules(rules: IRuleConfig[]) {
+        this._rules =  rules.map((rule) => {
             return new NormalizedConfig(rule);
         }).sort(NormalizedConfig.sort);
     }

@@ -1,5 +1,9 @@
 import * as ts from 'typescript';
 
+export function isAsExpression(node: ts.Node): node is ts.AsExpression {
+    return node.kind === ts.SyntaxKind.AsExpression;
+}
+
 export function isBlockLike(node: ts.Node): node is ts.BlockLike {
     return 'statements' in node;
 }
@@ -31,4 +35,8 @@ export function isPropertyAccessExpression(node: ts.Node): node is ts.PropertyAc
 
 export function isSwitchStatement(node: ts.Node): node is ts.SwitchStatement {
     return node.kind === ts.SyntaxKind.SwitchStatement;
+}
+
+export function isTypeAssertion(node: ts.Node): node is ts.TypeAssertion {
+    return node.kind === ts.SyntaxKind.TypeAssertionExpression;
 }

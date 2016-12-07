@@ -1,0 +1,23 @@
+foo = <number>bar;
+foo = <number>bar;
+
+foo = <number>(<any>bar);
+foo = <number>(<any>bar);
+
+foo = <any><number>bar;
+foo = <any><number>bar;
+
+foo = <number><any><string>bar;
+foo = <number><any><string>bar;
+
+foo = <{foo: number}>bar;
+foo = <{foo: number}>bar;
+
+foo = <number|undefined>bar;
+foo = <number|undefined>bar;
+
+foo = <number><any>bar;
+foo = <number><any>bar;
+
+foo = <number><any><string>bar;
+foo = <number><any><string>bar;

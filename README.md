@@ -257,6 +257,11 @@ Here I explain how everything explained above works together. As example I use t
 ]
 ```
 
+## no-as-type-assertion
+The complete opposite of the tslint core rule `no-angle-bracket-type-assertion` plus the ability to automatically fix all findings.
+
+I added this rule for completeness and because I find it more readable this way.
+
 ## no-collapsible-if
 *Tired of unnecessarily deep nested if blocks?*
 This rule comes to rescue you.

@@ -104,10 +104,12 @@
       {"type": "genericTypeParameter", "prefix": "T"},
       {"type": "enumMember", "format": "PascalCase"}
     ],
+    "no-as-type-assertion": true,
     "no-collapsible-if": true,
     "no-return-undefined": true,
     "no-unnecessary-else": true,
     "no-var-before-return": true,
+    "object-shorthand-properties-first": true,
     "parameter-properties": [
       true,
       "leading",

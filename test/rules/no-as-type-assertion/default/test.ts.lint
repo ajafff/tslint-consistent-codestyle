@@ -1,0 +1,35 @@
+foo = bar as number;
+          ~~~~~~~~~ [fail]
+foo = <number>bar;
+
+foo = (<any>bar) as number;
+                 ~~~~~~~~~ [fail]
+foo = <number>(<any>bar);
+
+foo = <any>bar as number;
+               ~~~~~~~~~ [fail]
+foo = <any><number>bar;
+
+foo = <number><any>bar as string;
+                       ~~~~~~~~~ [fail]
+foo = <number><any><string>bar;
+
+foo = bar as {foo: number};
+          ~~~~~~~~~~~~~~~~ [fail]
+foo = <{foo: number}>bar;
+
+foo = bar as number|undefined;
+          ~~~~~~~~~~~~~~~~~~~ [fail]
+foo = <number|undefined>bar;
+
+foo = bar as any as number;
+          ~~~~~~ [fail]
+                 ~~~~~~~~~ [fail]
+foo = <number><any>bar;
+
+foo = <number>bar as string as any;
+                  ~~~~~~~~~ [fail]
+                            ~~~~~~ [fail]
+foo = <number><any><string>bar;
+
+[fail]: use <Type> instead of `as Type`

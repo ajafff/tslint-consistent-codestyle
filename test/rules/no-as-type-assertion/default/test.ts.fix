@@ -21,3 +21,6 @@ foo = <number><any>bar;
 
 foo = <number><any><string>bar;
 foo = <number><any><string>bar;
+
+foo = <boolean><number><any><string>bar;
+foo = <boolean><number><any><string>bar;

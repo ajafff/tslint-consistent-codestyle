@@ -32,4 +32,9 @@ foo = <number>bar as string as any;
                             ~~~~~~ [fail]
 foo = <number><any><string>bar;
 
+foo = <boolean><number>bar as string as any;
+                           ~~~~~~~~~ [fail]
+                                     ~~~~~~ [fail]
+foo = <boolean><number><any><string>bar;
+
 [fail]: use <Type> instead of `as Type`

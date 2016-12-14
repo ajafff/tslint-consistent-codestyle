@@ -58,8 +58,11 @@ class ReturnWalker extends Lint.RuleWalker {
             if (!track.isConst && track.canBeConst) {
                 for (let occurence of track.occurences) {
                     const start = occurence.getStart(sourceFile);
+                    const fix = new Lint.Fix('prefer-const-enum', [
+                        this.createReplacement(start, 0, 'const '),
+                    ]);
                     const width = occurence.name.getEnd() - start;
-                    this.addFailure(this.createFailure(start, width, FAIL_MESSAGE));
+                    this.addFailure(this.createFailure(start, width, FAIL_MESSAGE, fix));
                 }
             }
         });

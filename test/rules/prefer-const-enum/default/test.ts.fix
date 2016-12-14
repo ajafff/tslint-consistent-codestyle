@@ -1,0 +1,89 @@
+const enum Empty {}
+
+const enum Foo {
+    bar,
+    baz,
+}
+bar = Foo.bar;
+baz = Foo['baz'];
+
+const enum Foo {
+    foo = 2,
+}
+
+enum Foo2 {
+    bar,
+    baz = foo,
+}
+
+enum Foo2 {
+    foo = 3,
+}
+
+const enum Bar {
+    foo = 1,
+    bar = 1 + 1,
+    baz = 1 << 1,
+}
+
+const enum ConstBar {
+}
+
+const enum Baz {
+    'foo',
+    bar = foo,
+    ['baz'] = Baz.bar,
+    bas = Baz['baz'],
+    quux = bas + Baz.baz | Baz['foo'] + ~~bar & (Foo.bar - Foo2.bar),
+}
+
+enum Baz2 {
+    foo = Foo2.baz,
+}
+
+enum Bas {
+    foo,
+}
+
+enum Bas2 {
+    foo = Bas[foo],
+}
+
+export enum ExportedEnum {}
+
+const enum Split {
+    Foo,
+    Bar,
+}
+
+const enum Split {
+    Baz = Foo,
+}
+
+export = Split;
+
+enum NumberAccess {
+    Foo,
+}
+NumberAccess[0];
+
+enum Assigned {}
+foo = Assigned;
+
+enum TemplateAccess {
+    Bar,
+}
+foo = TemplateAccess[`Bar`];
+
+enum Parameter {}
+foo(Parameter);
+
+enum Paren {
+    Bar,
+    Baz = (Paren).Bar,
+}
+
+enum Paren2 {
+    Bar,
+}
+foo = (Paren2).Bar;

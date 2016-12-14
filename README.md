@@ -382,7 +382,7 @@ To be honest, I don't think this is always feasible and you should get an achiev
 A `for`-loop without initializer and incrementer can also be rewritten as `while`-loop. That's what this rule does.
 It can also automatically fix any finding, if you set the `--fix` command line switch for `tslint`.
 
-# Remcommendations
+# Recommendations
 
 * [vrsource-tslint-rules](https://www.npmjs.com/package/vrsource-tslint-rules)
 * [tslint-microsoft-contrib](https://www.npmjs.com/package/tslint-microsoft-contrib)

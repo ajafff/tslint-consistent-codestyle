@@ -62,7 +62,7 @@ export function getChildOfKind(node: ts.Node, kind: ts.SyntaxKind, sourceFile?: 
     }
 }
 
-export function getPropertyName(propertyName: ts.PropertyName): string|undefined {
+export function getPropertyName(propertyName: ts.PropertyName|ts.LiteralExpression): string|undefined {
     if (isIdentifier(propertyName))
         return propertyName.text;
     if (isComputedPropertyName(propertyName)) {

@@ -12,7 +12,6 @@
     "noUnusedParameters": true,
     "strictNullChecks": true,
     "stripInternal": true,
-    "noFallthroughCasesInSwitch": true,
     "lib": ["es6"],
     "skipLibCheck": true
   }

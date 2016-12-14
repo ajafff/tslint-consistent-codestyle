@@ -30,6 +30,6 @@
     "tslint": "^4.0.2"
   },
   "devDependencies": {
-    "typescript": "^2.1.1"
+    "typescript": "^2.1.4"
   }
 }

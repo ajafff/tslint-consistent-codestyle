@@ -33,6 +33,10 @@ export function isPropertyAccessExpression(node: ts.Node): node is ts.PropertyAc
     return node.kind === ts.SyntaxKind.PropertyAccessExpression;
 }
 
+export function isStringLiteral(node: ts.Node): node is ts.StringLiteral {
+    return node.kind === ts.SyntaxKind.StringLiteral;
+}
+
 export function isSwitchStatement(node: ts.Node): node is ts.SwitchStatement {
     return node.kind === ts.SyntaxKind.SwitchStatement;
 }

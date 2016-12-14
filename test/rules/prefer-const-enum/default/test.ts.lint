@@ -1,5 +1,8 @@
+enum Empty {}
+~~~~~~~~~~ [fail]
+
 enum Foo {
-~~~~~~~~ [enum can be declared const]
+~~~~~~~~ [fail]
     bar,
     baz,
 }
@@ -7,7 +10,7 @@ bar = Foo.bar;
 baz = Foo['baz'];
 
 enum Foo {
-~~~~~~~~ [enum can be declared const]
+~~~~~~~~ [fail]
     foo = 2,
 }
 
@@ -21,7 +24,7 @@ enum Foo2 {
 }
 
 enum Bar {
-~~~~~~~~ [enum can be declared const]
+~~~~~~~~ [fail]
     foo = 1,
     bar = 1 + 1,
     baz = 1 << 1,
@@ -31,12 +34,12 @@ const enum ConstBar {
 }
 
 enum Baz {
-~~~~~~~~ [enum can be declared const]
+~~~~~~~~ [fail]
     'foo',
-    `bar` = foo,
+    bar = foo,
     ['baz'] = Baz.bar,
     bas = Baz['baz'],
-    quux = bas + Baz.baz | Baz['foo'] + ~~bar & Foo.bar - Foo2.bar,
+    quux = bas + Baz.baz | Baz['foo'] + ~~bar & (Foo.bar - Foo2.bar),
 }
 
 enum Baz2 {
@@ -50,3 +53,46 @@ enum Bas {
 enum Bas2 {
     foo = Bas[foo],
 }
+
+export enum ExportedEnum {}
+
+enum Split {
+~~~~~~~~~~ [fail]
+    Foo,
+    Bar,
+}
+
+enum Split {
+~~~~~~~~~~ [fail]
+    Baz = Foo,
+}
+
+export = Split;
+
+enum NumberAccess {
+    Foo,
+}
+NumberAccess[0];
+
+enum Assigned {}
+foo = Assigned;
+
+enum TemplateAccess {
+    Bar,
+}
+foo = TemplateAccess[`Bar`];
+
+enum Parameter {}
+foo(Parameter);
+
+enum Paren {
+    Bar,
+    Baz = (Paren).Bar,
+}
+
+enum Paren2 {
+    Bar,
+}
+foo = (Paren2).Bar;
+
+[fail]: enum can be declared const

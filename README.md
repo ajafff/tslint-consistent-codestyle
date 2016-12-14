@@ -370,8 +370,7 @@ Flags all enum declarations, if enum can be declared as constant. That is: there
 
 __Current limitations:__
 * no support for scopes
-* doesn't ignore exported enums (maybe add option or use `preserveConstEnums` compiler flag)
-* doesn't detect if enum is assigned to variable or passed as function parameter
+* exported enums are excluded (maybe add option or use `preserveConstEnums` compiler flag)
 
 ## pefer-static-method
 If you don't reference `this` or `super` within a method, it could also be declared as static method or (global/local) function.

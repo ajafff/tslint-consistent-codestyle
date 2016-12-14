@@ -1,4 +1,4 @@
-import { isElementAccessExpression, isIdentifier, isLiteralExpression, isPropertyAccessExpression } from '../src/typeguard';
+import { isElementAccessExpression, isIdentifier, isPropertyAccessExpression, isStringLiteral } from '../src/typeguard';
 import { getPropertyName } from '../src/utils';
 import * as ts from 'typescript';
 import * as Lint from 'tslint';
@@ -22,6 +22,10 @@ interface IEnum {
 class ReturnWalker extends Lint.RuleWalker {
     private _enums = new Map<string, IEnum>();
 
+    private _getEnumInScope(name: string) {
+        return this._enums.get(name);
+    }
+
     private _addEnum(node: ts.EnumDeclaration): IEnum {
         let trackingStructure = this._enums.get(node.name.text);
         if (trackingStructure === undefined) {
@@ -39,7 +43,17 @@ class ReturnWalker extends Lint.RuleWalker {
     }
 
     public walk(sourceFile: ts.SourceFile) {
-        super.walk(sourceFile);
+        const cb = (node: ts.Node) => {
+            switch (node.kind) {
+                case ts.SyntaxKind.Identifier:
+                    return this._checkUsage(<ts.Identifier>node);
+                case ts.SyntaxKind.EnumDeclaration:
+                    return this.visitEnumDeclaration(<ts.EnumDeclaration>node);
+            }
+            ts.forEachChild(node, cb);
+        };
+        ts.forEachChild(sourceFile, cb);
+
         this._enums.forEach((track) => {
             if (!track.isConst && track.canBeConst) {
                 for (let occurence of track.occurences) {
@@ -53,70 +67,67 @@ class ReturnWalker extends Lint.RuleWalker {
 
     public visitEnumDeclaration(node: ts.EnumDeclaration) {
         const track = this._addEnum(node);
-        const enums = this._enums;
-        function* getEnums() {
-            for (let value of enums.values()) {
-                yield value;
-            }
-        }
         for (let member of node.members) {
             const isConstMember = track.isConst ||
                     member.initializer === undefined ||
-                    isConstInitializer(member.initializer, track.members, getEnums);
+                    this._isConstInitializer(member.initializer, track.members);
             track.canBeConst = track.canBeConst && isConstMember;
             track.members.set(getPropertyName(member.name)!, isConstMember);
         }
-        super.visitEnumDeclaration(node);
+
+        // ignore exported enums for now
+        track.canBeConst = track.canBeConst && !Lint.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword);
     }
 
-    private _checkAccess(node: ts.ElementAccessExpression) {
-        if (isIdentifier(node.expression) &&
-            node.argumentExpression !== undefined &&
-            // literal access is ok
-            !isLiteralExpression(node.argumentExpression)) {
-            const track = this._enums.get(node.expression.text);
-            if (track !== undefined) {
-                track.canBeConst = false;
-            }
-        }
+    private _checkUsage(node: ts.Identifier) {
+        const parent = node.parent!;
+        if (parent.kind === ts.SyntaxKind.PropertyAccessExpression ||
+            parent.kind === ts.SyntaxKind.ExportAssignment ||
+            isElementAccessExpression(parent) &&
+            parent.expression === node && parent.argumentExpression !== undefined &&
+            parent.argumentExpression.kind === ts.SyntaxKind.StringLiteral)
+            return;
+        const track = this._getEnumInScope(node.text);
+        if (track !== undefined)
+            track.canBeConst = false;
     }
 
-    public visitNode(node: ts.Node) {
-        if (isElementAccessExpression(node))
-            this._checkAccess(node);
+    private _isConstInitializer(initializer: ts.Expression, members: Map<string, boolean>): boolean {
+        let isConst = true;
+        const cb = (current: ts.Expression) => {
+            if (isIdentifier(current)) {
+                if (!members.get(current.text))
+                    isConst = false;
+                return;
+            }
+            if (isPropertyAccessExpression(current)) {
+                if (isIdentifier(current.expression)) {
+                    const track = this._getEnumInScope(current.expression.text);
+                    if (track !== undefined && track.members.get(current.name.text)) {
+                        return;
+                    }
+                }
+                isConst = false;
+            } else if (isElementAccessExpression(current)) {
+                if (isIdentifier(current.expression)) {
+                    const track = this._getEnumInScope(current.expression.text);
+                    if (track !== undefined) {
+                        if (current.argumentExpression !== undefined &&
+                            isStringLiteral(current.argumentExpression)) {
+                            if (track.members.get(current.argumentExpression.text))
+                                return;
+                        } else {
+                            track.canBeConst = false;
+                        }
+                    }
+                }
+                isConst = false;
+            }
 
-        super.visitNode(node);
+            ts.forEachChild(current, cb);
+        };
+
+        cb(initializer);
+        return isConst;
     }
-}
-
-function isConstInitializer(initializer: ts.Expression, members: Map<string, boolean>, enums: () => IterableIterator<IEnum>): boolean {
-    // brainfuck: ts.forEachChild stops when truthy value is returned, so we need to invert every boolean
-    const checkNotConst = (current: ts.Expression): boolean => {
-        if (isIdentifier(current))
-            return !members.get(current.text);
-        if (isPropertyAccessExpression(current)) {
-            if (!isIdentifier(current.expression))
-                return true;
-            for (let track of enums()) {
-                if (track.name === current.expression.text)
-                    return !track.members.get(current.name.text);
-            }
-            return true;
-        }
-        if (isElementAccessExpression(current)) {
-            if (current.argumentExpression === undefined ||
-                !isLiteralExpression(current.argumentExpression) ||
-                !isIdentifier(current.expression))
-                return true;
-            for (let track of enums()) {
-                if (track.name === current.expression.text)
-                    return !track.members.get(current.argumentExpression.text);
-            }
-            return true;
-        }
-
-        return ts.forEachChild(current, checkNotConst);
-    };
-
-    return !checkNotConst(initializer);
 }

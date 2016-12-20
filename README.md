@@ -127,7 +127,7 @@ After filtering the formatting rules are reduced from the first to the last. Rem
 #### member
 
 * Scope: used as superclass for `property`, `method`, ...
-* Extends: `default`, always has `local` modifier
+* Extends: `default`
 * Valid modifiers: refer to subtypes
 
 
@@ -145,7 +145,7 @@ After filtering the formatting rules are reduced from the first to the last. Rem
 #### parameterProperty
 
 * Scope: class constructor's parameter properties
-* Extends: `property` and `parameter`
+* Extends: `property` and `parameter`, always has `local` modifier
 * Valid modifiers:
   * `private`, `protected` or `public`
   * `const` == `readonly`
@@ -222,7 +222,7 @@ After filtering the formatting rules are reduced from the first to the last. Rem
   * `export`
 
 ### Examples
-Here I explain how everything explained above works together. As example I use the configuration I use in this project.
+Here you see an example of how everything explained above works together. This is the configuration used in this project.
 
 ```javascript
 "naming-convention": [
@@ -301,6 +301,12 @@ if (foo) {
   if (bar) {
   } else {
   }
+}
+
+if (foo) {
+  if (bar) {
+  }
+} else {
 }
 ```
 I recommend you use this rule together with [no-else-after-return](#no-else-after-return) or [no-unnecessary-else](#no-unnecessary-else) to further reduce block nesting.

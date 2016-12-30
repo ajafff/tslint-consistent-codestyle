@@ -46,15 +46,15 @@ interface IRuleScope {
     final?: boolean;
 }
 
-type IRuleConfig = IRuleScope & IFormat;
+type IRuleConfig = IRuleScope & Partial<IFormat>;
 
 interface IFormat {
-    format?: TFormat;
-    leadingUnderscore?: UnderscoreOption;
-    trailingUnderscore?: UnderscoreOption;
-    prefix?: string|string[];
-    suffix?: string|string[];
-    regex?: string;
+    format: TFormat|undefined;
+    leadingUnderscore: UnderscoreOption|undefined;
+    trailingUnderscore: UnderscoreOption|undefined;
+    prefix: string|string[]|undefined;
+    suffix: string|string[]|undefined;
+    regex: string|undefined;
 }
 
 enum Types {
@@ -149,7 +149,7 @@ export class Rule extends AbstractConfigDependentRule {
 
 class NormalizedConfig {
     private _type: Types;
-    private _format: IFormat;
+    private _format: Partial<IFormat>;
     private _modifiers: number;
     private _specifity: number;
     private _final: boolean;
@@ -173,13 +173,13 @@ class NormalizedConfig {
         this._format = raw;
     }
 
-    public matches(type: TypeSelector, modifiers: number) {
+    public matches(type: TypeSelector, modifiers: number): boolean {
         if (this._final && type > this._type << 1) // check if TypeSelector has a higher bit set than this._type
             return false;
         return (this._type & type) !== 0 && (this._modifiers & ~modifiers) === 0;
     }
 
-    public getFormat(): IFormat {
+    public getFormat() {
         return this._format;
     }
 
@@ -189,35 +189,29 @@ class NormalizedConfig {
 }
 
 class NameChecker {
-    private _format?: string;
-    private _leadingUnderscore?: UnderscoreOption;
-    private _trailingUnderscore?: UnderscoreOption;
-    private _prefix?: string|string[];
-    private _suffix?: string|string[];
-    private _regex?: RegExp;
+    private _format: string|undefined;
+    private _leadingUnderscore: UnderscoreOption|undefined;
+    private _trailingUnderscore: UnderscoreOption|undefined;
+    private _prefix: string|string[]|undefined;
+    private _suffix: string|string[]|undefined;
+    private _regex: RegExp|undefined;
     constructor(private readonly _type: TypeSelector, format: IFormat) {
-        if (format.format)
-            this._format = format.format;
-        if (format.leadingUnderscore)
-            this._leadingUnderscore = format.leadingUnderscore;
-        if (format.trailingUnderscore)
-            this._trailingUnderscore = format.trailingUnderscore;
-        if (format.prefix) {
-            if (!Array.isArray(format.prefix) || format.prefix.length > 1) {
-                this._prefix = format.prefix;
-            } else if (format.prefix.length === 1) {
-                this._prefix = format.prefix[0];
-            }
+        ({
+            format: this._format,
+            leadingUnderscore: this._leadingUnderscore,
+            trailingUnderscore: this._trailingUnderscore,
+        } = format);
+        if (!Array.isArray(format.prefix) || format.prefix.length > 1) {
+            this._prefix = format.prefix;
+        } else if (format.prefix.length === 1) {
+            this._prefix = format.prefix[0];
         }
-        if (format.suffix) {
-            if (!Array.isArray(format.suffix) || format.suffix.length > 1) {
-                this._suffix = format.suffix;
-            } else if (format.suffix.length === 1) {
-                this._suffix = format.suffix[0];
-            }
+        if (!Array.isArray(format.suffix) || format.suffix.length > 1) {
+            this._suffix = format.suffix;
+        } else if (format.suffix.length === 1) {
+            this._suffix = format.suffix[0];
         }
-        if (format.regex)
-            this._regex = new RegExp(format.regex);
+        this._regex = format.regex ? new RegExp(format.regex) : undefined;
     }
 
     private _failMessage(message: string): string {
@@ -351,9 +345,7 @@ class IdentifierNameWalker extends Lint.RuleWalker {
     }
 
     private _normalizeRules(rules: IRuleConfig[]) {
-        this._rules =  rules.map((rule) => {
-            return new NormalizedConfig(rule);
-        }).sort(NormalizedConfig.sort);
+        this._rules = rules.map((rule) => new NormalizedConfig(rule)).sort(NormalizedConfig.sort);
     }
 
     private _checkTypeParameters(node: ts.DeclarationWithTypeParameters, modifiers: Modifiers) {
@@ -508,25 +500,11 @@ class IdentifierNameWalker extends Lint.RuleWalker {
     }
 
     private _createChecker(type: TypeSelector, modifiers: number): NameChecker|undefined {
-        const config = this._rules.reduce<IFormat>(
-            (format, rule) => {
+        const config = this._rules.reduce(
+            (format: IFormat, rule) => {
                 if (!rule.matches(type, modifiers))
                     return format;
-
-                const ruleFormat = rule.getFormat();
-                if (ruleFormat.leadingUnderscore !== undefined)
-                    format.leadingUnderscore = ruleFormat.leadingUnderscore;
-                if (ruleFormat.trailingUnderscore !== undefined)
-                    format.trailingUnderscore = ruleFormat.trailingUnderscore;
-                if (ruleFormat.format !== undefined)
-                    format.format = ruleFormat.format;
-                if (ruleFormat.prefix !== undefined)
-                    format.prefix = ruleFormat.prefix;
-                if (ruleFormat.regex !== undefined)
-                    format.regex = ruleFormat.regex;
-                if (ruleFormat.suffix !== undefined)
-                    format.suffix = ruleFormat.suffix;
-                return format;
+                return Object.assign(format, rule.getFormat());
             },
             {
                 leadingUnderscore: undefined,
@@ -538,12 +516,7 @@ class IdentifierNameWalker extends Lint.RuleWalker {
             });
 
         // ohne Regeln kein Checker
-        if (!config.leadingUnderscore &&
-            !config.trailingUnderscore &&
-            !config.format &&
-            !config.prefix &&
-            !config.regex &&
-            !config.suffix)
+        if (!Object.keys(config).some((key) => config[key]))
             return;
 
         return new NameChecker(type, config);

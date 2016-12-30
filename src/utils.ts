@@ -17,7 +17,7 @@ export function hasAccessModifier(node: ts.Node): boolean {
                             ts.SyntaxKind.PrivateKeyword);
 }
 
-export function destructDeclarationContains(pattern: ts.BindingPattern, name: string, ignoreDefaults?: boolean): boolean {
+function bindingPatternContains(pattern: ts.BindingPattern, name: string, ignoreDefaults?: boolean): boolean {
     for (let element of pattern.elements) {
         if (element.kind !== ts.SyntaxKind.BindingElement)
             continue;
@@ -27,7 +27,7 @@ export function destructDeclarationContains(pattern: ts.BindingPattern, name: st
         if (ignoreDefaults && bindingElement.initializer !== undefined && !isUndefined(bindingElement.initializer))
             continue;
 
-        if (bindingNameContains(bindingElement.name, name))
+        if (bindingNameContains(bindingElement.name, name, ignoreDefaults))
             return true;
     }
     return false;
@@ -36,7 +36,7 @@ export function destructDeclarationContains(pattern: ts.BindingPattern, name: st
 export function bindingNameContains(bindingName: ts.BindingName, name: string, ignoreDefaults?: boolean): boolean {
     return isIdentifier(bindingName) ?
            bindingName.text === name :
-           destructDeclarationContains(bindingName, name, ignoreDefaults);
+           bindingPatternContains(bindingName, name, ignoreDefaults);
 }
 
 export function isUndefined(expression: ts.Expression): boolean {
@@ -51,7 +51,15 @@ export function getPreviousStatement(statement: ts.Statement): ts.Statement|unde
         if (index > 0)
             return parent.statements[index - 1];
     }
-    return;
+}
+
+export function getNextStatement(statement: ts.Statement): ts.Statement|undefined {
+    const parent = statement.parent!;
+    if (isBlockLike(parent)) {
+        const index = parent.statements.indexOf(statement);
+        if (index < parent.statements.length)
+            return parent.statements[index + 1];
+    }
 }
 
 export function getChildOfKind(node: ts.Node, kind: ts.SyntaxKind, sourceFile?: ts.SourceFile): ts.Node|undefined {
@@ -76,7 +84,6 @@ export function getPropertyName(propertyName: ts.PropertyName|ts.LiteralExpressi
 export function isElseIf(node: ts.IfStatement): boolean {
     const parent = node.parent!;
     return isIfStatement(parent) &&
-         parent.elseStatement !== undefined &&
          parent.elseStatement === node;
 }
 

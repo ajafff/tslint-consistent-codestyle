@@ -49,7 +49,7 @@ So for example, if you want to force every local variable to be in camelCase, yo
 
 ### Formatting rules:
 
-All formatting rules are optional. Formatting rules are inherited by the `type`'s parent type. You can shadow the parent config by setting a new rule for the desired check or even disable the check by setting any falsy value other than `undefined`.
+All formatting rules are optional. Formatting rules are inherited by the `type`'s parent type. You can shadow the parent config by setting a new rule for the desired check or even disable the check by setting any falsy value.
 
 * `regex: string`: A regular expression, which is applied to the name. (without any regex flags)
 * `leadingUnderscore: string, trailingUnderscore: string`: Options `forbid`, `allow` and `require` can be used to forbid, allow or require _one_ leading or trailing underscore in the name. **If one option is specified, the leading or trailing underscore will be sliced off the name before any further checks are performed.**
@@ -58,7 +58,7 @@ All formatting rules are optional. Formatting rules are inherited by the `type`'
 
 ### "Inheritance" / Extending configurations:
 
-As mentioned above, a type's configuration is used as base for the configuration of all of it's subtypes. Of course the subtype can override any inherited configuration option by providing a new value or disable it by setting a falsy value other than `undefined`.
+As mentioned above, a type's configuration is used as base for the configuration of all of it's subtypes. Of course the subtype can override any inherited configuration option by providing a new value or disable it by setting any falsy value.
 
 For example there is a base type `default` that applies to every other type, if it is not declared as `final`.
 We will cover that concept later in the examples section.

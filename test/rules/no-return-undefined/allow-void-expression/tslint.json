@@ -1,0 +1,9 @@
+{
+  "rulesDirectory": "../../../../rules",
+  "rules": {
+    "no-return-undefined": [
+      true,
+      "allow-void-expression"
+    ]
+  }
+}

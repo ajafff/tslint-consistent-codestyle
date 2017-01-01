@@ -52,3 +52,7 @@ export function isTypeAssertion(node: ts.Node): node is ts.TypeAssertion {
 export function isVariableStatement(node: ts.Node): node is ts.VariableStatement {
     return node.kind === ts.SyntaxKind.VariableStatement;
 }
+
+export function isVoidExpression(node: ts.Node): node is ts.VoidExpression {
+    return node.kind === ts.SyntaxKind.VoidExpression;
+}

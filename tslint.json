@@ -105,7 +105,10 @@
     ],
     "no-as-type-assertion": true,
     "no-collapsible-if": true,
-    "no-return-undefined": true,
+    "no-return-undefined": [
+      true,
+      "allow-void-expression"
+    ],
     "no-unnecessary-else": true,
     "no-var-before-return": true,
     "object-shorthand-properties-first": true,

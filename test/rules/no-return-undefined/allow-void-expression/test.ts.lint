@@ -22,7 +22,6 @@ function foo(bar) {
 
 function foo(bar) {
     return void bar;
-           ~~~~~~~~ [fail]
 }
 
 [fail]: don't return explicit undefined

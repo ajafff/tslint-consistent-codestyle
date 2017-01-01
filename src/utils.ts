@@ -1,4 +1,11 @@
-import { isBlockLike, isComputedPropertyName, isIdentifier, isIfStatement, isLiteralExpression } from './typeguard';
+import {
+    isBindingElement,
+    isBlockLike,
+    isComputedPropertyName,
+    isIdentifier,
+    isIfStatement,
+    isLiteralExpression,
+} from './typeguard';
 import * as ts from 'typescript';
 import * as Lint from 'tslint';
 
@@ -15,28 +22,6 @@ export function hasAccessModifier(node: ts.Node): boolean {
                             ts.SyntaxKind.PublicKeyword,
                             ts.SyntaxKind.ProtectedKeyword,
                             ts.SyntaxKind.PrivateKeyword);
-}
-
-function bindingPatternContains(pattern: ts.BindingPattern, name: string, ignoreDefaults?: boolean): boolean {
-    for (let element of pattern.elements) {
-        if (element.kind !== ts.SyntaxKind.BindingElement)
-            continue;
-
-        const bindingElement = <ts.BindingElement>element;
-        // defaulting to undefined is not really a default -> check for undefined and void initializer
-        if (ignoreDefaults && bindingElement.initializer !== undefined && !isUndefined(bindingElement.initializer))
-            continue;
-
-        if (bindingNameContains(bindingElement.name, name, ignoreDefaults))
-            return true;
-    }
-    return false;
-}
-
-export function bindingNameContains(bindingName: ts.BindingName, name: string, ignoreDefaults?: boolean): boolean {
-    return isIdentifier(bindingName) ?
-           bindingName.text === name :
-           bindingPatternContains(bindingName, name, ignoreDefaults);
 }
 
 export function isUndefined(expression: ts.Expression): boolean {
@@ -92,6 +77,24 @@ export function endsThisContext(node: ts.Node): boolean {
            node.kind === ts.SyntaxKind.FunctionExpression ||
            node.kind === ts.SyntaxKind.ClassDeclaration ||
            node.kind === ts.SyntaxKind.ClassExpression;
+}
+
+export type ForEachDestructuringIdentifierCallback = (element: ts.BindingElement & {name: ts.Identifier}) => boolean|undefined;
+
+export function forEachDestructuringIdentifier(pattern: ts.BindingPattern, fn: ForEachDestructuringIdentifierCallback): boolean|undefined {
+    for (const element of pattern.elements) {
+        if (!isBindingElement(element))
+            continue;
+        let result: boolean|undefined;
+        if (isIdentifier(element.name)) {
+            result = fn(<ts.BindingElement & {name: ts.Identifier}>element);
+        } else {
+            result = forEachDestructuringIdentifier(element.name, fn);
+        }
+        if (result !== undefined) {
+            return result;
+        }
+    }
 }
 
 export let isScopeBoundary = (class extends Lint.ScopeAwareRuleWalker<void> {

@@ -106,4 +106,60 @@ function foo(bar) {
            ~~~  [fail]
 }
 
+function foo(bar) {
+    let {foo: {baz = undefined}} = bar;
+    return baz;
+           ~~~  [fail]
+}
+
+function foo(bar) {
+    let {foo: {baz = 1}} = bar;
+    return baz;
+}
+
+function foo(bar) {
+    let {foo, [foo]: baz} = bar;
+    return baz;
+}
+
+function foo(bar) {
+    let {foo, [tmp]: baz} = bar;
+    return baz;
+           ~~~  [fail]
+}
+
+function foo(bar) {
+    let {foo: {foo}, [foo]: baz} = bar;
+    return baz;
+}
+
+function foo(bar) {
+    let [, ...baz] = bar;
+    return baz;
+}
+
+function foo(bar) {
+    let {foo, ...baz} = bar;
+    return baz;
+}
+
+function foo(bar) {
+    let {foo, bas, baz: [ajaff, {moar}]} = bar;
+    return baz;
+}
+
+class Test {
+    foo(bar) {
+        let baz = bar;
+        return baz;
+               ~~~  [fail]
+    }
+
+    get baz() {
+        let baz = bar;
+        return baz;
+               ~~~  [fail]
+    }
+}
+
 [fail]: don't declare variable baz to return it immediately

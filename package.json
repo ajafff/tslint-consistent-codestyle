@@ -8,11 +8,10 @@
   },
   "scripts": {
     "test": "echo test/rules/*/* | xargs -n 1 tslint --test",
-    "pretest": "npm run build",
-    "prebuild": "npm run lint",
     "build": "tsc -p .",
-    "prepublish": "npm test",
-    "lint": "tslint '{rules,src}/**/*.ts'"
+    "prepublish": "npm run verify",
+    "lint": "tslint '{rules,src}/**/*.ts'",
+    "verify": "npm run build && npm run lint && npm run test"
   },
   "keywords": [
     "eslint",

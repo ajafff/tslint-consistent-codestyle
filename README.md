@@ -321,6 +321,10 @@ If you like this rule, I recommend you try [no-unnecessary-else](#no-unnecessary
 ## no-return-undefined
 Using `return undefined` or `return void 0` is unnecessary, because `undefined` is the default return value. Just use `return;` instead.
 
+### allow-void-expression
+Option `"allow-void-expression"` allows the usage of void expressions like `return void callback()` or `return foo = bar`.
+Using the void keyword with a static expression like `return void 0` is still not allowed, as this has no benefit.
+
 ## no-static-this
 Ban the use of `this` in static methods.
 

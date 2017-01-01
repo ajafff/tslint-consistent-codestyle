@@ -36,10 +36,8 @@ class ReturnWalker extends ReturnStatementWalker {
 function isSimpleDestructuringForName(pattern: ts.BindingPattern, name: string): boolean {
     const identifiersSeen = new Set<string>();
     return forEachDestructuringIdentifier(pattern, (element) => {
-        if (element.name.text !== name) {
-            identifiersSeen.add(element.name.text);
-            return;
-        }
+        if (element.name.text !== name)
+            return void identifiersSeen.add(element.name.text);
         if (element.dotDotDotToken !== undefined ||
             element.initializer !== undefined && !isUndefined(element.initializer))
             return false;

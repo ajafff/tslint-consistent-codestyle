@@ -53,6 +53,10 @@ export function isVariableStatement(node: ts.Node): node is ts.VariableStatement
     return node.kind === ts.SyntaxKind.VariableStatement;
 }
 
+export function isVariableDeclarationList(node: ts.Node): node is ts.VariableDeclarationList {
+    return node.kind === ts.SyntaxKind.VariableDeclarationList;
+}
+
 export function isVoidExpression(node: ts.Node): node is ts.VoidExpression {
     return node.kind === ts.SyntaxKind.VoidExpression;
 }

@@ -1,8 +1,8 @@
 import * as ts from 'typescript';
 import * as Lint from 'tslint';
 
-import { isParameterProperty, isScopeBoundary } from '../src/utils';
-import { isIdentifier } from '../src/typeguard';
+import { forEachDestructuringIdentifier, isParameterProperty, isScopeBoundary } from '../src/utils';
+import { isIdentifier, isVariableDeclarationList } from '../src/typeguard';
 import { AbstractConfigDependentRule } from '../src/rules';
 
 // TODO don't flag inherited members
@@ -439,20 +439,20 @@ class IdentifierNameWalker extends Lint.RuleWalker {
     }
 
     public visitForStatement(node: ts.ForStatement) {
-        if (node.initializer !== undefined && node.initializer.kind === ts.SyntaxKind.VariableDeclarationList)
-            this._checkVariableDeclarationList(<ts.VariableDeclarationList>node.initializer, this._getModifiers(node.initializer,
+        if (node.initializer !== undefined && isVariableDeclarationList(node.initializer))
+            this._checkVariableDeclarationList(node.initializer, this._getModifiers(node.initializer,
                                                                                                                 TypeSelector.variable));
     }
 
     public visitForOfStatement(node: ts.ForOfStatement) {
-        if (node.initializer.kind === ts.SyntaxKind.VariableDeclarationList)
-            this._checkVariableDeclarationList(<ts.VariableDeclarationList>node.initializer, this._getModifiers(node.initializer,
+        if (isVariableDeclarationList(node.initializer))
+            this._checkVariableDeclarationList(node.initializer, this._getModifiers(node.initializer,
                                                                                                                 TypeSelector.variable));
     }
 
     public visitForInStatement(node: ts.ForInStatement) {
-        if (node.initializer.kind === ts.SyntaxKind.VariableDeclarationList)
-            this._checkVariableDeclarationList(<ts.VariableDeclarationList>node.initializer, this._getModifiers(node.initializer,
+        if (isVariableDeclarationList(node.initializer))
+            this._checkVariableDeclarationList(node.initializer, this._getModifiers(node.initializer,
                                                                                                                 TypeSelector.variable));
     }
 
@@ -642,18 +642,11 @@ function isNameIdentifier(node: ts.Declaration & {name: any}): node is Declarati
     return node.name.kind === ts.SyntaxKind.Identifier;
 }
 
-function foreachDeclaredIdentifier(bindingName: ts.BindingName,
-                                   cb: (name: ts.Identifier, original: boolean) => void,
-                                   propertyName?: ts.PropertyName,
-                                   ) {
+function foreachDeclaredIdentifier(bindingName: ts.BindingName, cb: (name: ts.Identifier, original: boolean) => void) {
     if (isIdentifier(bindingName))
-        return cb(bindingName,
-                  propertyName === undefined ||
-                  propertyName.kind === ts.SyntaxKind.Identifier &&
-                  (<ts.Identifier>propertyName).text === bindingName.text);
-
-    for (let element of bindingName.elements) {
-        if (element.kind === ts.SyntaxKind.BindingElement)
-            foreachDeclaredIdentifier((<ts.BindingElement>element).name, cb, (<ts.BindingElement>element).propertyName);
-    }
+        return cb(bindingName, true);
+    forEachDestructuringIdentifier(bindingName, (element) => {
+        cb(element.name,
+           element.propertyName === undefined || isIdentifier(element.propertyName) && element.propertyName.text === element.name.text);
+    });
 }

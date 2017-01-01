@@ -79,13 +79,13 @@ export function endsThisContext(node: ts.Node): boolean {
            node.kind === ts.SyntaxKind.ClassExpression;
 }
 
-export type ForEachDestructuringIdentifierCallback = (element: ts.BindingElement & {name: ts.Identifier}) => boolean|undefined;
+export type ForEachDestructuringIdentifierCallback = (element: ts.BindingElement & {name: ts.Identifier}) => boolean|void;
 
-export function forEachDestructuringIdentifier(pattern: ts.BindingPattern, fn: ForEachDestructuringIdentifierCallback): boolean|undefined {
+export function forEachDestructuringIdentifier(pattern: ts.BindingPattern, fn: ForEachDestructuringIdentifierCallback): boolean|void {
     for (const element of pattern.elements) {
         if (!isBindingElement(element))
             continue;
-        let result: boolean|undefined;
+        let result: boolean|void;
         if (isIdentifier(element.name)) {
             result = fn(<ts.BindingElement & {name: ts.Identifier}>element);
         } else {

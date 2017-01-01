@@ -22,15 +22,15 @@ class ForWalker extends ForStatementWalker {
             let fix: Lint.Fix;
             if (node.condition === undefined) {
                 fix = new Lint.Fix('prefer-while', [
-                    this.createReplacement(start, width, 'while (true)'),
+                    new Lint.Replacement(start, width, 'while (true)'),
                 ]);
             } else {
                 const conditionEnd = node.condition.getEnd();
                 fix = new Lint.Fix('prefer-while', [
-                    this.createReplacement(start,
+                    new Lint.Replacement(start,
                                            node.condition.getStart(sourceFile) - start,
                                            'while ('),
-                    this.createReplacement(conditionEnd,
+                    new Lint.Replacement(conditionEnd,
                                            closeParenEnd - conditionEnd - 1,
                                            ''),
                 ]);

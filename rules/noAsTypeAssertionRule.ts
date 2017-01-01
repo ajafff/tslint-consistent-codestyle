@@ -17,8 +17,8 @@ export class AsExpressionWalker extends Lint.RuleWalker {
         const end = node.getEnd();
         const expressionEnd = node.expression.getEnd();
         const fix = new Lint.Fix('no-as-type-assertion', [
-            this.createReplacement(getInsertionPosition(node, sourceFile), 0, `<${node.type.getText(sourceFile)}>`),
-            this.createReplacement(expressionEnd, end - expressionEnd, ''),
+            new Lint.Replacement(getInsertionPosition(node, sourceFile), 0, `<${node.type.getText(sourceFile)}>`),
+            new Lint.Replacement(expressionEnd, end - expressionEnd, ''),
         ]);
         const start = getChildOfKind(node, ts.SyntaxKind.AsKeyword, sourceFile)!.getStart(sourceFile);
         this.addFailure(this.createFailure(start, end - start, FAIL_MESSAGE, fix));

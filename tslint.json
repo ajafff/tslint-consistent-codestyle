@@ -58,8 +58,8 @@
       "ignore-for-loop"
     ],
     "only-arrow-functions": [
-      false,
-      "allow-named-functions"
+      true,
+      "allow-declarations"
     ],
     "prefer-const": true,
     "prefer-for-of": true,

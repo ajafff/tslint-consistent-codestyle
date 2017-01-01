@@ -27,7 +27,7 @@ class MethodWalker extends Lint.RuleWalker {
         let relevant = false;
         let canBeStatic = false;
         const cb = (child: ts.Node) => {
-            let boundary = isScopeBoundary(child);
+            const boundary = isScopeBoundary(child);
             if (boundary) {
                 stack.push({relevant, canBeStatic});
                 if (!relevant || endsThisContext(child)) {

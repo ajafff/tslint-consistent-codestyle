@@ -49,7 +49,7 @@ export function getNextStatement(statement: ts.Statement): ts.Statement|undefine
 
 export function getChildOfKind(node: ts.Node, kind: ts.SyntaxKind, sourceFile?: ts.SourceFile): ts.Node|undefined {
     const children = node.getChildren(sourceFile);
-    for (let child of children) {
+    for (const child of children) {
         if (child.kind === kind)
             return child;
     }

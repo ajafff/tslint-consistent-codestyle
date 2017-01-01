@@ -19,7 +19,7 @@ class StaticMethodWalker extends Lint.RuleWalker {
         const stack: boolean[] = [];
         let current = false;
         const cb = (child: ts.Node) => {
-            let boundary = isScopeBoundary(child);
+            const boundary = isScopeBoundary(child);
             if (boundary) {
                 stack.push(current);
                 if (!current || endsThisContext(child))

@@ -57,6 +57,11 @@
       true,
       "ignore-for-loop"
     ],
+    "only-arrow-functions": [
+      false,
+      "allow-named-functions"
+    ],
+    "prefer-const": true,
     "prefer-for-of": true,
     "quotemark": [
       true, 

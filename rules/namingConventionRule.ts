@@ -161,7 +161,7 @@ class NormalizedConfig {
         this._modifiers = 0;
         if (raw.modifiers !== undefined) {
             if (Array.isArray(raw.modifiers)) {
-                for (let modifier of raw.modifiers) {
+                for (const modifier of raw.modifiers) {
                     this._modifiers |= Modifiers[modifier];
                     this._specifity |= Specifity[modifier];
                 }
@@ -309,7 +309,7 @@ class NameChecker {
     }
 
     private _checkPrefixes(identifier: string, name: ts.Identifier, prefixes: string[], walker: Lint.RuleWalker): string {
-        for (let prefix of prefixes) {
+        for (const prefix of prefixes) {
             if (identifier.startsWith(prefix))
                 return identifier.slice(prefix.length);
         }
@@ -321,7 +321,7 @@ class NameChecker {
     }
 
     private _checkSuffixes(identifier: string, name: ts.Identifier, suffixes: string[], walker: Lint.RuleWalker): string {
-        for (let suffix of suffixes) {
+        for (const suffix of suffixes) {
             if (identifier.endsWith(suffix))
                 return identifier.slice(-suffix.length);
         }
@@ -350,7 +350,7 @@ class IdentifierNameWalker extends Lint.RuleWalker {
 
     private _checkTypeParameters(node: ts.DeclarationWithTypeParameters, modifiers: Modifiers) {
         if (node.typeParameters !== undefined) {
-            for (let {name} of node.typeParameters) {
+            for (const {name} of node.typeParameters) {
                 this._checkName(name, TypeSelector.genericTypeParameter, modifiers);
             }
         }
@@ -360,7 +360,7 @@ class IdentifierNameWalker extends Lint.RuleWalker {
         let modifiers = this._getModifiers(node, TypeSelector.enum);
         this._checkName(node.name, TypeSelector.enum, modifiers);
         modifiers |= Modifiers.static | Modifiers.public | Modifiers.readonly; // treat enum members as public static readonly properties
-        for (let {name} of node.members) {
+        for (const {name} of node.members) {
             if (isIdentifier(name))
                 this._checkName(name, TypeSelector.enumMember, modifiers);
         }
@@ -432,7 +432,7 @@ class IdentifierNameWalker extends Lint.RuleWalker {
         const cb = (name: ts.Identifier, original: boolean) => {
             this._checkName(name, TypeSelector.variable, modifiers | (original ? 0 : Modifiers.rename));
         };
-        for (let {name} of list.declarations) {
+        for (const {name} of list.declarations) {
             // handle identifiers and destructuring
             foreachDeclaredIdentifier(name, cb);
         }
@@ -554,7 +554,7 @@ class IdentifierNameWalker extends Lint.RuleWalker {
 
     public walk(sourceFile: ts.Node) {
         const cb = (node: ts.Node) => {
-            let boundary = isScopeBoundary(node);
+            const boundary = isScopeBoundary(node);
             if (boundary)
                 ++this._depth;
             this.visitNode(node);

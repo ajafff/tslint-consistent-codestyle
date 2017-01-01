@@ -56,7 +56,7 @@ class ReturnWalker extends Lint.RuleWalker {
 
         this._enums.forEach((track) => {
             if (!track.isConst && track.canBeConst) {
-                for (let occurence of track.occurences) {
+                for (const occurence of track.occurences) {
                     const start = occurence.getStart(sourceFile);
                     const fix = new Lint.Fix('prefer-const-enum', [
                         this.createReplacement(start, 0, 'const '),
@@ -70,7 +70,7 @@ class ReturnWalker extends Lint.RuleWalker {
 
     public visitEnumDeclaration(node: ts.EnumDeclaration) {
         const track = this._addEnum(node);
-        for (let member of node.members) {
+        for (const member of node.members) {
             const isConstMember = track.isConst ||
                     member.initializer === undefined ||
                     this._isConstInitializer(member.initializer, track.members);

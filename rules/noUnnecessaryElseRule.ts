@@ -68,7 +68,7 @@ function hasReturnBreakContinueThrow(statement: ts.Statement): StatementType {
     if (isSwitchStatement(statement)) {
         let hasDefault = false;
         let fallthrough = false;
-        for (let clause of statement.caseBlock.clauses) {
+        for (const clause of statement.caseBlock.clauses) {
             const retVal = endsControlFlow(clause);
             if (retVal === StatementType.None) {
                 fallthrough = true;

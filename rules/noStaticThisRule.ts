@@ -1,4 +1,4 @@
-import { endsThisContext, isScopeBoundary } from '../src/utils';
+import { endsThisContext } from '../src/utils';
 import * as ts from 'typescript';
 import * as Lint from 'tslint';
 
@@ -19,7 +19,7 @@ class StaticMethodWalker extends Lint.RuleWalker {
         const stack: boolean[] = [];
         let current = false;
         const cb = (child: ts.Node) => {
-            const boundary = isScopeBoundary(child);
+            const boundary = Lint.isScopeBoundary(child);
             if (boundary) {
                 stack.push(current);
                 if (!current || endsThisContext(child))

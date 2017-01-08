@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 import * as Lint from 'tslint';
 
-import { forEachDestructuringIdentifier, isParameterProperty, isScopeBoundary } from '../src/utils';
+import { forEachDestructuringIdentifier, isParameterProperty } from '../src/utils';
 import { isIdentifier, isVariableDeclarationList } from '../src/typeguard';
 import { AbstractConfigDependentRule } from '../src/rules';
 
@@ -554,7 +554,7 @@ class IdentifierNameWalker extends Lint.RuleWalker {
 
     public walk(sourceFile: ts.Node) {
         const cb = (node: ts.Node) => {
-            const boundary = isScopeBoundary(node);
+            const boundary = Lint.isScopeBoundary(node);
             if (boundary)
                 ++this._depth;
             this.visitNode(node);

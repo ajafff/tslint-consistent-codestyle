@@ -95,10 +95,3 @@ export function forEachDestructuringIdentifier<T>(pattern: ts.BindingPattern,
         }
     }
 }
-
-export let isScopeBoundary = (class extends Lint.ScopeAwareRuleWalker<void> {
-    public createScope() { return this; }
-    public static getFn() {
-        return this.prototype.isScopeBoundary;
-    }
-}).getFn();

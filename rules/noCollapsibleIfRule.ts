@@ -1,7 +1,6 @@
 import * as ts from 'typescript';
 import * as Lint from 'tslint';
 
-import { getChildOfKind } from '../src/utils';
 import { isBlockLike, isIfStatement } from '../src/typeguard';
 import { IfStatementWalker } from '../src/walker';
 
@@ -23,15 +22,15 @@ class CollapsibleIfWalker extends IfStatementWalker {
             if (isIfStatement(then) && then.elseStatement === undefined) {
                 const sourceFile = this.getSourceFile();
                 const start = node.getStart(sourceFile);
-                const width = getChildOfKind(then, ts.SyntaxKind.CloseParenToken, sourceFile)!.getEnd() - start;
+                const width = Lint.childOfKind(then, ts.SyntaxKind.CloseParenToken)!.getEnd() - start;
                 this.addFailure(this.createFailure(start, width, FAIL_MERGE_IF));
             }
         } else if (isBlockLike(node.elseStatement) &&
             node.elseStatement.statements.length === 1 &&
             isIfStatement(node.elseStatement.statements[0])) {
             const sourceFile = this.getSourceFile();
-            const start = getChildOfKind(node, ts.SyntaxKind.ElseKeyword, sourceFile)!.getStart(sourceFile);
-            const width = getChildOfKind(node.elseStatement.statements[0], ts.SyntaxKind.CloseParenToken, sourceFile)!.getEnd() - start;
+            const start = Lint.childOfKind(node, ts.SyntaxKind.ElseKeyword)!.getStart(sourceFile);
+            const width = Lint.childOfKind(node.elseStatement.statements[0], ts.SyntaxKind.CloseParenToken)!.getEnd() - start;
             this.addFailure(this.createFailure(start, width, FAIL_MERGE_ELSE_IF));
         }
     }

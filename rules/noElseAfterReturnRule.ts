@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 import * as Lint from 'tslint';
 
-import { getChildOfKind, isElseIf } from '../src/utils';
+import { isElseIf } from '../src/utils';
 import { isBlockLike, isIfStatement, isSwitchStatement } from '../src/typeguard';
 import { IfStatementWalker } from '../src/walker';
 
@@ -26,9 +26,8 @@ class IfWalker extends IfStatementWalker {
         if (node.elseStatement !== undefined &&
             !isElseIf(node) &&
             isLastStatementReturn(node.thenStatement)) {
-            const sourceFile = this.getSourceFile();
-            const elseKeyword = getChildOfKind(node, ts.SyntaxKind.ElseKeyword, sourceFile)!;
-            this.addFailure(this.createFailure(elseKeyword.getStart(sourceFile),
+            const elseKeyword = Lint.childOfKind(node, ts.SyntaxKind.ElseKeyword)!;
+            this.addFailure(this.createFailure(elseKeyword.getStart(this.getSourceFile()),
                                                4,
                                                FAIL_MESSAGE));
         }

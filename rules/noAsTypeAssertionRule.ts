@@ -1,5 +1,4 @@
 import { isAsExpression, isTypeAssertion } from '../src/typeguard';
-import { getChildOfKind } from '../src/utils';
 import * as ts from 'typescript';
 import * as Lint from 'tslint';
 
@@ -20,7 +19,7 @@ export class AsExpressionWalker extends Lint.RuleWalker {
             new Lint.Replacement(getInsertionPosition(node, sourceFile), 0, `<${node.type.getText(sourceFile)}>`),
             new Lint.Replacement(expressionEnd, end - expressionEnd, ''),
         );
-        const start = getChildOfKind(node, ts.SyntaxKind.AsKeyword, sourceFile)!.getStart(sourceFile);
+        const start = Lint.childOfKind(node, ts.SyntaxKind.AsKeyword)!.getStart(sourceFile);
         this.addFailure(this.createFailure(start, end - start, FAIL_MESSAGE, fix));
     }
 

@@ -1,4 +1,3 @@
-import { getChildOfKind } from '../src/utils';
 import * as ts from 'typescript';
 import * as Lint from 'tslint';
 
@@ -17,7 +16,7 @@ class ForWalker extends ForStatementWalker {
         if (node.initializer === undefined && node.incrementor === undefined) {
             const sourceFile = this.getSourceFile();
             const start = node.getStart(sourceFile);
-            const closeParenEnd = getChildOfKind(node, ts.SyntaxKind.CloseParenToken)!.getEnd();
+            const closeParenEnd = Lint.childOfKind(node, ts.SyntaxKind.CloseParenToken)!.getEnd();
             const width = closeParenEnd - start;
             let fix: Lint.Fix;
             if (node.condition === undefined) {

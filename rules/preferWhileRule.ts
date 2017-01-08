@@ -21,19 +21,17 @@ class ForWalker extends ForStatementWalker {
             const width = closeParenEnd - start;
             let fix: Lint.Fix;
             if (node.condition === undefined) {
-                fix = new Lint.Fix('prefer-while', [
-                    new Lint.Replacement(start, width, 'while (true)'),
-                ]);
+                fix = this.createFix(new Lint.Replacement(start, width, 'while (true)'));
             } else {
                 const conditionEnd = node.condition.getEnd();
-                fix = new Lint.Fix('prefer-while', [
+                fix = this.createFix(
                     new Lint.Replacement(start,
-                                           node.condition.getStart(sourceFile) - start,
-                                           'while ('),
+                                         node.condition.getStart(sourceFile) - start,
+                                         'while ('),
                     new Lint.Replacement(conditionEnd,
-                                           closeParenEnd - conditionEnd - 1,
-                                           ''),
-                ]);
+                                         closeParenEnd - conditionEnd - 1,
+                                         ''),
+                );
             }
 
             this.addFailure(this.createFailure(start, width, FAIL_MESSAGE, fix));

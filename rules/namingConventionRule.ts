@@ -9,6 +9,7 @@ import { AbstractConfigDependentRule } from '../src/rules';
 // TODO check renamed imports
 // TODO skip all ambient declarations
 // TODO async modifier
+// TODO public protected private as modifier on class or just final for private
 
 const PASCAL_OPTION = 'PascalCase';
 const CAMEL_OPTION  = 'camelCase';

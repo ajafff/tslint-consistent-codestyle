@@ -16,10 +16,10 @@ export class AsExpressionWalker extends Lint.RuleWalker {
         const sourceFile = this.getSourceFile();
         const end = node.getEnd();
         const expressionEnd = node.expression.getEnd();
-        const fix = new Lint.Fix('no-as-type-assertion', [
+        const fix = this.createFix(
             new Lint.Replacement(getInsertionPosition(node, sourceFile), 0, `<${node.type.getText(sourceFile)}>`),
             new Lint.Replacement(expressionEnd, end - expressionEnd, ''),
-        ]);
+        );
         const start = getChildOfKind(node, ts.SyntaxKind.AsKeyword, sourceFile)!.getStart(sourceFile);
         this.addFailure(this.createFailure(start, end - start, FAIL_MESSAGE, fix));
     }

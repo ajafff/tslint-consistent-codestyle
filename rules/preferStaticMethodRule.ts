@@ -73,5 +73,6 @@ function isRecursion(node: ts.Node, methodName: string|undefined) {
     if (methodName === undefined)
         return false;
     const parent = node.parent!;
+    // TODO handle ElementAccessExpression
     return isPropertyAccessExpression(parent) && parent.name.text === methodName && parent.parent!.kind === ts.SyntaxKind.CallExpression;
 }

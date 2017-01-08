@@ -1,4 +1,5 @@
-import { endsThisContext } from '../src/utils';
+import { isPropertyAccessExpression } from '../src/typeguard';
+import { endsThisContext, getPropertyName } from '../src/utils';
 import * as ts from 'typescript';
 import * as Lint from 'tslint';
 
@@ -21,29 +22,35 @@ class MethodWalker extends Lint.RuleWalker {
     public walk(node: ts.Node) {
         interface IStackEntry {
             relevant: boolean;
+            methodName: string|undefined;
             canBeStatic: boolean;
         };
         const stack: IStackEntry[] = [];
         let relevant = false;
         let canBeStatic = false;
+        let methodName: string|undefined = undefined;
         const cb = (child: ts.Node) => {
             const boundary = Lint.isScopeBoundary(child);
             if (boundary) {
-                stack.push({relevant, canBeStatic});
+                stack.push({relevant, canBeStatic, methodName});
                 if (!relevant || endsThisContext(child)) {
                     relevant = isRelevant(child);
-                    canBeStatic = true;
+                    if (relevant) {
+                        canBeStatic = true;
+                        methodName = getPropertyName((<ts.MethodDeclaration>child).name);
+                    }
                 }
             }
-            if (relevant && (child.kind === ts.SyntaxKind.ThisKeyword || child.kind === ts.SyntaxKind.SuperKeyword))
+            if (relevant &&
+                (child.kind === ts.SyntaxKind.ThisKeyword && !isRecursion(child, methodName) || child.kind === ts.SyntaxKind.SuperKeyword))
                 canBeStatic = false;
             ts.forEachChild(child, cb);
             if (boundary) {
                 if (!relevant) {
-                    ({relevant, canBeStatic} = stack.pop()!);
+                    ({relevant, canBeStatic, methodName} = stack.pop()!);
                 } else {
                     const s = canBeStatic;
-                    ({relevant, canBeStatic} = stack.pop()!);
+                    ({relevant, canBeStatic, methodName} = stack.pop()!);
                     if (relevant) {
                         canBeStatic = canBeStatic && s;
                     } else if (s) {
@@ -60,4 +67,11 @@ class MethodWalker extends Lint.RuleWalker {
 function isRelevant(node: ts.Node): boolean {
     return node.kind === ts.SyntaxKind.MethodDeclaration &&
            !Lint.hasModifier(node.modifiers, ts.SyntaxKind.StaticKeyword, ts.SyntaxKind.AbstractKeyword);
+}
+
+function isRecursion(node: ts.Node, methodName: string|undefined) {
+    if (methodName === undefined)
+        return false;
+    const parent = node.parent!;
+    return isPropertyAccessExpression(parent) && parent.name.text === methodName && parent.parent!.kind === ts.SyntaxKind.CallExpression;
 }

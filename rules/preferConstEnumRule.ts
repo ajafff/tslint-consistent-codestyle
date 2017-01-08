@@ -59,8 +59,8 @@ class ReturnWalker extends Lint.RuleWalker {
                 for (const occurence of track.occurences) {
                     const start = occurence.getStart(sourceFile);
                     const fix = this.createFix(new Lint.Replacement(start, 0, 'const '));
-                    const width = occurence.name.getEnd() - start;
-                    this.addFailure(this.createFailure(start, width, FAIL_MESSAGE, fix));
+                    const end = occurence.name.getEnd();
+                    this.addFailureFromStartToEnd(start, end, FAIL_MESSAGE, fix);
                 }
             }
         });

@@ -21,14 +21,8 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class IfWalker extends IfStatementWalker {
     public visitIfStatement(node: ts.IfStatement) {
-        if (node.elseStatement !== undefined &&
-            !isElseIf(node) &&
-            endsControlFlow(node.thenStatement)) {
-            const elseKeyword = Lint.childOfKind(node, ts.SyntaxKind.ElseKeyword)!;
-            this.addFailure(this.createFailure(elseKeyword.getStart(this.getSourceFile()),
-                                               4,
-                                               FAIL_MESSAGE));
-        }
+        if (node.elseStatement !== undefined && !isElseIf(node) && endsControlFlow(node.thenStatement))
+            this.addFailureAtNode(Lint.childOfKind(node, ts.SyntaxKind.ElseKeyword)!, FAIL_MESSAGE);
     }
 }
 

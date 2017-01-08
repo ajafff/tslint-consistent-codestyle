@@ -14,14 +14,11 @@ export class Rule extends Lint.Rules.AbstractRule {
 class ObjectWalker extends ObjectLiteralWalker {
     public visitObjectLiteralExpression(node: ts.ObjectLiteralExpression) {
         let seenRegularProperty = false;
-        const sourceFile = this.getSourceFile();
         for (const property of node.properties) {
             if (property.kind === ts.SyntaxKind.PropertyAssignment) {
                 seenRegularProperty = true;
             } else if (seenRegularProperty && property.kind === ts.SyntaxKind.ShorthandPropertyAssignment) {
-                this.addFailure(this.createFailure(property.getStart(sourceFile),
-                                                   property.getWidth(sourceFile),
-                                                   FAIL_MESSAGE));
+                this.addFailureAtNode(property, FAIL_MESSAGE);
             }
         }
     }

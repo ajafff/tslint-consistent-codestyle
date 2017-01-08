@@ -20,18 +20,16 @@ class CollapsibleIfWalker extends IfStatementWalker {
             if (isBlockLike(then) && then.statements.length === 1)
                 then = then.statements[0];
             if (isIfStatement(then) && then.elseStatement === undefined) {
-                const sourceFile = this.getSourceFile();
-                const start = node.getStart(sourceFile);
-                const width = Lint.childOfKind(then, ts.SyntaxKind.CloseParenToken)!.getEnd() - start;
-                this.addFailure(this.createFailure(start, width, FAIL_MERGE_IF));
+                const end = Lint.childOfKind(then, ts.SyntaxKind.CloseParenToken)!.getEnd();
+                this.addFailureFromStartToEnd(node.getStart(this.getSourceFile()), end, FAIL_MERGE_IF);
             }
         } else if (isBlockLike(node.elseStatement) &&
             node.elseStatement.statements.length === 1 &&
             isIfStatement(node.elseStatement.statements[0])) {
-            const sourceFile = this.getSourceFile();
-            const start = Lint.childOfKind(node, ts.SyntaxKind.ElseKeyword)!.getStart(sourceFile);
-            const width = Lint.childOfKind(node.elseStatement.statements[0], ts.SyntaxKind.CloseParenToken)!.getEnd() - start;
-            this.addFailure(this.createFailure(start, width, FAIL_MERGE_ELSE_IF));
+
+            const start = Lint.childOfKind(node, ts.SyntaxKind.ElseKeyword)!.getStart(this.getSourceFile());
+            const end = Lint.childOfKind(node.elseStatement.statements[0], ts.SyntaxKind.CloseParenToken)!.getEnd();
+            this.addFailureFromStartToEnd(start, end, FAIL_MERGE_ELSE_IF);
         }
     }
 }

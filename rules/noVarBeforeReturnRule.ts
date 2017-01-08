@@ -24,10 +24,7 @@ class ReturnWalker extends ReturnStatementWalker {
                 } else if (!isSimpleDestructuringForName(lastDeclaration, node.expression.text)) {
                     return;
                 }
-                const sourceFile = this.getSourceFile();
-                this.addFailure(this.createFailure(node.expression.getStart(sourceFile),
-                                                   node.expression.getWidth(sourceFile),
-                                                   `don't declare variable ${node.expression.text} to return it immediately`));
+                this.addFailureAtNode(node.expression, `don't declare variable ${node.expression.text} to return it immediately`);
             }
         }
     }

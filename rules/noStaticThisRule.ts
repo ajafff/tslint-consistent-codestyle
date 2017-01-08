@@ -12,7 +12,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class StaticMethodWalker extends Lint.RuleWalker {
     private _displayError(node: ts.ThisExpression) {
-        this.addFailure(this.createFailure(node.getStart(this.getSourceFile()), 4, FAIL_MESSAGE));
+        this.addFailureAtNode(node, FAIL_MESSAGE);
     }
 
     public walk(node: ts.Node) {

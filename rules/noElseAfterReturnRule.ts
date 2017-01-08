@@ -26,10 +26,8 @@ class IfWalker extends IfStatementWalker {
         if (node.elseStatement !== undefined &&
             !isElseIf(node) &&
             isLastStatementReturn(node.thenStatement)) {
-            const elseKeyword = Lint.childOfKind(node, ts.SyntaxKind.ElseKeyword)!;
-            this.addFailure(this.createFailure(elseKeyword.getStart(this.getSourceFile()),
-                                               4,
-                                               FAIL_MESSAGE));
+
+            this.addFailureAtNode(Lint.childOfKind(node, ts.SyntaxKind.ElseKeyword)!, FAIL_MESSAGE);
         }
     }
 }

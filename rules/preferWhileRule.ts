@@ -33,7 +33,7 @@ class ForWalker extends ForStatementWalker {
                 );
             }
 
-            this.addFailure(this.createFailure(start, width, FAIL_MESSAGE, fix));
+            this.addFailureAt(start, width, FAIL_MESSAGE, fix);
         }
     }
 }

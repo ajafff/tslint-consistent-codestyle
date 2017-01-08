@@ -22,12 +22,8 @@ class ReturnWalker extends ReturnStatementWalker {
     }
 
     public visitReturnStatement(node: ts.ReturnStatement) {
-        if (node.expression !== undefined && this._isUndefined(node.expression)) {
-            const sourceFile = this.getSourceFile();
-            this.addFailure(this.createFailure(node.expression.getStart(sourceFile),
-                                               node.expression.getWidth(sourceFile),
-                                               FAIL_MESSAGE));
-        }
+        if (node.expression !== undefined && this._isUndefined(node.expression))
+            this.addFailureAtNode(node.expression, FAIL_MESSAGE);
     }
 
     private _isUndefined(expression: ts.Expression): boolean {

@@ -220,40 +220,29 @@ class NameChecker {
     }
 
     public check(name: ts.Identifier, walker: Lint.RuleWalker) {
-        const sourceFile = walker.getSourceFile();
         let identifier = name.text;
 
         // start with regex test before we potentially strip off underscores and affixes
         if (this._regex !== undefined && !this._regex.test(identifier))
-            walker.addFailure(walker.createFailure(name.getStart(sourceFile),
-                                                   name.getWidth(sourceFile),
-                                                   this._failMessage(REGEX_FAIL)));
+            walker.addFailureAtNode(name, this._failMessage(REGEX_FAIL));
 
         if (this._leadingUnderscore !== undefined) {
             if (identifier[0] === '_') {
                 if (this._leadingUnderscore === 'forbid')
-                    walker.addFailure(walker.createFailure(name.getStart(sourceFile),
-                                                           name.getWidth(sourceFile),
-                                                           this._failMessage(LEADING_FAIL)));
+                    walker.addFailureAtNode(name, this._failMessage(LEADING_FAIL));
                 identifier = identifier.slice(1);
             } else if (this._leadingUnderscore === 'require') {
-                walker.addFailure(walker.createFailure(name.getStart(sourceFile),
-                                                       name.getWidth(sourceFile),
-                                                       this._failMessage(NO_LEADING_FAIL)));
+                walker.addFailureAtNode(name, this._failMessage(NO_LEADING_FAIL));
             }
         }
 
         if (this._trailingUnderscore !== undefined) {
             if (identifier[identifier.length - 1] === '_') {
                 if (this._trailingUnderscore === 'forbid')
-                    walker.addFailure(walker.createFailure(name.getStart(sourceFile),
-                                                           name.getWidth(sourceFile),
-                                                           this._failMessage(TRAILING_FAIL)));
+                    walker.addFailureAtNode(name, this._failMessage(TRAILING_FAIL));
                 identifier = identifier.slice(0, -1);
             } else if (this._trailingUnderscore === 'require') {
-                walker.addFailure(walker.createFailure(name.getStart(sourceFile),
-                                                       name.getWidth(sourceFile),
-                                                       this._failMessage(NO_TRAILING_FAIL)));
+                walker.addFailureAtNode(name, this._failMessage(NO_TRAILING_FAIL));
             }
         }
 
@@ -263,9 +252,7 @@ class NameChecker {
             } else if (identifier.startsWith(this._prefix)) {
                 identifier = identifier.slice(this._prefix.length);
             } else {
-                walker.addFailure(walker.createFailure(name.getStart(sourceFile),
-                                                       name.getWidth(sourceFile),
-                                                       this._failMessage(PREFIX_FAIL + this._prefix)));
+                walker.addFailureAtNode(name, this._failMessage(PREFIX_FAIL + this._prefix));
             }
         }
         if (this._suffix !== undefined) {
@@ -274,9 +261,7 @@ class NameChecker {
             } else if (identifier.endsWith(this._suffix)) {
                 identifier = identifier.slice(0, -this._suffix.length);
             } else {
-                walker.addFailure(walker.createFailure(name.getStart(sourceFile),
-                                                       name.getWidth(sourceFile),
-                                                       this._failMessage(SUFFIX_FAIL + this._suffix)));
+                walker.addFailureAtNode(name, this._failMessage(SUFFIX_FAIL + this._suffix));
             }
         }
 
@@ -284,27 +269,19 @@ class NameChecker {
         switch (this._format) {
             case PASCAL_OPTION:
                 if (!isPascalCase(identifier))
-                    walker.addFailure(walker.createFailure(name.getStart(sourceFile),
-                                                           name.getWidth(sourceFile),
-                                                           this._failMessage(PASCAL_FAIL)));
+                    walker.addFailureAtNode(name, this._failMessage(PASCAL_FAIL));
                 break;
             case CAMEL_OPTION:
                 if (!isCamelCase(identifier))
-                    walker.addFailure(walker.createFailure(name.getStart(sourceFile),
-                                                           name.getWidth(sourceFile),
-                                                           this._failMessage(CAMEL_FAIL)));
+                    walker.addFailureAtNode(name, this._failMessage(CAMEL_FAIL));
                 break;
             case SNAKE_OPTION:
                 if (!isSnakeCase(identifier))
-                    walker.addFailure(walker.createFailure(name.getStart(sourceFile),
-                                                           name.getWidth(sourceFile),
-                                                           this._failMessage(SNAKE_FAIL)));
+                    walker.addFailureAtNode(name, this._failMessage(SNAKE_FAIL));
                 break;
             case UPPER_OPTION:
                 if (!isUpperCase(identifier))
-                    walker.addFailure(walker.createFailure(name.getStart(sourceFile),
-                                                           name.getWidth(sourceFile),
-                                                           this._failMessage(UPPER_FAIL)));
+                    walker.addFailureAtNode(name, this._failMessage(UPPER_FAIL));
                 break;
         }
     }
@@ -314,10 +291,7 @@ class NameChecker {
             if (identifier.startsWith(prefix))
                 return identifier.slice(prefix.length);
         }
-        const sourceFile = walker.getSourceFile();
-        walker.addFailure(walker.createFailure(name.getStart(sourceFile),
-                                               name.getWidth(sourceFile),
-                                               this._failMessage(PREFIX_FAIL_ARR + prefixes.toString())));
+        walker.addFailureAtNode(name, this._failMessage(PREFIX_FAIL_ARR + prefixes.toString()));
         return identifier;
     }
 
@@ -326,10 +300,7 @@ class NameChecker {
             if (identifier.endsWith(suffix))
                 return identifier.slice(-suffix.length);
         }
-        const sourceFile = walker.getSourceFile();
-        walker.addFailure(walker.createFailure(name.getStart(sourceFile),
-                                               name.getWidth(sourceFile),
-                                               this._failMessage(SUFFIX_FAIL_ARR + suffixes.toString())));
+        walker.addFailureAtNode(name, this._failMessage(SUFFIX_FAIL_ARR + suffixes.toString()));
         return identifier;
     }
 

@@ -20,7 +20,7 @@ export class AsExpressionWalker extends Lint.RuleWalker {
             new Lint.Replacement(expressionEnd, end - expressionEnd, ''),
         );
         const start = Lint.childOfKind(node, ts.SyntaxKind.AsKeyword)!.getStart(sourceFile);
-        this.addFailure(this.createFailure(start, end - start, FAIL_MESSAGE, fix));
+        this.addFailureFromStartToEnd(start, end, FAIL_MESSAGE, fix);
     }
 
     public walk(node: ts.Node) {

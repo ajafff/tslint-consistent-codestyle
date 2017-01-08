@@ -13,10 +13,9 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class MethodWalker extends Lint.RuleWalker {
     private _reportError(node: ts.MethodDeclaration) {
-        const sourceFile = this.getSourceFile();
-        const start = node.getStart(sourceFile);
-        const width = node.name.getEnd() - start;
-        this.addFailure(this.createFailure(start, width, FAIL_MESSAGE));
+        const start = node.getStart(this.getSourceFile());
+        const end = node.name.getEnd();
+        this.addFailureFromStartToEnd(start, end, FAIL_MESSAGE);
     }
 
     public walk(node: ts.Node) {

@@ -62,17 +62,15 @@ class ParameterPropertyWalker extends ConstructorDeclarationWalker {
         if (index === -1)
             return;
 
-        const sourceFile = this.getSourceFile();
-
         if (this._allOrNone) {
-            const start = parameters[0].getStart(sourceFile);
-            const width = parameters[parameters.length - 1].getEnd() - start;
+            const start = parameters[0].getStart(this.getSourceFile());
+            const end = parameters[parameters.length - 1].getEnd();
             if (index > 0) {
-                this.addFailure(this.createFailure(start, width, ALL_OR_NONE_FAIL));
+                this.addFailureFromStartToEnd(start, end, ALL_OR_NONE_FAIL);
             } else {
                 for (let i = index + 1; i < length; ++i) {
                     if (!isParameterProperty(parameters[i])) {
-                        this.addFailure(this.createFailure(start, width, ALL_OR_NONE_FAIL));
+                        this.addFailureFromStartToEnd(start, end, ALL_OR_NONE_FAIL);
                         break;
                     }
                 }
@@ -82,9 +80,7 @@ class ParameterPropertyWalker extends ConstructorDeclarationWalker {
             for (let i = index; i < length; ++i) {
                 if (isParameterProperty(parameters[i])) {
                     if (regular)
-                        this.addFailure(this.createFailure(parameters[i].getStart(sourceFile),
-                                                           parameters[i].getWidth(sourceFile),
-                                                           LEADING_FAIL));
+                        this.addFailureAtNode(parameters[i], LEADING_FAIL);
                 } else {
                     regular = true;
                 }
@@ -95,7 +91,7 @@ class ParameterPropertyWalker extends ConstructorDeclarationWalker {
             for (let i = index; i < length; ++i) {
                 const parameter = parameters[i];
                 if (isParameterProperty(parameter) && !hasAccessModifier(parameter))
-                    this.addFailure(this.createFailure(parameter.getStart(sourceFile), parameter.getWidth(sourceFile), MEMBER_ACCESS_FAIL));
+                    this.addFailureAtNode(parameter, MEMBER_ACCESS_FAIL);
             }
         }
 
@@ -103,7 +99,7 @@ class ParameterPropertyWalker extends ConstructorDeclarationWalker {
             for (let i = index; i < length; ++i) {
                 const parameter = parameters[i];
                 if (isParameterProperty(parameter) && !Lint.hasModifier(parameter.modifiers, ts.SyntaxKind.ReadonlyKeyword))
-                    this.addFailure(this.createFailure(parameter.getStart(sourceFile), parameter.getWidth(sourceFile), READONLY_FAIL));
+                    this.addFailureAtNode(parameter, READONLY_FAIL);
             }
         }
     }

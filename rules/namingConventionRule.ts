@@ -32,7 +32,7 @@ const SUFFIX_FAIL_ARR  = ' name must end with one of ';
 
 type DeclarationWithIdentifierName = ts.Declaration & {name: ts.Identifier};
 
-type TFormat = 'camelCase' | 'PascalCase' | 'snake_case' | 'UPPER_CASE';
+type Format = 'camelCase' | 'PascalCase' | 'snake_case' | 'UPPER_CASE';
 type IdentifierType = 'class' | 'interface' | 'function' | 'variable' | 'method' |
                       'property' | 'parameter' | 'default' | 'member' | 'type' |
                       'genericTypeParameter';
@@ -47,10 +47,10 @@ interface IRuleScope {
     final?: boolean;
 }
 
-type IRuleConfig = IRuleScope & Partial<IFormat>;
+type RuleConfig = IRuleScope & Partial<IFormat>;
 
 interface IFormat {
-    format: TFormat|undefined;
+    format: Format|undefined;
     leadingUnderscore: UnderscoreOption|undefined;
     trailingUnderscore: UnderscoreOption|undefined;
     prefix: string|string[]|undefined;
@@ -155,7 +155,7 @@ class NormalizedConfig {
     private _specifity: number;
     private _final: boolean;
 
-    constructor(raw: IRuleConfig) {
+    constructor(raw: RuleConfig) {
         this._type = Types[raw.type];
         this._final = !!raw.final;
         this._specifity = Specifity[raw.type];
@@ -313,10 +313,10 @@ class IdentifierNameWalker extends Lint.RuleWalker {
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
-        this._normalizeRules(<IRuleConfig[]> options.ruleArguments);
+        this._normalizeRules(<RuleConfig[]> options.ruleArguments);
     }
 
-    private _normalizeRules(rules: IRuleConfig[]) {
+    private _normalizeRules(rules: RuleConfig[]) {
         this._rules = rules.map((rule) => new NormalizedConfig(rule)).sort(NormalizedConfig.sort);
     }
 
@@ -595,11 +595,33 @@ class IdentifierNameWalker extends Lint.RuleWalker {
 }
 
 function isPascalCase(name: string) {
-    return name.length === 0 || name[0] === name[0].toUpperCase() && name.indexOf('_') === -1;
+    return name.length === 0 || name[0] === name[0].toUpperCase() && hasStrictCamelHumps(name, true);
 }
 
 function isCamelCase(name: string) {
-    return name.length === 0 || name[0] === name[0].toLowerCase() && name.indexOf('_') === -1;
+    return name.length === 0 || name[0] === name[0].toLowerCase() && hasStrictCamelHumps(name, false);
+}
+
+function hasStrictCamelHumps(name: string, isUpper: boolean) {
+    if (name.length <= 1)
+        return true;
+    if (name[0] === '_')
+        return false;
+    for (let i = 1; i < name.length; ++i) {
+        if (name[i] === '_')
+            return false;
+        if (isUpper === isUppercaseChar(name[i])) {
+            if (isUpper)
+                return false;
+        } else {
+            isUpper = !isUpper;
+        }
+    }
+    return true;
+}
+
+function isUppercaseChar(char: string) {
+    return char === char.toUpperCase() && char !== char.toLowerCase();
 }
 
 function isSnakeCase(name: string) {

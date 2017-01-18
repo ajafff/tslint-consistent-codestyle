@@ -16,6 +16,17 @@ var trailing_ = "";
     ~~~~~~~~~   [variable name must not have trailing underscore]
 var number = 42;
 
+let goodCamel, goodCameL, good123Camel, goodCamel123, baDCamel;
+                                                      ~~~~~~~~ [variable name must be in camelCase]
+interface GoodPascal{}
+interface GoodPascaL{}
+interface GoodPascal123{}
+interface Good123Pascal{}
+interface BADPASCAL{}
+          ~~~~~~~~~ [interface name must be in PascalCase]
+interface BadPAscal{}
+          ~~~~~~~~~ [interface name must be in PascalCase]
+
 function foo({_Bar, Baz, _bas}) {}
               ~~~~      [parameter name must be in camelCase]
                     ~~~ [parameter name must be in camelCase]

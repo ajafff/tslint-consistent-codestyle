@@ -1,6 +1,6 @@
 {
   "name": "tslint-consistent-codestyle",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Enforce constistent code style with tslint",
   "repository": {
     "type": "git",

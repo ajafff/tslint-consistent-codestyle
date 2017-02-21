@@ -1,0 +1,8 @@
+foo % 2;
+    ~~~  [Modulus 2 can be replaced with & 1]
+foo%2;
+   ~~  [Modulus 2 can be replaced with & 1]
+bar%1;
+bar % -2;
+foo % bar;
+2 % bar;

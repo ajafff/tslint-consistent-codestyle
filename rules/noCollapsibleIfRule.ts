@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 import * as Lint from 'tslint';
+import * as utils from 'tsutils';
 
-import { isBlockLike, isIfStatement } from '../src/typeguard';
 import { IfStatementWalker } from '../src/walker';
 
 const FAIL_MERGE_IF = `if statements can be merged`;
@@ -17,18 +17,19 @@ class CollapsibleIfWalker extends IfStatementWalker {
     public visitIfStatement(node: ts.IfStatement) {
         if (node.elseStatement === undefined) {
             let then = node.thenStatement;
-            if (isBlockLike(then) && then.statements.length === 1)
+            if (utils.isBlockLike(then) && then.statements.length === 1)
                 then = then.statements[0];
-            if (isIfStatement(then) && then.elseStatement === undefined) {
-                const end = Lint.childOfKind(then, ts.SyntaxKind.CloseParenToken)!.getEnd();
+            if (utils.isIfStatement(then) && then.elseStatement === undefined) {
+                const end = utils.getChildOfKind(then, ts.SyntaxKind.CloseParenToken, this.getSourceFile())!.getEnd();
                 this.addFailureFromStartToEnd(node.getStart(this.getSourceFile()), end, FAIL_MERGE_IF);
             }
-        } else if (isBlockLike(node.elseStatement) &&
+        } else if (utils.isBlockLike(node.elseStatement) &&
             node.elseStatement.statements.length === 1 &&
-            isIfStatement(node.elseStatement.statements[0])) {
+            utils.isIfStatement(node.elseStatement.statements[0])) {
 
-            const start = Lint.childOfKind(node, ts.SyntaxKind.ElseKeyword)!.getStart(this.getSourceFile());
-            const end = Lint.childOfKind(node.elseStatement.statements[0], ts.SyntaxKind.CloseParenToken)!.getEnd();
+            const sourceFile = this.getSourceFile();
+            const start = utils.getChildOfKind(node, ts.SyntaxKind.ElseKeyword, sourceFile)!.getStart(sourceFile);
+            const end = utils.getChildOfKind(node.elseStatement.statements[0], ts.SyntaxKind.CloseParenToken, sourceFile)!.getEnd();
             this.addFailureFromStartToEnd(start, end, FAIL_MERGE_ELSE_IF);
         }
     }

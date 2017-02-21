@@ -17,6 +17,9 @@ class ObjectWalker extends ObjectLiteralWalker {
         for (const property of node.properties) {
             if (property.kind === ts.SyntaxKind.PropertyAssignment) {
                 seenRegularProperty = true;
+            } else if (property.kind === ts.SyntaxKind.SpreadAssignment) {
+                // reset at spread, because ordering matters
+                seenRegularProperty = false;
             } else if (seenRegularProperty && property.kind === ts.SyntaxKind.ShorthandPropertyAssignment) {
                 this.addFailureAtNode(property, FAIL_MESSAGE);
             }

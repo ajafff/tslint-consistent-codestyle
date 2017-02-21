@@ -1,8 +1,8 @@
 import * as ts from 'typescript';
 import * as Lint from 'tslint';
+import * as utils from 'tsutils';
 
 import { isElseIf } from '../src/utils';
-import { isBlockLike, isIfStatement, isSwitchStatement } from '../src/typeguard';
 import { IfStatementWalker } from '../src/walker';
 
 const FAIL_MESSAGE = `unnecessary else after return`;
@@ -27,7 +27,7 @@ class IfWalker extends IfStatementWalker {
             !isElseIf(node) &&
             isLastStatementReturn(node.thenStatement)) {
 
-            this.addFailureAtNode(Lint.childOfKind(node, ts.SyntaxKind.ElseKeyword)!, FAIL_MESSAGE);
+            this.addFailureAtNode(utils.getChildOfKind(node, ts.SyntaxKind.ElseKeyword, this.getSourceFile())!, FAIL_MESSAGE);
         }
     }
 }
@@ -38,7 +38,7 @@ function isLastStatementReturn(statement: ts.Statement | ts.BlockLike | ts.Defau
 
 function endsControlFlow(statement: ts.Statement|ts.BlockLike|ts.DefaultClause): StatementType {
     // recurse into nested blocks
-    while (isBlockLike(statement)) {
+    while (utils.isBlockLike(statement)) {
         if (statement.statements.length === 0)
             return StatementType.None;
 
@@ -54,7 +54,7 @@ function isDefinitelyReturned(statement: ts.Statement): StatementType {
     if (statement.kind === ts.SyntaxKind.BreakStatement)
         return StatementType.Break;
 
-    if (isIfStatement(statement)) {
+    if (utils.isIfStatement(statement)) {
         if (statement.elseStatement === undefined)
             return StatementType.None;
         const then = endsControlFlow(statement.thenStatement);
@@ -66,7 +66,7 @@ function isDefinitelyReturned(statement: ts.Statement): StatementType {
         );
     }
 
-    if (isSwitchStatement(statement)) {
+    if (utils.isSwitchStatement(statement)) {
         let hasDefault = false;
         let fallthrough = false;
         for (const clause of statement.caseBlock.clauses) {

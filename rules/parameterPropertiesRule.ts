@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 import * as Lint from 'tslint';
+import * as utils from 'tsutils';
 
-import { hasAccessModifier, isParameterProperty } from '../src/utils';
 import { AbstractConfigDependentRule } from '../src/rules';
 import { ConstructorDeclarationWalker } from '../src/walker';
 
@@ -54,7 +54,7 @@ class ParameterPropertyWalker extends ConstructorDeclarationWalker {
 
         let index = -1;
         for (let i = 0; i < length; ++i) {
-            if (isParameterProperty(parameters[i])) {
+            if (utils.isParameterProperty(parameters[i])) {
                 index = i;
                 break;
             }
@@ -69,7 +69,7 @@ class ParameterPropertyWalker extends ConstructorDeclarationWalker {
                 this.addFailureFromStartToEnd(start, end, ALL_OR_NONE_FAIL);
             } else {
                 for (let i = index + 1; i < length; ++i) {
-                    if (!isParameterProperty(parameters[i])) {
+                    if (!utils.isParameterProperty(parameters[i])) {
                         this.addFailureFromStartToEnd(start, end, ALL_OR_NONE_FAIL);
                         break;
                     }
@@ -78,7 +78,7 @@ class ParameterPropertyWalker extends ConstructorDeclarationWalker {
         } else if (this._leading) {
             let regular = index > 0;
             for (let i = index; i < length; ++i) {
-                if (isParameterProperty(parameters[i])) {
+                if (utils.isParameterProperty(parameters[i])) {
                     if (regular)
                         this.addFailureAtNode(parameters[i], LEADING_FAIL);
                 } else {
@@ -90,7 +90,7 @@ class ParameterPropertyWalker extends ConstructorDeclarationWalker {
         if (this._memberAccess) {
             for (let i = index; i < length; ++i) {
                 const parameter = parameters[i];
-                if (isParameterProperty(parameter) && !hasAccessModifier(parameter))
+                if (utils.isParameterProperty(parameter) && !utils.hasAccessModifier(parameter))
                     this.addFailureAtNode(parameter, MEMBER_ACCESS_FAIL);
             }
         }
@@ -98,7 +98,7 @@ class ParameterPropertyWalker extends ConstructorDeclarationWalker {
         if (this._readOnly) {
             for (let i = index; i < length; ++i) {
                 const parameter = parameters[i];
-                if (isParameterProperty(parameter) && !Lint.hasModifier(parameter.modifiers, ts.SyntaxKind.ReadonlyKeyword))
+                if (utils.isParameterProperty(parameter) && !utils.hasModifier(parameter.modifiers, ts.SyntaxKind.ReadonlyKeyword))
                     this.addFailureAtNode(parameter, READONLY_FAIL);
             }
         }

@@ -1,8 +1,8 @@
 import * as ts from 'typescript';
 import * as Lint from 'tslint';
+import * as utils from 'tsutils';
 
-import { forEachDestructuringIdentifier, getPreviousStatement, isUndefined } from '../src/utils';
-import { isComputedPropertyName, isIdentifier, isLiteralExpression, isVariableStatement } from '../src/typeguard';
+import { isUndefined } from '../src/utils';
 import { ReturnStatementWalker } from '../src/walker';
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -13,12 +13,12 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class ReturnWalker extends ReturnStatementWalker {
     public visitReturnStatement(node: ts.ReturnStatement) {
-        if (node.expression !== undefined && isIdentifier(node.expression)) {
-            const statement = getPreviousStatement(node);
-            if (statement !== undefined && isVariableStatement(statement)) {
+        if (node.expression !== undefined && utils.isIdentifier(node.expression)) {
+            const statement = utils.getPreviousStatement(node);
+            if (statement !== undefined && utils.isVariableStatement(statement)) {
                 const declarations = statement.declarationList.declarations;
                 const lastDeclaration = declarations[declarations.length - 1].name;
-                if (isIdentifier(lastDeclaration)) {
+                if (utils.isIdentifier(lastDeclaration)) {
                     if (lastDeclaration.text !== node.expression.text)
                         return;
                 } else if (!isSimpleDestructuringForName(lastDeclaration, node.expression.text)) {
@@ -32,24 +32,28 @@ class ReturnWalker extends ReturnStatementWalker {
 
 function isSimpleDestructuringForName(pattern: ts.BindingPattern, name: string): boolean {
     const identifiersSeen = new Set<string>();
-    return forEachDestructuringIdentifier(pattern, (element) => {
+    interface IResult {
+        result: boolean;
+    }
+    const result = utils.forEachDestructuringIdentifier(pattern, (element): IResult | undefined => {
         if (element.name.text !== name)
             return void identifiersSeen.add(element.name.text);
         if (element.dotDotDotToken !== undefined ||
             element.initializer !== undefined && !isUndefined(element.initializer))
-            return false;
+            return {result: false};
 
         const property = element.propertyName;
         if (property === undefined)
-            return true;
+            return {result: true};
 
-        if (isComputedPropertyName(property)) {
-            if (isIdentifier(property.expression))
-                return !identifiersSeen.has(property.expression.text);
-            if (isLiteralExpression(property.expression))
-                return true;
-            return false;
+        if (utils.isComputedPropertyName(property)) {
+            if (utils.isIdentifier(property.expression))
+                return {result: !identifiersSeen.has(property.expression.text)};
+            if (utils.isLiteralExpression(property.expression))
+                return {result: true};
+            return {result: false};
         }
-        return true;
-    }) === true;
+        return {result: true};
+    });
+    return result !== undefined && result.result;
 }

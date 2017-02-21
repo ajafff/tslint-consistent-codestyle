@@ -13,4 +13,12 @@ foo = {
     bas: bas,
 }
 
+foo = {
+    bar: bar,
+    baz,
+    ~~~ [fail]
+    ...bar,
+    bas,
+}
+
 [fail]: shorthand properties should come first

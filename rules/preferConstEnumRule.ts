@@ -1,7 +1,6 @@
-import { isElementAccessExpression, isIdentifier, isPropertyAccessExpression, isStringLiteral } from '../src/typeguard';
-import { getPropertyName } from '../src/utils';
 import * as ts from 'typescript';
 import * as Lint from 'tslint';
+import * as utils from 'tsutils';
 
 const FAIL_MESSAGE = `enum can be declared const`;
 
@@ -31,7 +30,7 @@ class ReturnWalker extends Lint.RuleWalker {
         if (trackingStructure === undefined) {
             trackingStructure = {
                 name: node.name.text,
-                isConst: Lint.hasModifier(node.modifiers, ts.SyntaxKind.ConstKeyword),
+                isConst: utils.hasModifier(node.modifiers, ts.SyntaxKind.ConstKeyword),
                 occurences: [],
                 members: new Map<string, boolean>(),
                 canBeConst: true,
@@ -73,18 +72,18 @@ class ReturnWalker extends Lint.RuleWalker {
                     member.initializer === undefined ||
                     this._isConstInitializer(member.initializer, track.members);
             track.canBeConst = track.canBeConst && isConstMember;
-            track.members.set(getPropertyName(member.name)!, isConstMember);
+            track.members.set(utils.getPropertyName(member.name)!, isConstMember);
         }
 
         // ignore exported enums for now
-        track.canBeConst = track.canBeConst && !Lint.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword);
+        track.canBeConst = track.canBeConst && !utils.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword);
     }
 
     private _checkUsage(node: ts.Identifier) {
         const parent = node.parent!;
         if (parent.kind === ts.SyntaxKind.PropertyAccessExpression ||
             parent.kind === ts.SyntaxKind.ExportAssignment ||
-            isElementAccessExpression(parent) &&
+            utils.isElementAccessExpression(parent) &&
             parent.expression === node && parent.argumentExpression !== undefined &&
             parent.argumentExpression.kind === ts.SyntaxKind.StringLiteral)
             return;
@@ -96,25 +95,25 @@ class ReturnWalker extends Lint.RuleWalker {
     private _isConstInitializer(initializer: ts.Expression, members: Map<string, boolean>): boolean {
         let isConst = true;
         const cb = (current: ts.Expression) => {
-            if (isIdentifier(current)) {
+            if (utils.isIdentifier(current)) {
                 if (!members.get(current.text))
                     isConst = false;
                 return;
             }
-            if (isPropertyAccessExpression(current)) {
-                if (isIdentifier(current.expression)) {
+            if (utils.isPropertyAccessExpression(current)) {
+                if (utils.isIdentifier(current.expression)) {
                     const track = this._getEnumInScope(current.expression.text);
                     if (track !== undefined && track.members.get(current.name.text)) {
                         return;
                     }
                 }
                 isConst = false;
-            } else if (isElementAccessExpression(current)) {
-                if (isIdentifier(current.expression)) {
+            } else if (utils.isElementAccessExpression(current)) {
+                if (utils.isIdentifier(current.expression)) {
                     const track = this._getEnumInScope(current.expression.text);
                     if (track !== undefined) {
                         if (current.argumentExpression !== undefined &&
-                            isStringLiteral(current.argumentExpression)) {
+                            utils.isStringLiteral(current.argumentExpression)) {
                             if (track.members.get(current.argumentExpression.text))
                                 return;
                         } else {

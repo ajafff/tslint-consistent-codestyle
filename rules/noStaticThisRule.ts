@@ -1,6 +1,8 @@
-import { endsThisContext } from '../src/utils';
 import * as ts from 'typescript';
 import * as Lint from 'tslint';
+import * as utils from 'tsutils';
+
+import { endsThisContext } from '../src/utils';
 
 const FAIL_MESSAGE = `don't use this in static methods`;
 
@@ -19,7 +21,7 @@ class StaticMethodWalker extends Lint.RuleWalker {
         const stack: boolean[] = [];
         let current = false;
         const cb = (child: ts.Node) => {
-            const boundary = Lint.isScopeBoundary(child);
+            const boundary = utils.isScopeBoundary(child);
             if (boundary) {
                 stack.push(current);
                 if (!current || endsThisContext(child))
@@ -39,5 +41,5 @@ function isStatic(node: ts.Node): boolean {
     return (node.kind === ts.SyntaxKind.MethodDeclaration ||
             node.kind === ts.SyntaxKind.GetAccessor ||
             node.kind === ts.SyntaxKind.SetAccessor) &&
-            Lint.hasModifier(node.modifiers, ts.SyntaxKind.StaticKeyword);
+            utils.hasModifier(node.modifiers, ts.SyntaxKind.StaticKeyword);
 }

@@ -1,7 +1,8 @@
-import { isPropertyAccessExpression } from '../src/typeguard';
-import { endsThisContext, getPropertyName } from '../src/utils';
 import * as ts from 'typescript';
 import * as Lint from 'tslint';
+import * as utils from 'tsutils';
+
+import { endsThisContext } from '../src/utils';
 
 const FAIL_MESSAGE = `method can be static or function`;
 
@@ -29,14 +30,14 @@ class MethodWalker extends Lint.RuleWalker {
         let canBeStatic = false;
         let methodName: string|undefined = undefined;
         const cb = (child: ts.Node) => {
-            const boundary = Lint.isScopeBoundary(child);
+            const boundary = utils.isScopeBoundary(child);
             if (boundary) {
                 stack.push({relevant, canBeStatic, methodName});
                 if (!relevant || endsThisContext(child)) {
                     relevant = isRelevant(child);
                     if (relevant) {
                         canBeStatic = true;
-                        methodName = getPropertyName((<ts.MethodDeclaration>child).name);
+                        methodName = utils.getPropertyName((<ts.MethodDeclaration>child).name);
                     }
                 }
             }
@@ -65,7 +66,7 @@ class MethodWalker extends Lint.RuleWalker {
 
 function isRelevant(node: ts.Node): boolean {
     return node.kind === ts.SyntaxKind.MethodDeclaration &&
-           !Lint.hasModifier(node.modifiers, ts.SyntaxKind.StaticKeyword, ts.SyntaxKind.AbstractKeyword);
+           !utils.hasModifier(node.modifiers, ts.SyntaxKind.StaticKeyword, ts.SyntaxKind.AbstractKeyword);
 }
 
 function isRecursion(node: ts.Node, methodName: string|undefined) {
@@ -73,5 +74,7 @@ function isRecursion(node: ts.Node, methodName: string|undefined) {
         return false;
     const parent = node.parent!;
     // TODO handle ElementAccessExpression
-    return isPropertyAccessExpression(parent) && parent.name.text === methodName && parent.parent!.kind === ts.SyntaxKind.CallExpression;
+    return utils.isPropertyAccessExpression(parent) &&
+        parent.name.text === methodName &&
+        parent.parent!.kind === ts.SyntaxKind.CallExpression;
 }

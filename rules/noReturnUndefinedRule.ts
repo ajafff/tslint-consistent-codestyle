@@ -1,6 +1,6 @@
-import { isIdentifier, isLiteralExpression, isVoidExpression } from '../src/typeguard';
 import * as ts from 'typescript';
 import * as Lint from 'tslint';
+import * as utils from 'tsutils';
 
 import {isUndefined} from '../src/utils';
 import {ReturnStatementWalker} from '../src/walker';
@@ -32,7 +32,7 @@ class ReturnWalker extends ReturnStatementWalker {
 }
 
 function isUndefinedNotVoidExpr(expression: ts.Expression): boolean {
-    if (isIdentifier(expression) && expression.text === 'undefined')
+    if (utils.isIdentifier(expression) && expression.text === 'undefined')
         return true;
-    return isVoidExpression(expression) && isLiteralExpression(expression.expression);
+    return utils.isVoidExpression(expression) && utils.isLiteralExpression(expression.expression);
 }

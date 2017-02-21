@@ -1,8 +1,7 @@
 import * as ts from 'typescript';
 import * as Lint from 'tslint';
+import * as utils from 'tsutils';
 
-import { forEachDestructuringIdentifier, isParameterProperty } from '../src/utils';
-import { isIdentifier, isVariableDeclarationList } from '../src/typeguard';
 import { AbstractConfigDependentRule } from '../src/rules';
 
 // TODO don't flag inherited members
@@ -333,7 +332,7 @@ class IdentifierNameWalker extends Lint.RuleWalker {
         this._checkName(node.name, TypeSelector.enum, modifiers);
         modifiers |= Modifiers.static | Modifiers.public | Modifiers.readonly; // treat enum members as public static readonly properties
         for (const {name} of node.members) {
-            if (isIdentifier(name))
+            if (utils.isIdentifier(name))
                 this._checkName(name, TypeSelector.enumMember, modifiers);
         }
     }
@@ -369,14 +368,14 @@ class IdentifierNameWalker extends Lint.RuleWalker {
     public visitParameterDeclaration(node: ts.ParameterDeclaration) {
         if (isNameIdentifier(node)) {
             // param properties cannot be destructuring assignments
-            this._checkDeclaration(node, isParameterProperty(node) ? TypeSelector.parameterProperty
-                                                                   : TypeSelector.parameter);
+            this._checkDeclaration(node, utils.isParameterProperty(node) ? TypeSelector.parameterProperty
+                                                                         : TypeSelector.parameter);
         } else {
             // handle destructuring
-            foreachDeclaredIdentifier(node.name, (name, original) => {
-                this._checkName(name,
+            utils.forEachDestructuringIdentifier(<ts.BindingPattern>node.name, (declaration) => {
+                this._checkName(declaration.name,
                                 TypeSelector.parameter,
-                                Modifiers.local | (original ? 0 : Modifiers.rename));
+                                Modifiers.local | (isEqualName(declaration.name, declaration.propertyName) ? 0 : Modifiers.rename));
             });
         }
 
@@ -401,36 +400,34 @@ class IdentifierNameWalker extends Lint.RuleWalker {
         // compute modifiers once and reuse for all declared variables
         if ((list.flags & ts.NodeFlags.Const) !== 0)
             modifiers |= Modifiers.const;
-        const cb = (name: ts.Identifier, original: boolean) => {
-            this._checkName(name, TypeSelector.variable, modifiers | (original ? 0 : Modifiers.rename));
-        };
-        for (const {name} of list.declarations) {
-            // handle identifiers and destructuring
-            foreachDeclaredIdentifier(name, cb);
-        }
+        utils.forEachDeclaredVariable(list, (declaration) => {
+            this._checkName(declaration.name,
+                            TypeSelector.variable,
+                            modifiers | (isEqualName(declaration.name, declaration.propertyName) ? 0 : Modifiers.rename));
+        });
     }
 
     public visitForStatement(node: ts.ForStatement) {
-        if (node.initializer !== undefined && isVariableDeclarationList(node.initializer))
+        if (node.initializer !== undefined && utils.isVariableDeclarationList(node.initializer))
             this._checkVariableDeclarationList(node.initializer, this._getModifiers(node.initializer,
                                                                                                                 TypeSelector.variable));
     }
 
     public visitForOfStatement(node: ts.ForOfStatement) {
-        if (isVariableDeclarationList(node.initializer))
+        if (utils.isVariableDeclarationList(node.initializer))
             this._checkVariableDeclarationList(node.initializer, this._getModifiers(node.initializer,
                                                                                                                 TypeSelector.variable));
     }
 
     public visitForInStatement(node: ts.ForInStatement) {
-        if (isVariableDeclarationList(node.initializer))
+        if (utils.isVariableDeclarationList(node.initializer))
             this._checkVariableDeclarationList(node.initializer, this._getModifiers(node.initializer,
                                                                                                                 TypeSelector.variable));
     }
 
     public visitVariableStatement(node: ts.VariableStatement) {
         // skip 'declare' keywords
-        if (!Lint.hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword)) {
+        if (!utils.hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword)) {
             this._checkVariableDeclarationList(node.declarationList, this._getModifiers(node, TypeSelector.variable));
         }
     }
@@ -488,9 +485,13 @@ class IdentifierNameWalker extends Lint.RuleWalker {
             });
 
         // ohne Regeln kein Checker
-        if (!Object.keys(config).some((key) => config[key]))
+        if (!config.leadingUnderscore &&
+            !config.trailingUnderscore &&
+            !config.format &&
+            !config.prefix &&
+            !config.regex &&
+            !config.suffix)
             return;
-
         return new NameChecker(type, config);
     }
 
@@ -498,23 +499,23 @@ class IdentifierNameWalker extends Lint.RuleWalker {
         let modifiers = 0;
         if (node.modifiers !== undefined) {
             if (type | Types.member) { // property, method, parameter property
-                if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.PrivateKeyword)) {
+                if (utils.hasModifier(node.modifiers, ts.SyntaxKind.PrivateKeyword)) {
                     modifiers |= Modifiers.private;
-                } else if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.ProtectedKeyword)) {
+                } else if (utils.hasModifier(node.modifiers, ts.SyntaxKind.ProtectedKeyword)) {
                     modifiers |= Modifiers.protected;
                 } else {
                     modifiers |= Modifiers.public;
                 }
-                if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.ReadonlyKeyword))
+                if (utils.hasModifier(node.modifiers, ts.SyntaxKind.ReadonlyKeyword))
                     modifiers |= Modifiers.const;
-                if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.StaticKeyword))
+                if (utils.hasModifier(node.modifiers, ts.SyntaxKind.StaticKeyword))
                     modifiers |= Modifiers.static;
             }
-            if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.ConstKeyword)) // stuff like const enums
+            if (utils.hasModifier(node.modifiers, ts.SyntaxKind.ConstKeyword)) // stuff like const enums
                 modifiers |= Modifiers.const;
-            if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword))
+            if (utils.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword))
                 modifiers |= Modifiers.export;
-            if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.AbstractKeyword))
+            if (utils.hasModifier(node.modifiers, ts.SyntaxKind.AbstractKeyword))
                 modifiers |= Modifiers.abstract;
         }
 
@@ -526,7 +527,7 @@ class IdentifierNameWalker extends Lint.RuleWalker {
 
     public walk(sourceFile: ts.Node) {
         const cb = (node: ts.Node) => {
-            const boundary = Lint.isScopeBoundary(node);
+            const boundary = utils.isScopeBoundary(node);
             if (boundary)
                 ++this._depth;
             this.visitNode(node);
@@ -632,15 +633,11 @@ function isUpperCase(name: string) {
     return name === name.toUpperCase();
 }
 
-function isNameIdentifier(node: ts.Declaration & {name: any}): node is DeclarationWithIdentifierName {
+function isNameIdentifier(node: ts.Declaration & {name: ts.DeclarationName}): node is DeclarationWithIdentifierName {
     return node.name.kind === ts.SyntaxKind.Identifier;
 }
 
-function foreachDeclaredIdentifier(bindingName: ts.BindingName, cb: (name: ts.Identifier, original: boolean) => void) {
-    if (isIdentifier(bindingName))
-        return cb(bindingName, true);
-    forEachDestructuringIdentifier(bindingName, (element) => {
-        cb(element.name,
-           element.propertyName === undefined || isIdentifier(element.propertyName) && element.propertyName.text === element.name.text);
-    });
+function isEqualName(name: ts.Identifier, propertyName?: ts.PropertyName) {
+    return propertyName === undefined ||
+        (propertyName.kind === ts.SyntaxKind.Identifier && propertyName.text === name.text);
 }

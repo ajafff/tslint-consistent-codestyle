@@ -225,7 +225,7 @@ class NameChecker {
         if (this._regex !== undefined && !this._regex.test(identifier))
             walker.addFailureAtNode(name, this._failMessage(REGEX_FAIL));
 
-        if (this._leadingUnderscore !== undefined) {
+        if (this._leadingUnderscore) {
             if (identifier[0] === '_') {
                 if (this._leadingUnderscore === 'forbid')
                     walker.addFailureAtNode(name, this._failMessage(LEADING_FAIL));
@@ -235,7 +235,7 @@ class NameChecker {
             }
         }
 
-        if (this._trailingUnderscore !== undefined) {
+        if (this._trailingUnderscore) {
             if (identifier[identifier.length - 1] === '_') {
                 if (this._trailingUnderscore === 'forbid')
                     walker.addFailureAtNode(name, this._failMessage(TRAILING_FAIL));
@@ -245,7 +245,7 @@ class NameChecker {
             }
         }
 
-        if (this._prefix !== undefined) {
+        if (this._prefix) {
             if (Array.isArray(this._prefix)) {
                 identifier = this._checkPrefixes(identifier, name, this._prefix, walker);
             } else if (identifier.startsWith(this._prefix)) {
@@ -254,7 +254,7 @@ class NameChecker {
                 walker.addFailureAtNode(name, this._failMessage(PREFIX_FAIL + this._prefix));
             }
         }
-        if (this._suffix !== undefined) {
+        if (this._suffix) {
             if (Array.isArray(this._suffix)) {
                 identifier = this._checkSuffixes(identifier, name, this._suffix, walker);
             } else if (identifier.endsWith(this._suffix)) {
@@ -626,11 +626,28 @@ function isUppercaseChar(char: string) {
 }
 
 function isSnakeCase(name: string) {
-    return name === name.toLowerCase();
+    return name === name.toLowerCase() && validateUnderscores(name);
 }
 
 function isUpperCase(name: string) {
-    return name === name.toUpperCase();
+    return name === name.toUpperCase() && validateUnderscores(name);
+}
+
+/** Check for leading trailing and adjacent underscores */
+function validateUnderscores(name: string) {
+    if (name[0] === '_')
+        return false;
+    let wasUnderscore = false;
+    for (let i = 1; i < name.length; ++i) {
+        if (name[i] === '_') {
+            if (wasUnderscore)
+                return false;
+            wasUnderscore = true;
+        } else {
+            wasUnderscore = false;
+        }
+    }
+    return !wasUnderscore;
 }
 
 function isNameIdentifier(node: ts.Declaration & {name: ts.DeclarationName}): node is DeclarationWithIdentifierName {

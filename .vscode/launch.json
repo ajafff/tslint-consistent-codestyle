@@ -7,7 +7,7 @@
 			"request": "launch",
 			"program": "${workspaceRoot}/node_modules/.bin/tslint",
 			"stopOnEntry": false,
-			"args": ["--test", "test/rules/naming-convention/new"],
+			"args": ["--test", "test/rules/naming-convention/default"],
 			"cwd": "${workspaceRoot}",
 			"preLaunchTask": "build",
 			"runtimeExecutable": null,

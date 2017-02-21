@@ -10,6 +10,13 @@ const {foo, bar} = baz;
 const [foo, , bar] = baz;
        ~~~        [variable name must be in UPPER_CASE]
               ~~~ [variable name must be in UPPER_CASE]
+const _FOO = "const";
+      ~~~~        [variable name must be in UPPER_CASE]
+const FOO_ = "const";
+      ~~~~        [variable name must be in UPPER_CASE]
+const F__OO = "const";
+      ~~~~~       [variable name must be in UPPER_CASE]
+const F_O_O = "const";
 var _noLeading = "";
     ~~~~~~~~~~  [variable name must not have leading underscore]
 var trailing_ = "";

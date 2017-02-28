@@ -3,7 +3,7 @@ import * as Lint from 'tslint';
 import * as utils from 'tsutils';
 
 import { isElseIf } from '../src/utils';
-import { IfStatementWalker } from '../src/walker';
+import { AbstractIfStatementWalker } from '../src/walker';
 
 const FAIL_MESSAGE = `unnecessary else after return`;
 
@@ -17,18 +17,16 @@ const enum StatementType {
 
 export class Rule extends Lint.Rules.AbstractRule {
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new IfWalker(sourceFile, this.getOptions()));
+        return this.applyWithWalker(new IfWalker(sourceFile, this.ruleName, undefined));
     }
 }
 
-class IfWalker extends IfStatementWalker {
-    public visitIfStatement(node: ts.IfStatement) {
+class IfWalker extends AbstractIfStatementWalker<void> {
+    protected _checkIfStatement(node: ts.IfStatement) {
         if (node.elseStatement !== undefined &&
             !isElseIf(node) &&
-            isLastStatementReturn(node.thenStatement)) {
-
-            this.addFailureAtNode(utils.getChildOfKind(node, ts.SyntaxKind.ElseKeyword, this.getSourceFile())!, FAIL_MESSAGE);
-        }
+            isLastStatementReturn(node.thenStatement))
+            this.addFailureAtNode(utils.getChildOfKind(node, ts.SyntaxKind.ElseKeyword, this.sourceFile)!, FAIL_MESSAGE);
     }
 }
 

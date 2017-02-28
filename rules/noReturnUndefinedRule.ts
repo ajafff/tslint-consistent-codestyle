@@ -3,31 +3,31 @@ import * as Lint from 'tslint';
 import * as utils from 'tsutils';
 
 import {isUndefined} from '../src/utils';
-import {ReturnStatementWalker} from '../src/walker';
+import {AbstractReturnStatementWalker} from '../src/walker';
 
 const FAIL_MESSAGE = `don't return explicit undefined`;
 const ALLOW_VOID_EXPRESSION_OPTION = 'allow-void-expression';
 
+interface IOptions {
+    allowVoid: boolean;
+}
+
 export class Rule extends Lint.Rules.AbstractRule {
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new ReturnWalker(sourceFile, this.getOptions()));
+        return this.applyWithWalker(new ReturnWalker(sourceFile, this.ruleName, {
+            allowVoid: this.ruleArguments.indexOf(ALLOW_VOID_EXPRESSION_OPTION) !== -1,
+        }));
     }
 }
 
-class ReturnWalker extends ReturnStatementWalker {
-    private _allowVoid: boolean;
-    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
-        super(sourceFile, options);
-        this._allowVoid = options.ruleArguments !== undefined && options.ruleArguments.indexOf(ALLOW_VOID_EXPRESSION_OPTION) !== -1;
-    }
-
-    public visitReturnStatement(node: ts.ReturnStatement) {
+class ReturnWalker extends AbstractReturnStatementWalker<IOptions> {
+    protected _checkReturnStatement(node: ts.ReturnStatement) {
         if (node.expression !== undefined && this._isUndefined(node.expression))
             this.addFailureAtNode(node.expression, FAIL_MESSAGE);
     }
 
     private _isUndefined(expression: ts.Expression): boolean {
-        return this._allowVoid ? isUndefinedNotVoidExpr(expression) : isUndefined(expression);
+        return this.options.allowVoid ? isUndefinedNotVoidExpr(expression) : isUndefined(expression);
     }
 }
 

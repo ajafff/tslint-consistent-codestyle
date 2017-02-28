@@ -6,7 +6,7 @@ const FAIL_MESSAGE = `enum can be declared const`;
 
 export class Rule extends Lint.Rules.AbstractRule {
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new ReturnWalker(sourceFile, this.getOptions()));
+        return this.applyWithWalker(new ReturnWalker(sourceFile, this.ruleName, undefined));
     }
 }
 
@@ -18,7 +18,7 @@ interface IEnum {
     canBeConst: boolean;
 }
 
-class ReturnWalker extends Lint.RuleWalker {
+class ReturnWalker extends Lint.AbstractWalker<void> {
     private _enums = new Map<string, IEnum>();
 
     private _getEnumInScope(name: string) {
@@ -42,30 +42,29 @@ class ReturnWalker extends Lint.RuleWalker {
     }
 
     public walk(sourceFile: ts.SourceFile) {
-        const cb = (node: ts.Node) => {
+        const cb = (node: ts.Node): void => {
             switch (node.kind) {
                 case ts.SyntaxKind.Identifier:
                     return this._checkUsage(<ts.Identifier>node);
                 case ts.SyntaxKind.EnumDeclaration:
-                    return this.visitEnumDeclaration(<ts.EnumDeclaration>node);
+                    return this._visitEnumDeclaration(<ts.EnumDeclaration>node);
             }
-            ts.forEachChild(node, cb);
+            return ts.forEachChild(node, cb);
         };
         ts.forEachChild(sourceFile, cb);
 
-        this._enums.forEach((track) => {
+        return this._enums.forEach((track) => {
             if (!track.isConst && track.canBeConst) {
                 for (const occurence of track.occurences) {
                     const start = occurence.getStart(sourceFile);
-                    const fix = this.createFix(new Lint.Replacement(start, 0, 'const '));
-                    const end = occurence.name.getEnd();
-                    this.addFailureFromStartToEnd(start, end, FAIL_MESSAGE, fix);
+                    const fix = this.createFix(Lint.Replacement.appendText(start, 'const '));
+                    this.addFailure(start, occurence.name.end, FAIL_MESSAGE, fix);
                 }
             }
         });
     }
 
-    public visitEnumDeclaration(node: ts.EnumDeclaration) {
+    private _visitEnumDeclaration(node: ts.EnumDeclaration) {
         const track = this._addEnum(node);
         for (const member of node.members) {
             const isConstMember = track.isConst ||
@@ -94,7 +93,7 @@ class ReturnWalker extends Lint.RuleWalker {
 
     private _isConstInitializer(initializer: ts.Expression, members: Map<string, boolean>): boolean {
         let isConst = true;
-        const cb = (current: ts.Expression) => {
+        const cb = (current: ts.Expression): void => {
             if (utils.isIdentifier(current)) {
                 if (!members.get(current.text))
                     isConst = false;
@@ -124,7 +123,7 @@ class ReturnWalker extends Lint.RuleWalker {
                 isConst = false;
             }
 
-            ts.forEachChild(current, cb);
+            return ts.forEachChild(current, cb);
         };
 
         cb(initializer);

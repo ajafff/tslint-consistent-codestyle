@@ -143,7 +143,11 @@ enum Specifity {
 
 export class Rule extends AbstractConfigDependentRule {
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new IdentifierNameWalker(sourceFile, this.getOptions()));
+        return this.applyWithWalker(new IdentifierNameWalker(
+            sourceFile,
+            this.ruleName,
+            this.ruleArguments.map((rule) => new NormalizedConfig(rule)).sort(NormalizedConfig.sort),
+        ));
     }
 }
 
@@ -218,7 +222,7 @@ class NameChecker {
         return TypeSelector[this._type] + message;
     }
 
-    public check(name: ts.Identifier, walker: Lint.RuleWalker) {
+    public check(name: ts.Identifier, walker: Lint.AbstractWalker<any>) {
         let identifier = name.text;
 
         // start with regex test before we potentially strip off underscores and affixes
@@ -285,7 +289,7 @@ class NameChecker {
         }
     }
 
-    private _checkPrefixes(identifier: string, name: ts.Identifier, prefixes: string[], walker: Lint.RuleWalker): string {
+    private _checkPrefixes(identifier: string, name: ts.Identifier, prefixes: string[], walker: Lint.AbstractWalker<any>): string {
         for (const prefix of prefixes) {
             if (identifier.startsWith(prefix))
                 return identifier.slice(prefix.length);
@@ -294,7 +298,7 @@ class NameChecker {
         return identifier;
     }
 
-    private _checkSuffixes(identifier: string, name: ts.Identifier, suffixes: string[], walker: Lint.RuleWalker): string {
+    private _checkSuffixes(identifier: string, name: ts.Identifier, suffixes: string[], walker: Lint.AbstractWalker<any>): string {
         for (const suffix of suffixes) {
             if (identifier.endsWith(suffix))
                 return identifier.slice(-suffix.length);
@@ -305,19 +309,9 @@ class NameChecker {
 
 }
 
-class IdentifierNameWalker extends Lint.RuleWalker {
+class IdentifierNameWalker extends Lint.AbstractWalker<NormalizedConfig[]> {
     private _depth = 0;
-    private _rules: NormalizedConfig[];
     private _cache = new Map<string, NameChecker>();
-
-    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
-        super(sourceFile, options);
-        this._normalizeRules(<RuleConfig[]> options.ruleArguments);
-    }
-
-    private _normalizeRules(rules: RuleConfig[]) {
-        this._rules = rules.map((rule) => new NormalizedConfig(rule)).sort(NormalizedConfig.sort);
-    }
 
     private _checkTypeParameters(node: ts.DeclarationWithTypeParameters, modifiers: Modifiers) {
         if (node.typeParameters !== undefined) {
@@ -469,7 +463,7 @@ class IdentifierNameWalker extends Lint.RuleWalker {
     }
 
     private _createChecker(type: TypeSelector, modifiers: number): NameChecker|undefined {
-        const config = this._rules.reduce(
+        const config = this.options.reduce(
             (format: IFormat, rule) => {
                 if (!rule.matches(type, modifiers))
                     return format;
@@ -526,71 +520,57 @@ class IdentifierNameWalker extends Lint.RuleWalker {
     }
 
     public walk(sourceFile: ts.Node) {
-        const cb = (node: ts.Node) => {
+        const cb = (node: ts.Node): void => {
             const boundary = utils.isScopeBoundary(node);
             if (boundary)
                 ++this._depth;
             this.visitNode(node);
-            ts.forEachChild(node, cb);
-            if (boundary)
+            if (boundary) {
+                ts.forEachChild(node, cb);
                 --this._depth;
+            } else {
+                return ts.forEachChild(node, cb);
+            }
         };
-        ts.forEachChild(sourceFile, cb);
+        return ts.forEachChild(sourceFile, cb);
     }
 
     public visitNode(node: ts.Node) {
         switch (node.kind) {
             case ts.SyntaxKind.VariableStatement:
-                this.visitVariableStatement(<ts.VariableStatement>node);
-                break;
+                return this.visitVariableStatement(<ts.VariableStatement>node);
             case ts.SyntaxKind.FunctionDeclaration:
-                this.visitFunctionDeclaration(<ts.FunctionDeclaration>node);
-                break;
+                return this.visitFunctionDeclaration(<ts.FunctionDeclaration>node);
             case ts.SyntaxKind.FunctionExpression:
-                this.visitFuncitonExpression(<ts.FunctionExpression>node);
-                break;
+                return this.visitFuncitonExpression(<ts.FunctionExpression>node);
             case ts.SyntaxKind.ForStatement:
-                this.visitForStatement(<ts.ForStatement>node);
-                break;
+                return this.visitForStatement(<ts.ForStatement>node);
             case ts.SyntaxKind.ForInStatement:
-                this.visitForInStatement(<ts.ForInStatement>node);
-                break;
+                return this.visitForInStatement(<ts.ForInStatement>node);
             case ts.SyntaxKind.ForOfStatement:
-                this.visitForOfStatement(<ts.ForOfStatement>node);
-                break;
+                return this.visitForOfStatement(<ts.ForOfStatement>node);
             case ts.SyntaxKind.Parameter:
-                this.visitParameterDeclaration(<ts.ParameterDeclaration>node);
-                break;
+                return this.visitParameterDeclaration(<ts.ParameterDeclaration>node);
             case ts.SyntaxKind.ClassDeclaration:
-                this.visitClassDeclaration(<ts.ClassDeclaration>node);
-                break;
+                return this.visitClassDeclaration(<ts.ClassDeclaration>node);
             case ts.SyntaxKind.ClassExpression:
-                this.visitClassExpression(<ts.ClassExpression>node);
-                break;
+                return this.visitClassExpression(<ts.ClassExpression>node);
             case ts.SyntaxKind.InterfaceDeclaration:
-                this.visitInterfaceDeclaration(<ts.InterfaceDeclaration>node);
-                break;
+                return this.visitInterfaceDeclaration(<ts.InterfaceDeclaration>node);
             case ts.SyntaxKind.EnumDeclaration:
-                this.visitEnumDeclaration(<ts.EnumDeclaration>node);
-                break;
+                return this.visitEnumDeclaration(<ts.EnumDeclaration>node);
             case ts.SyntaxKind.TypeAliasDeclaration:
-                this.visitTypeAliasDeclaration(<ts.TypeAliasDeclaration>node);
-                break;
+                return this.visitTypeAliasDeclaration(<ts.TypeAliasDeclaration>node);
             case ts.SyntaxKind.PropertyDeclaration:
-                this.visitPropertyDeclaration(<ts.PropertyDeclaration>node);
-                break;
+                return this.visitPropertyDeclaration(<ts.PropertyDeclaration>node);
             case ts.SyntaxKind.MethodDeclaration:
-                this.visitMethodDeclaration(<ts.MethodDeclaration>node);
-                break;
+                return this.visitMethodDeclaration(<ts.MethodDeclaration>node);
             case ts.SyntaxKind.GetAccessor:
-                this.visitGetAccessor(<ts.GetAccessorDeclaration>node);
-                break;
+                return this.visitGetAccessor(<ts.GetAccessorDeclaration>node);
             case ts.SyntaxKind.SetAccessor:
-                this.visitSetAccessor(<ts.SetAccessorDeclaration>node);
-                break;
+                return this.visitSetAccessor(<ts.SetAccessorDeclaration>node);
             case ts.SyntaxKind.ArrowFunction:
-                this.visitArrowFunction(<ts.ArrowFunction>node);
-                break;
+                return this.visitArrowFunction(<ts.ArrowFunction>node);
         }
     }
 }

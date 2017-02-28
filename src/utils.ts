@@ -11,10 +11,3 @@ export function isElseIf(node: ts.IfStatement): boolean {
     return utils.isIfStatement(parent) &&
          parent.elseStatement === node;
 }
-
-export function endsThisContext(node: ts.Node): boolean {
-    return node.kind === ts.SyntaxKind.FunctionDeclaration ||
-           node.kind === ts.SyntaxKind.FunctionExpression ||
-           node.kind === ts.SyntaxKind.ClassDeclaration ||
-           node.kind === ts.SyntaxKind.ClassExpression;
-}

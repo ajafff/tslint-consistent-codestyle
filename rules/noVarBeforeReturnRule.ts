@@ -3,16 +3,16 @@ import * as Lint from 'tslint';
 import * as utils from 'tsutils';
 
 import { isUndefined } from '../src/utils';
-import { ReturnStatementWalker } from '../src/walker';
+import { AbstractReturnStatementWalker } from '../src/walker';
 
 export class Rule extends Lint.Rules.AbstractRule {
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new ReturnWalker(sourceFile, this.getOptions()));
+        return this.applyWithWalker(new ReturnWalker(sourceFile, this.ruleName, undefined));
     }
 }
 
-class ReturnWalker extends ReturnStatementWalker {
-    public visitReturnStatement(node: ts.ReturnStatement) {
+class ReturnWalker extends AbstractReturnStatementWalker<void> {
+    protected _checkReturnStatement(node: ts.ReturnStatement) {
         if (node.expression !== undefined && utils.isIdentifier(node.expression)) {
             const statement = utils.getPreviousStatement(node);
             if (statement !== undefined && utils.isVariableStatement(statement)) {

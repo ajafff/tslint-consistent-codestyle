@@ -6,11 +6,11 @@ const FAILURE_STRING = 'Modulus 2 can be replaced with & 1';
 
 export class Rule extends Lint.Rules.AbstractRule {
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new ReturnWalker(sourceFile, this.getOptions()));
+        return this.applyWithWalker(new ReturnWalker(sourceFile, this.ruleName, undefined));
     }
 }
 
-class ReturnWalker extends Lint.RuleWalker {
+class ReturnWalker extends Lint.AbstractWalker<void> {
     public walk(sourceFile: ts.SourceFile) {
         const cb = (node: ts.Node): void => {
             if (utils.isBinaryExpression(node) &&
@@ -23,10 +23,10 @@ class ReturnWalker extends Lint.RuleWalker {
                     new Lint.Replacement(start, 1, '&'),
                     new Lint.Replacement(node.right.end - 1, 1, '1'),
                 );
-                this.addFailureFromStartToEnd(start, node.right.end, FAILURE_STRING, fix);
+                this.addFailure(start, node.right.end, FAILURE_STRING, fix);
             }
-            ts.forEachChild(node, cb);
+            return ts.forEachChild(node, cb);
         };
-        ts.forEachChild(sourceFile, cb);
+        return ts.forEachChild(sourceFile, cb);
     }
 }

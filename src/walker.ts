@@ -1,57 +1,28 @@
 import * as ts from 'typescript';
 import * as Lint from 'tslint';
 
-export class ReturnStatementWalker extends Lint.RuleWalker {
-    public walk(node: ts.Node) {
-        const cb = (child: ts.Node) => {
-            if (child.kind === ts.SyntaxKind.ReturnStatement)
-                this.visitReturnStatement(<ts.ReturnStatement>child);
-            ts.forEachChild(child, cb);
+export abstract class AbstractReturnStatementWalker<T> extends Lint.AbstractWalker<T> {
+    public walk(sourceFile: ts.SourceFile) {
+        const cb = (node: ts.Node): void => {
+            if (node.kind === ts.SyntaxKind.ReturnStatement)
+                this._checkReturnStatement(<ts.ReturnStatement>node);
+            return ts.forEachChild(node, cb);
         };
-        ts.forEachChild(node, cb);
+        return ts.forEachChild(sourceFile, cb);
     }
+
+    protected abstract _checkReturnStatement(node: ts.ReturnStatement): void;
 }
 
-export class ConstructorDeclarationWalker extends Lint.RuleWalker {
-    public walk(node: ts.Node) {
-        const cb = (child: ts.Node) => {
-            if (child.kind === ts.SyntaxKind.Constructor)
-                this.visitConstructorDeclaration(<ts.ConstructorDeclaration>child);
-            ts.forEachChild(child, cb);
+export abstract class AbstractIfStatementWalker<T> extends Lint.AbstractWalker<T> {
+    public walk(sourceFile: ts.SourceFile) {
+        const cb = (node: ts.Node): void => {
+            if (node.kind === ts.SyntaxKind.IfStatement)
+                this._checkIfStatement(<ts.IfStatement>node);
+            return ts.forEachChild(node, cb);
         };
-        ts.forEachChild(node, cb);
+        return ts.forEachChild(sourceFile, cb);
     }
-}
 
-export class IfStatementWalker extends Lint.RuleWalker {
-    public walk(node: ts.Node) {
-        const cb = (child: ts.Node) => {
-            if (child.kind === ts.SyntaxKind.IfStatement)
-                this.visitIfStatement(<ts.IfStatement>child);
-            ts.forEachChild(child, cb);
-        };
-        ts.forEachChild(node, cb);
-    }
-}
-
-export class ForStatementWalker extends Lint.RuleWalker {
-    public walk(node: ts.Node) {
-        const cb = (child: ts.Node) => {
-            if (child.kind === ts.SyntaxKind.ForStatement)
-                this.visitForStatement(<ts.ForStatement>child);
-            ts.forEachChild(child, cb);
-        };
-        ts.forEachChild(node, cb);
-    }
-}
-
-export class ObjectLiteralWalker extends Lint.RuleWalker {
-    public walk(node: ts.Node) {
-        const cb = (child: ts.Node) => {
-            if (child.kind === ts.SyntaxKind.ObjectLiteralExpression)
-                this.visitObjectLiteralExpression(<ts.ObjectLiteralExpression>child);
-            ts.forEachChild(child, cb);
-        };
-        ts.forEachChild(node, cb);
-    }
+    protected abstract _checkIfStatement(node: ts.IfStatement): void;
 }

@@ -53,7 +53,7 @@ All formatting rules are optional. Formatting rules are inherited by the `type`'
 
 * `regex: string`: A regular expression, which is applied to the name. (without any regex flags)
 * `leadingUnderscore: string, trailingUnderscore: string`: Options `forbid`, `allow` and `require` can be used to forbid, allow or require _one_ leading or trailing underscore in the name. **If one option is specified, the leading or trailing underscore will be sliced off the name before any further checks are performed.**
-* `prefix: string|string[], suffix: string|string[]`: Specify one or more prefixes or suffixes. When given a single string, that string must match in the specified position. When given an array, one of the strings must match in the specified position. Matching is done in the given order. **If a prefix or suffix is specified, the matching portion of the name is sliced off before any further checks are performed:** If you enforce `cascalCase` and a prefix `has`, the name `hasFoo` will not match. That's because the prefix `has` is removed and the remaining `Foo` is not valid `camelCase`  
+* `prefix: string|string[], suffix: string|string[]`: Specify one or more prefixes or suffixes. When given a single string, that string must match in the specified position. When given an array, one of the strings must match in the specified position. Matching is done in the given order. **If a prefix or suffix is specified, the matching portion of the name is sliced off before any further checks are performed:** If you enforce `camelCase` and a prefix `has`, the name `hasFoo` will not match. That's because the prefix `has` is removed and the remaining `Foo` is not valid `camelCase`  
 * `format: string`: Valid options are `camelCase`, `PascalCase`, `UPPER_CASE` and `snake_case`.
 
 ### "Inheritance" / Extending configurations:
@@ -138,7 +138,7 @@ After filtering the formatting rules are reduced from the first to the last. Rem
 * Valid modifiers:
   * `private`, `protected` or `public`
   * `static`
-  * `const` == `readonly` // can be used interchangably. internally both are handled as `const`
+  * `const` == `readonly` // can be used interchangeably. internally both are handled as `const`
   * `abstract` // for abstract property accessors
 
 
@@ -382,7 +382,7 @@ __Current limitations:__
 * no support for scopes
 * exported enums are excluded (maybe add option or use `preserveConstEnums` compiler flag)
 
-## pefer-static-method
+## prefer-static-method
 If you don't reference `this` or `super` within a method, it could also be declared as static method or (global/local) function.
 
 To be honest, I don't think this is always feasible and you should get an achievement, if all of your code conforms to this rule.

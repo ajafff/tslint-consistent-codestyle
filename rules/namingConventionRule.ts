@@ -311,7 +311,7 @@ class NameChecker {
 
 class IdentifierNameWalker extends Lint.AbstractWalker<NormalizedConfig[]> {
     private _depth = 0;
-    private _cache = new Map<string, NameChecker>();
+    private _cache = new Map<string, NameChecker | null>();
 
     private _checkTypeParameters(node: ts.DeclarationWithTypeParameters, modifiers: Modifiers) {
         if (node.typeParameters !== undefined) {
@@ -448,21 +448,22 @@ class IdentifierNameWalker extends Lint.AbstractWalker<NormalizedConfig[]> {
 
     private _checkName(name: ts.Identifier, type: TypeSelector, modifiers: number) {
         const matchingChecker = this._getMatchingChecker(type, modifiers);
-        if (matchingChecker !== undefined)
+        if (matchingChecker !== null)
             matchingChecker.check(name, this);
     }
 
-    private _getMatchingChecker(type: TypeSelector, modifiers: number): NameChecker|undefined {
+    private _getMatchingChecker(type: TypeSelector, modifiers: number): NameChecker|null {
         const key = `${type},${modifiers}`;
-        if (this._cache.has(key))
-            return this._cache.get(key);
+        const cached = this._cache.get(key);
+        if (cached !== undefined)
+            return cached;
 
         const checker = this._createChecker(type, modifiers);
         this._cache.set(key, checker);
         return checker;
     }
 
-    private _createChecker(type: TypeSelector, modifiers: number): NameChecker|undefined {
+    private _createChecker(type: TypeSelector, modifiers: number): NameChecker|null {
         const config = this.options.reduce(
             (format: IFormat, rule) => {
                 if (!rule.matches(type, modifiers))
@@ -485,7 +486,7 @@ class IdentifierNameWalker extends Lint.AbstractWalker<NormalizedConfig[]> {
             !config.prefix &&
             !config.regex &&
             !config.suffix)
-            return;
+            return null;
         return new NameChecker(type, config);
     }
 

@@ -34,7 +34,7 @@
     "typescript": "^2.1.4"
   },
   "peerDependencies": {
-    "tslint": "^4.0.0",
-    "typescript": "^2.1.4"
+    "tslint": "^4.5.0",
+    "typescript": "^2.1.4 || >=2.1.0-dev || >=2.2.0-dev || >=2.3.0-dev"
   }
 }

@@ -452,7 +452,7 @@ class IdentifierNameWalker extends Lint.AbstractWalker<NormalizedConfig[]> {
 
     private _checkName(name: ts.Identifier, type: TypeSelector, modifiers: number) {
         const matchingChecker = this._getMatchingChecker(type, modifiers);
-        if (matchingChecker !== null)
+        if (matchingChecker !== null) // tslint:disable-line:no-null-keyword
             matchingChecker.check(name, this);
     }
 
@@ -490,7 +490,7 @@ class IdentifierNameWalker extends Lint.AbstractWalker<NormalizedConfig[]> {
             !config.prefix &&
             !config.regex &&
             !config.suffix)
-            return null;
+            return null; // tslint:disable-line:no-null-keyword
         return new NameChecker(type, config);
     }
 

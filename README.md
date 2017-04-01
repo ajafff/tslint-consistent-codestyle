@@ -382,11 +382,6 @@ __Current limitations:__
 * no support for scopes
 * exported enums are excluded (maybe add option or use `preserveConstEnums` compiler flag)
 
-## prefer-static-method
-If you don't reference `this` or `super` within a method, it could also be declared as static method or (global/local) function.
-
-To be honest, I don't think this is always feasible and you should get an achievement, if all of your code conforms to this rule.
-
 ## prefer-while
 A `for`-loop without initializer and incrementer can also be rewritten as `while`-loop. That's what this rule does.
 It can also automatically fix any finding, if you set the `--fix` command line switch for `tslint`.

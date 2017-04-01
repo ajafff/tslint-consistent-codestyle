@@ -1,0 +1,4 @@
+function foo(this: any, that, bar) {}
+                        ~~~~ [parameter name must have leading underscore]
+                              ~~~ [parameter name must have leading underscore]
+function foo(_this: any) {}

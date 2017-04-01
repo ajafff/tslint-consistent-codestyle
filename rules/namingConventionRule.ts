@@ -361,6 +361,10 @@ class IdentifierNameWalker extends Lint.AbstractWalker<NormalizedConfig[]> {
 
     public visitParameterDeclaration(node: ts.ParameterDeclaration) {
         if (isNameIdentifier(node)) {
+            if (node.name.originalKeywordKind === ts.SyntaxKind.ThisKeyword) {
+                // exempt this parameter
+                return;
+            }
             // param properties cannot be destructuring assignments
             this._checkDeclaration(node, utils.isParameterProperty(node) ? TypeSelector.parameterProperty
                                                                          : TypeSelector.parameter);

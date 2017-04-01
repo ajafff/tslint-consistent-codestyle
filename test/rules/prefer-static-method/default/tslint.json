@@ -1,6 +1,0 @@
-{
-  "rulesDirectory": "../../../../rules",
-  "rules": {
-    "prefer-static-method": true
-  }
-}

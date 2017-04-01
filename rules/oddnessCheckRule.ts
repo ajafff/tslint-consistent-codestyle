@@ -19,11 +19,10 @@ class ReturnWalker extends Lint.AbstractWalker<void> {
                 node.right.text === '2') {
                 // TODO if this is part of a comparison with a negative value, this failure would be a false positive
                 const start = node.operatorToken.getStart(sourceFile);
-                const fix = this.createFix(
+                this.addFailure(start, node.right.end, FAILURE_STRING, [
                     new Lint.Replacement(start, 1, '&'),
                     new Lint.Replacement(node.right.end - 1, 1, '1'),
-                );
-                this.addFailure(start, node.right.end, FAILURE_STRING, fix);
+                ]);
             }
             return ts.forEachChild(node, cb);
         };

@@ -57,8 +57,7 @@ class ReturnWalker extends Lint.AbstractWalker<void> {
             if (!track.isConst && track.canBeConst) {
                 for (const occurence of track.occurences) {
                     const start = occurence.getStart(sourceFile);
-                    const fix = this.createFix(Lint.Replacement.appendText(start, 'const '));
-                    this.addFailure(start, occurence.name.end, FAIL_MESSAGE, fix);
+                    this.addFailure(start, occurence.name.end, FAIL_MESSAGE, Lint.Replacement.appendText(start, 'const '));
                 }
             }
         });

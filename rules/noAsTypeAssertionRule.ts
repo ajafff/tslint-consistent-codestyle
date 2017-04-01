@@ -21,12 +21,11 @@ export class AsExpressionWalker extends Lint.AbstractWalker<void> {
     }
 
     private _reportError(node: ts.AsExpression) {
-        const fix = this.createFix(
+        const start = utils.getChildOfKind(node, ts.SyntaxKind.AsKeyword, this.sourceFile)!.getStart(this.sourceFile);
+        this.addFailure(start, node.end, FAIL_MESSAGE, [
             Lint.Replacement.appendText(getInsertionPosition(node, this.sourceFile), `<${node.type.getText(this.sourceFile)}>`),
             Lint.Replacement.deleteFromTo(node.expression.end, node.end),
-        );
-        const start = utils.getChildOfKind(node, ts.SyntaxKind.AsKeyword, this.sourceFile)!.getStart(this.sourceFile);
-        this.addFailure(start, node.end, FAIL_MESSAGE, fix);
+        ]);
     }
 
 }

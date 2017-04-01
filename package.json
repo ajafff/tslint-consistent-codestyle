@@ -27,14 +27,14 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "tsutils": "^1.1.0"
+    "tsutils": "^1.4.0"
   },
   "devDependencies": {
-    "tslint": "^4.5.0",
+    "tslint": "^5.0.0",
     "typescript": "^2.1.4"
   },
   "peerDependencies": {
-    "tslint": "^4.5.0",
+    "tslint": "^5.0.0",
     "typescript": "^2.1.4 || >=2.1.0-dev || >=2.2.0-dev || >=2.3.0-dev"
   }
 }

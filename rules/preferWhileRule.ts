@@ -25,12 +25,12 @@ class ForWalker extends Lint.AbstractWalker<void> {
             const closeParenEnd = utils.getChildOfKind(node, ts.SyntaxKind.CloseParenToken, this.sourceFile)!.end;
             let fix: Lint.Fix;
             if (node.condition === undefined) {
-                fix = this.createFix(new Lint.Replacement(start, closeParenEnd - start, 'while (true)'));
+                fix = new Lint.Replacement(start, closeParenEnd - start, 'while (true)');
             } else {
-                fix = this.createFix(
+                fix = [
                     new Lint.Replacement(start, node.condition.getStart(this.sourceFile) - start, 'while ('),
                     Lint.Replacement.deleteFromTo(node.condition.end, closeParenEnd - 1),
-                );
+                ];
             }
 
             this.addFailure(start, closeParenEnd, FAIL_MESSAGE, fix);

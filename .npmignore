@@ -1,7 +1,8 @@
-.vscode
+/.vscode
 .gitignore
 tsconfig.json
 tslint.json
-.npmignore
 *.ts
-test
+/test/
+/coverage/
+/.nyc_output

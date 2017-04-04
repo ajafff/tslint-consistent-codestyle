@@ -1,0 +1,15 @@
+{
+    "include": [
+        "rules/*.js",
+        "src/*.js"
+    ],
+    "extension": [
+        ".js"
+    ],
+    "reporter": [
+        "text-summary",
+        "html"
+    ],
+    "sourceMap": true,
+    "all": true
+}

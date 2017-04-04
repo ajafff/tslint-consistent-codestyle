@@ -12,7 +12,8 @@
     "prepublish": "npm run verify",
     "lint": "tslint '{rules,src}/**/*.ts'",
     "lint:fix": "tslint --fix '{rules,src}/**/*.ts'",
-    "verify": "npm run build && npm run lint && npm run test"
+    "verify": "npm run build && npm run lint && npm run coverage",
+    "coverage": "nyc npm test"
   },
   "keywords": [
     "eslint",
@@ -30,6 +31,7 @@
     "tsutils": "^1.4.0"
   },
   "devDependencies": {
+    "nyc": "^10.2.0",
     "tslint": "^5.0.0",
     "typescript": "^2.1.4"
   },

@@ -589,8 +589,6 @@ function isCamelCase(name: string) {
 }
 
 function hasStrictCamelHumps(name: string, isUpper: boolean) {
-    if (name.length <= 1)
-        return true;
     if (name[0] === '_')
         return false;
     for (let i = 1; i < name.length; ++i) {
@@ -623,7 +621,7 @@ function validateUnderscores(name: string) {
     if (name[0] === '_')
         return false;
     let wasUnderscore = false;
-    for (let i = 1; i < name.length; ++i) {
+    for (let i = 1; i < name.length; ++i)
         if (name[i] === '_') {
             if (wasUnderscore)
                 return false;
@@ -631,7 +629,6 @@ function validateUnderscores(name: string) {
         } else {
             wasUnderscore = false;
         }
-    }
     return !wasUnderscore;
 }
 

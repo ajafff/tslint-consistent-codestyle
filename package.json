@@ -6,6 +6,7 @@
     "type": "git",
     "url": "https://github.com/ajafff/tslint-consistent-codestyle"
   },
+  "main": "rules/index.js",
   "scripts": {
     "test": "echo test/rules/*/* | xargs -n 1 tslint --test",
     "build": "tsc -p .",

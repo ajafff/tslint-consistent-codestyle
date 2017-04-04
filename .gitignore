@@ -1,4 +1,5 @@
 /node_modules
 *.js
+!/rules/index.js
 /coverage/
 /.nyc_output

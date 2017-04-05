@@ -1,3 +1,4 @@
+/.nycrc
 /.vscode
 .gitignore
 tsconfig.json

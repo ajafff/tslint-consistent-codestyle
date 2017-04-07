@@ -16,7 +16,7 @@ Add the following path to the `rulesDirectory` setting in your `tslint.json` fil
 
 ```javascript
 {
-   "rulesDirectory": ["node_modules/tslint-consistent-codestyle/rules"]
+   "rulesDirectory": ["./node_modules/tslint-consistent-codestyle/rules"]
    "rules": {
      ...
    }
@@ -46,6 +46,7 @@ So for example, if you want to force every local variable to be in camelCase, yo
 * `type: string`: The selector consists of a required field `type`, which identifies the type of thing this configuration applies to.
 * `modifiers?: string|string[]`: To further specify your selection you can provide one or more `modifiers`. All of those modifiers must match an identifier, to activate this config. That means `["global", "const"]` will match every constant in global scope. It will not match any not-const global. Some of those modifiers are mutually exclusive, so you will never match anything if you specify more than one of them, for example `global` and `local` or the access modifiers `private`, `protected` and `public`.
 * `final?: boolean`: If set to true, this configuration will not contribute to the composition of any subtype's configuration.
+* `filter?: string`: Regular expression to limit the scope of this configuration to names that match this regex.
 
 ### Formatting rules:
 

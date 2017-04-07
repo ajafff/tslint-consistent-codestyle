@@ -44,6 +44,7 @@ interface IRuleScope {
     type: IdentifierType;
     modifiers?: Modifier | Modifier[];
     final?: boolean;
+    filter?: string;
 }
 
 type RuleConfig = IRuleScope & Partial<IFormat>;
@@ -138,6 +139,8 @@ enum Specifity {
     typeAlias = Specifity.class,
     genericTypeParameter = Specifity.class,
     enum = Specifity.class,
+
+    filter = 1 << 11,
     // tslint:enable:naming-convention
 }
 
@@ -153,6 +156,7 @@ export class Rule extends AbstractConfigDependentRule {
 
 class NormalizedConfig {
     private _type: Types;
+    private _filter: RegExp|undefined;
     private _format: Partial<IFormat>;
     private _modifiers: number;
     private _specifity: number;
@@ -174,13 +178,23 @@ class NormalizedConfig {
                 this._specifity |= Specifity[raw.modifiers];
             }
         }
+        if (raw.filter !== undefined) {
+            this._filter = new RegExp(raw.filter);
+            this._specifity |= Specifity.filter;
+        } else {
+            this._filter = undefined;
+        }
         this._format = raw;
     }
 
-    public matches(type: TypeSelector, modifiers: number): boolean {
+    public matches(type: TypeSelector, modifiers: number, name: string): [boolean, boolean] {
         if (this._final && type > this._type << 1) // check if TypeSelector has a higher bit set than this._type
-            return false;
-        return (this._type & type) !== 0 && (this._modifiers & ~modifiers) === 0;
+            return [false, false];
+        if ((this._type & type) === 0 || (this._modifiers & ~modifiers) !== 0)
+            return [false, false];
+        if (this._filter === undefined)
+            return [true, false];
+        return [this._filter.test(name), true];
     }
 
     public getFormat() {
@@ -451,27 +465,32 @@ class IdentifierNameWalker extends Lint.AbstractWalker<NormalizedConfig[]> {
     }
 
     private _checkName(name: ts.Identifier, type: TypeSelector, modifiers: number) {
-        const matchingChecker = this._getMatchingChecker(type, modifiers);
+        const matchingChecker = this._getMatchingChecker(type, modifiers, name.text);
         if (matchingChecker !== null) // tslint:disable-line:no-null-keyword
             matchingChecker.check(name, this);
     }
 
-    private _getMatchingChecker(type: TypeSelector, modifiers: number): NameChecker|null {
+    private _getMatchingChecker(type: TypeSelector, modifiers: number, name: string): NameChecker|null {
         const key = `${type},${modifiers}`;
         const cached = this._cache.get(key);
         if (cached !== undefined)
             return cached;
 
-        const checker = this._createChecker(type, modifiers);
-        this._cache.set(key, checker);
+        const [checker, hasFilter] = this._createChecker(type, modifiers, name);
+        if (!hasFilter) // only cache if there is no filter for the name
+            this._cache.set(key, checker);
         return checker;
     }
 
-    private _createChecker(type: TypeSelector, modifiers: number): NameChecker|null {
+    private _createChecker(type: TypeSelector, modifiers: number, name: string): [NameChecker|null, boolean] {
+        let hasFilter = false;
         const config = this.options.reduce(
             (format: IFormat, rule) => {
-                if (!rule.matches(type, modifiers))
+                const [matches, filterUsed] = rule.matches(type, modifiers, name);
+                if (!matches)
                     return format;
+                if (filterUsed)
+                    hasFilter = true;
                 return Object.assign(format, rule.getFormat());
             },
             {
@@ -490,8 +509,8 @@ class IdentifierNameWalker extends Lint.AbstractWalker<NormalizedConfig[]> {
             !config.prefix &&
             !config.regex &&
             !config.suffix)
-            return null; // tslint:disable-line:no-null-keyword
-        return new NameChecker(type, config);
+            return [null, hasFilter]; // tslint:disable-line:no-null-keyword
+        return [new NameChecker(type, config), hasFilter];
     }
 
     private _getModifiers(node: ts.Node, type: TypeSelector): number {

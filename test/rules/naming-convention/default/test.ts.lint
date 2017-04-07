@@ -79,6 +79,13 @@ class TestClass {
                                 ~~~~ [parameterProperty name must be in UPPER_CASE]
                                                 ~~~ [parameterProperty name must have leading underscore]
     constructor(private readonly _FOO_Bar) {}
+    toJSON() {}
+    testtoJSON() {}
+    ~~~~~~~~~~ [method name must be in camelCase]
+    toJSONtest() {}
+    ~~~~~~~~~~ [method name must be in camelCase]
+    toJSON = "foo";
+    ~~~~~~ [property name must be in camelCase]
 }
 
 class FooBar<t> {}

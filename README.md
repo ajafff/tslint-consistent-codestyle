@@ -241,6 +241,8 @@ Here you see an example of how everything explained above works together. This i
   {"type": "member", "modifiers": "private", "leadingUnderscore": "require"},
   // same for protected
   {"type": "member", "modifiers": "protected", "leadingUnderscore": "require"},
+  // exclicitly disable the format check only for method toJSON
+  {"type": "method", "filter": "^toJSON$", "format": null},
   // enforce UPPER_CASE for all public static readonly(!) properties
   {"type": "property", "modifiers": ["public", "static", "const"], "format": "UPPER_CASE"},
   // enforce PascalCase for classes, interfaces, enums, etc. Remember, there are still no underscores allowed.

@@ -1,5 +1,10 @@
 # Change Log
 
+## v1.1.0
+
+**Features:**
+* `naming-convention`: Add `filter` option to config
+
 ## v1.0.0
 
 **Breaking Changes:**

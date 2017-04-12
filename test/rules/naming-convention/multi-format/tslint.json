@@ -1,0 +1,11 @@
+{
+  "rulesDirectory": ["../../../../rules"],
+  "rules": {
+    "naming-convention": [
+       true,
+       {"type": "function", "format": ["UPPER_CASE", "camelCase"]},
+       {"type": "function", "modifiers": "local", "format": "camelCase"},
+       {"type": "variable", "format": ["UPPER_CASE", "camelCase", "PascalCase"]}
+    ]
+  }
+}

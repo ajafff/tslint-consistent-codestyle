@@ -55,7 +55,7 @@ All formatting rules are optional. Formatting rules are inherited by the `type`'
 * `regex: string`: A regular expression, which is applied to the name. (without any regex flags)
 * `leadingUnderscore: string, trailingUnderscore: string`: Options `forbid`, `allow` and `require` can be used to forbid, allow or require _one_ leading or trailing underscore in the name. **If one option is specified, the leading or trailing underscore will be sliced off the name before any further checks are performed.**
 * `prefix: string|string[], suffix: string|string[]`: Specify one or more prefixes or suffixes. When given a single string, that string must match in the specified position. When given an array, one of the strings must match in the specified position. Matching is done in the given order. **If a prefix or suffix is specified, the matching portion of the name is sliced off before any further checks are performed:** If you enforce `camelCase` and a prefix `has`, the name `hasFoo` will not match. That's because the prefix `has` is removed and the remaining `Foo` is not valid `camelCase`  
-* `format: string`: Valid options are `camelCase`, `PascalCase`, `UPPER_CASE` and `snake_case`.
+* `format: string|string[]`: Valid options are `camelCase`, `PascalCase`, `UPPER_CASE` and `snake_case`. If an array is given, the name must match one format in that array. If the array is empty, no format check is made.
 
 ### "Inheritance" / Extending configurations:
 
@@ -230,9 +230,11 @@ Here you see an example of how everything explained above works together. This i
   true,
   // forbid leading and trailing underscores and enforce camelCase on EVERY name. will be overridden by subtypes if needed
   {"type": "default", "format": "camelCase", "leadingUnderscore": "forbid", "trailingUnderscore": "forbid"},
-  // require all global constants to be UPPER_CASE
+  // require all global constants to be camelCase or UPPER_CASE
   // all other variables and functions still need to be camelCase
-  {"type": "variable", "modifiers": ["global", "const"], "format": "UPPER_CASE"},
+  {"type": "variable", "modifiers": ["global", "const"], "format": ["camelCase","UPPER_CASE"]},
+  // override the above format option for exported constants to allow only UPPER_CASE
+  {"type": "variable", "modifiers": ["export", "const"], "format": "UPPER_CASE"},
   // allow leading underscores for parameters, because `tsc --noUnusedParameters` will not flag underscore prefixed parameters
   // all other rules (trailingUnderscore: forbid, format: camelCase) still apply
   // since we don't want to inherit this config to `parameterProperties`, we set `final = true`

@@ -15,10 +15,7 @@ const CAMEL_OPTION  = 'camelCase';
 const SNAKE_OPTION  = 'snake_case';
 const UPPER_OPTION  = 'UPPER_CASE';
 
-const CAMEL_FAIL    = ' name must be in camelCase';
-const PASCAL_FAIL   = ' name must be in PascalCase';
-const SNAKE_FAIL    = ' name must be in snake_case';
-const UPPER_FAIL    = ' name must be in UPPER_CASE';
+const FORMAT_FAIL   = ' name must be in ';
 const LEADING_FAIL  = ' name must not have leading underscore';
 const TRAILING_FAIL = ' name must not have trailing underscore';
 const NO_LEADING_FAIL  = ' name must have leading underscore';
@@ -32,11 +29,8 @@ const SUFFIX_FAIL_ARR  = ' name must end with one of ';
 type DeclarationWithIdentifierName = ts.Declaration & {name: ts.Identifier};
 
 type Format = 'camelCase' | 'PascalCase' | 'snake_case' | 'UPPER_CASE';
-type IdentifierType = 'class' | 'interface' | 'function' | 'variable' | 'method' |
-                      'property' | 'parameter' | 'default' | 'member' | 'type' |
-                      'genericTypeParameter';
-type Modifier = 'static' | 'const' | 'export' | 'public' | 'protected' |
-                'private' | 'abstract' | 'global' | 'local' | 'readonly';
+type IdentifierType = keyof typeof Types;
+type Modifier = keyof typeof Modifiers;
 
 type UnderscoreOption = 'allow' | 'require' | 'forbid';
 
@@ -50,7 +44,7 @@ interface IRuleScope {
 type RuleConfig = IRuleScope & Partial<IFormat>;
 
 interface IFormat {
-    format: Format|undefined;
+    format: Format|Format[]|undefined;
     leadingUnderscore: UnderscoreOption|undefined;
     trailingUnderscore: UnderscoreOption|undefined;
     prefix: string|string[]|undefined;
@@ -125,22 +119,21 @@ enum Specifity {
     export = 1 << 4,
     import = 1 << 5,
     rename = 1 << 6,
-    default = 1 << 7,
-    variable = 2 << 7,
-    function = Specifity.variable,
-    parameter = 3 << 7,
-    member = 4 << 7,
-    property = 5 << 7,
+    filter = 1 << 7,
+    default = 1 << 8,
+    variable = 2 << 8,
+    function = 3 << 8,
+    parameter = 4 << 8,
+    member = 5 << 8,
+    property = 6 << 8,
     method = Specifity.property,
-    enumMember = 6 << 7,
-    type = 7 << 7,
-    class = 8 << 7,
+    enumMember = 7 << 8,
+    type = 8 << 8,
+    class = 9 << 8,
     interface = Specifity.class,
     typeAlias = Specifity.class,
     genericTypeParameter = Specifity.class,
     enum = Specifity.class,
-
-    filter = 1 << 11,
     // tslint:enable:naming-convention
 }
 
@@ -207,28 +200,18 @@ class NormalizedConfig {
 }
 
 class NameChecker {
-    private _format: string|undefined;
+    private _format: Format|Format[]|undefined;
     private _leadingUnderscore: UnderscoreOption|undefined;
     private _trailingUnderscore: UnderscoreOption|undefined;
     private _prefix: string|string[]|undefined;
     private _suffix: string|string[]|undefined;
     private _regex: RegExp|undefined;
     constructor(private readonly _type: TypeSelector, format: IFormat) {
-        ({
-            format: this._format,
-            leadingUnderscore: this._leadingUnderscore,
-            trailingUnderscore: this._trailingUnderscore,
-        } = format);
-        if (!Array.isArray(format.prefix) || format.prefix.length > 1) {
-            this._prefix = format.prefix;
-        } else if (format.prefix.length === 1) {
-            this._prefix = format.prefix[0];
-        }
-        if (!Array.isArray(format.suffix) || format.suffix.length > 1) {
-            this._suffix = format.suffix;
-        } else if (format.suffix.length === 1) {
-            this._suffix = format.suffix[0];
-        }
+        this._leadingUnderscore = format.leadingUnderscore;
+        this._trailingUnderscore = format.trailingUnderscore;
+        this._format = parseOptionArray<Format>(format.format);
+        this._prefix = parseOptionArray(format.prefix);
+        this._suffix = parseOptionArray(format.suffix);
         this._regex = format.regex ? new RegExp(format.regex) : undefined;
     }
 
@@ -282,24 +265,15 @@ class NameChecker {
             }
         }
 
-        // run case checks
-        switch (this._format) {
-            case PASCAL_OPTION:
-                if (!isPascalCase(identifier))
-                    walker.addFailureAtNode(name, this._failMessage(PASCAL_FAIL));
-                break;
-            case CAMEL_OPTION:
-                if (!isCamelCase(identifier))
-                    walker.addFailureAtNode(name, this._failMessage(CAMEL_FAIL));
-                break;
-            case SNAKE_OPTION:
-                if (!isSnakeCase(identifier))
-                    walker.addFailureAtNode(name, this._failMessage(SNAKE_FAIL));
-                break;
-            case UPPER_OPTION:
-                if (!isUpperCase(identifier))
-                    walker.addFailureAtNode(name, this._failMessage(UPPER_FAIL));
-                break;
+        // case checks
+        if (this._format) {
+            if (Array.isArray(this._format)) {
+                if (!matchesAnyFormat(identifier, this._format)) {
+                    walker.addFailureAtNode(name, this._failMessage(FORMAT_FAIL + formatFormatList(this._format)));
+                }
+            } else if (!matchesFormat(identifier, this._format)) {
+                walker.addFailureAtNode(name, this._failMessage(FORMAT_FAIL + this._format));
+            }
         }
     }
 
@@ -545,11 +519,9 @@ class IdentifierNameWalker extends Lint.AbstractWalker<NormalizedConfig[]> {
 
     public walk(sourceFile: ts.Node) {
         const cb = (node: ts.Node): void => {
-            const boundary = utils.isScopeBoundary(node);
-            if (boundary)
-                ++this._depth;
             this.visitNode(node);
-            if (boundary) {
+            if (utils.isScopeBoundary(node)) {
+                ++this._depth;
                 ts.forEachChild(node, cb);
                 --this._depth;
             } else {
@@ -597,6 +569,41 @@ class IdentifierNameWalker extends Lint.AbstractWalker<NormalizedConfig[]> {
                 return this.visitArrowFunction(<ts.ArrowFunction>node);
         }
     }
+}
+
+function parseOptionArray<T>(option?: T|T[]): T|T[]|undefined {
+    if (!Array.isArray(option) || option.length > 1)
+        return option;
+    return option[0];
+}
+
+function matchesFormat(identifier: string, format: Format): boolean {
+    switch (format) {
+        case PASCAL_OPTION:
+            return isPascalCase(identifier);
+        case CAMEL_OPTION:
+            return isCamelCase(identifier);
+        case SNAKE_OPTION:
+            return isSnakeCase(identifier);
+        case UPPER_OPTION:
+            return isUpperCase(identifier);
+    }
+}
+
+function matchesAnyFormat(identifier: string, formats: Format[]): boolean {
+    for (const format of formats)
+        if (matchesFormat(identifier, format))
+            return true;
+    return false;
+}
+
+function formatFormatList(formats: Format[]): string {
+    let result = formats[0];
+    const lastIndex = formats.length - 1;
+    for (let i = 1; i < lastIndex; ++i) {
+        result += ', ' + formats[i];
+    }
+    return result + ' or ' + formats[lastIndex];
 }
 
 function isPascalCase(name: string) {

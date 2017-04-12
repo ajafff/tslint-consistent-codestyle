@@ -1,0 +1,37 @@
+function foo() {}
+function fooBar() {}
+function Foo() {}
+         ~~~ [1]
+function FooBar( {})
+         ~~~~~~ [1]
+function FOO() {}
+function FOO_BAR() {}
+function foo_bar() {}
+         ~~~~~~~ [1]
+
+var foo;
+var Foo;
+var FOO;
+var fooBar;
+var FooBar;
+var FOO_BAR;
+var foo_bar;
+    ~~~~~~~ [variable name must be in UPPER_CASE, camelCase or PascalCase]
+
+(function() {
+    function foo() {}
+    function fooBar() {}
+    function Foo() {}
+             ~~~ [0]
+    function FooBar( {})
+             ~~~~~~ [0]
+    function FOO() {}
+             ~~~ [0]
+    function FOO_BAR() {}
+             ~~~~~~~ [0]
+    function foo_bar() {}
+             ~~~~~~~ [0]
+})()
+
+[0]: function name must be in camelCase
+[1]: function name must be in UPPER_CASE or camelCase

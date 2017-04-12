@@ -1,5 +1,15 @@
 # Change Log
 
+## v1.2.0
+**Features:**
+* `naming-convention`: Allow an array of formats
+
+**Bugfixes:**
+* `naming-convention`:
+  * `global` modifier now works correctly on functions, classes, enums, etc. Before they were all considered `local`
+  * type `function` now correctly inherits from type `variable` instead of getting overridden depending on their ordering
+  * Adding a `filter` to a configuration no longer overrides every other config in the inheritance chain
+
 ## v1.1.0
 
 **Features:**

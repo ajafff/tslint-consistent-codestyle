@@ -14,7 +14,8 @@
     "lint": "tslint '{rules,src}/**/*.ts'",
     "lint:fix": "tslint --fix '{rules,src}/**/*.ts'",
     "verify": "npm run build && npm run lint && npm run coverage",
-    "coverage": "nyc npm test"
+    "coverage": "rm -rf coverage .nyc_output && nyc npm test",
+    "report-coverage": "cat ./coverage/lcov.info | coveralls"
   },
   "keywords": [
     "eslint",
@@ -32,6 +33,7 @@
     "tsutils": "^1.4.0"
   },
   "devDependencies": {
+    "coveralls": "^2.13.0",
     "nyc": "^10.2.0",
     "tslint": "^5.0.0",
     "typescript": "^2.3.0"

@@ -28,30 +28,6 @@ const SUFFIX_FAIL_ARR  = ' name must end with one of ';
 
 type DeclarationWithIdentifierName = ts.Declaration & {name: ts.Identifier};
 
-type Format = 'camelCase' | 'PascalCase' | 'snake_case' | 'UPPER_CASE';
-type IdentifierType = keyof typeof Types;
-type Modifier = keyof typeof Modifiers;
-
-type UnderscoreOption = 'allow' | 'require' | 'forbid';
-
-interface IRuleScope {
-    type: IdentifierType;
-    modifiers?: Modifier | Modifier[];
-    final?: boolean;
-    filter?: string;
-}
-
-type RuleConfig = IRuleScope & Partial<IFormat>;
-
-interface IFormat {
-    format: Format|Format[]|undefined;
-    leadingUnderscore: UnderscoreOption|undefined;
-    trailingUnderscore: UnderscoreOption|undefined;
-    prefix: string|string[]|undefined;
-    suffix: string|string[]|undefined;
-    regex: string|undefined;
-}
-
 enum Types {
     // tslint:disable:naming-convention
     default = -1,
@@ -135,6 +111,30 @@ enum Specifity {
     genericTypeParameter = Specifity.class,
     enum = Specifity.class,
     // tslint:enable:naming-convention
+}
+
+type Format = 'camelCase' | 'PascalCase' | 'snake_case' | 'UPPER_CASE';
+type IdentifierType = keyof typeof Types;
+type Modifier = keyof typeof Modifiers;
+
+type UnderscoreOption = 'allow' | 'require' | 'forbid';
+
+interface IRuleScope {
+    type: IdentifierType;
+    modifiers?: Modifier | Modifier[];
+    final?: boolean;
+    filter?: string;
+}
+
+type RuleConfig = IRuleScope & Partial<IFormat>;
+
+interface IFormat {
+    format: Format|Format[]|undefined;
+    leadingUnderscore: UnderscoreOption|undefined;
+    trailingUnderscore: UnderscoreOption|undefined;
+    prefix: string|string[]|undefined;
+    suffix: string|string[]|undefined;
+    regex: string|undefined;
 }
 
 export class Rule extends AbstractConfigDependentRule {

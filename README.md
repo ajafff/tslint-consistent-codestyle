@@ -1,5 +1,6 @@
 [![npm version](http://img.shields.io/npm/v/tslint-consistent-codestyle.svg)](https://npmjs.org/package/tslint-consistent-codestyle)
 [![Downloads](http://img.shields.io/npm/dm/tslint-consistent-codestyle.svg)](https://npmjs.org/package/tslint-consistent-codestyle)
+[![Coverage Status](https://coveralls.io/repos/github/ajafff/tslint-consistent-codestyle/badge.svg)](https://coveralls.io/github/ajafff/tslint-consistent-codestyle)
 
 # Purpose
 

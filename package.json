@@ -8,7 +8,7 @@
   },
   "main": "rules/index.js",
   "scripts": {
-    "test": "echo test/rules/*/* | xargs -n 1 tslint --test",
+    "test": "tslint --test test/rules/*/*",
     "build": "tsc -p .",
     "prepublish": "npm run verify",
     "lint": "tslint '{rules,src}/**/*.ts'",

@@ -1,3 +1,6 @@
+[![npm version](http://img.shields.io/npm/v/tslint-consistent-codestyle.svg)](https://npmjs.org/package/tslint-consistent-codestyle)
+[![Downloads](http://img.shields.io/npm/dm/tslint-consistent-codestyle.svg)](https://npmjs.org/package/tslint-consistent-codestyle)
+
 # Purpose
 
 The rules in this package can be used to enforce consistent code style.

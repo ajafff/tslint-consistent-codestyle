@@ -44,21 +44,26 @@
     "no-default-export": true,
     "no-empty-interface": true,
     "no-eval": true,
+    "no-import-side-effect": true,
     "no-invalid-this": true,
     "no-inferrable-types": [
       true,
       "ignore-params"
     ],
+    "no-irregular-whitespace": true,
     "no-null-keyword": true,
     "no-require-imports": true,
     "no-shadowed-variable": true,
+    "no-sparse-arrays": true,
     "no-string-literal": true,
     "no-switch-case-fall-through": true,
     "no-trailing-whitespace": true,
+    "no-unnecessary-callback-wrapper": true,
     "no-unnecessary-initializer": true,
     "no-unsafe-finally": true,
     "no-unused-expression": true,
     "no-var-keyword": true,
+    "number-literal-format": true,
     "object-literal-shorthand": true,
     "one-line": [true,
       "check-open-brace",
@@ -73,11 +78,12 @@
     ],
     "only-arrow-functions": [
       true,
-      "allow-declarations"
+      "allow-named-functions"
     ],
     "prefer-const": true,
     "prefer-for-of": true,
     "prefer-function-over-method": true,
+    "prefer-switch": [true, {"min-cases": 3}],
     "quotemark": [
       true, 
       "single"
@@ -123,7 +129,7 @@
     "naming-convention": [
       true,
       {"type": "default", "format": "camelCase", "leadingUnderscore": "forbid", "trailingUnderscore": "forbid"},
-      {"type": "variable", "modifiers": ["global", "const"], "format": "UPPER_CASE"},
+      {"type": "variable", "modifiers": ["global", "const"], "format": ["camelCase", "UPPER_CASE"]},
       {"type": "parameter", "leadingUnderscore": "allow", "final": true},
       {"type": "member", "modifiers": "private", "leadingUnderscore": "require"},
       {"type": "member", "modifiers": "protected", "leadingUnderscore": "require"},
@@ -131,7 +137,7 @@
       {"type": "type", "format": "PascalCase"},
       {"type": "class", "modifiers": "abstract", "prefix": "Abstract"},
       {"type": "interface", "prefix": "I"},
-      {"type": "genericTypeParameter", "prefix": "T"},
+      {"type": "genericTypeParameter", "regex": "^[A-Z]$"},
       {"type": "enumMember", "format": "PascalCase"}
     ],
     "no-as-type-assertion": true,

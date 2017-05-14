@@ -3,6 +3,9 @@
         "rules/*.js",
         "src/*.js"
     ],
+    "exclude": [
+        "rules/index.js"
+    ],
     "extension": [
         ".js"
     ],

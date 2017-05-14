@@ -9,7 +9,7 @@
   "main": "rules/index.js",
   "scripts": {
     "test": "tslint --test test/rules/*/*",
-    "build": "tsc -p .",
+    "build": "rm -rf {src,rules}/*.js; tsc -p .",
     "prepublish": "npm run verify",
     "lint": "tslint '{rules,src}/**/*.ts'",
     "lint:fix": "tslint --fix '{rules,src}/**/*.ts'",

@@ -15,13 +15,24 @@ Install from npm to your devDependencies  (https://www.npmjs.com/package/tslint-
 npm install --save-dev tslint-consistent-codestyle
 ```
 
-Configure tslint to use the tslint-consistent-codestyle folder:
+Configure tslint to use `tslint-consistent-codestyle`:
 
-Add the following path to the `rulesDirectory` setting in your `tslint.json` file:
+This package provides an empty configuration preset that just contains the `rulesDirectory`. That means you can easily use the rules in this package, but don't get any predefined configuration. To use it, just add it to the `extends` array in your `tslint.json`:
 
 ```javascript
 {
-   "rulesDirectory": ["./node_modules/tslint-consistent-codestyle/rules"]
+   "extends": ["tslint-consistent-codestyle"]
+   "rules": {
+     ...
+   }
+}
+```
+
+As of `tslint@5.2.0` you can also use `tslint-consistent-codestyle` as `rulesDirectory`:
+
+```javascript
+{
+   "rulesDirectory": ["tslint-consistent-codestyle"]
    "rules": {
      ...
    }

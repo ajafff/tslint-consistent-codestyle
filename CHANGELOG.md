@@ -1,5 +1,13 @@
 # Change Log
 
+## v1.3.0
+**Features:**
+* This package now contains an empty config that can easily be extended using `"extends": ["tslint-consistent-codestyle"]` in your `tslint.json`
+* Add documentation about the module resolution of `rulesDirectory`
+
+**Bugfixes:**
+* Remove `no-curly` rule from package, which is still under development
+
 ## v1.2.0
 **Features:**
 * `naming-convention`: Allow an array of formats

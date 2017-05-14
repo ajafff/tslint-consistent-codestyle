@@ -395,20 +395,17 @@ class IdentifierNameWalker extends Lint.AbstractWalker<NormalizedConfig[]> {
 
     public visitForStatement(node: ts.ForStatement) {
         if (node.initializer !== undefined && utils.isVariableDeclarationList(node.initializer))
-            this._checkVariableDeclarationList(node.initializer, this._getModifiers(node.initializer,
-                                                                                                                TypeSelector.variable));
+            this._checkVariableDeclarationList(node.initializer, this._getModifiers(node.initializer, TypeSelector.variable));
     }
 
     public visitForOfStatement(node: ts.ForOfStatement) {
         if (utils.isVariableDeclarationList(node.initializer))
-            this._checkVariableDeclarationList(node.initializer, this._getModifiers(node.initializer,
-                                                                                                                TypeSelector.variable));
+            this._checkVariableDeclarationList(node.initializer, this._getModifiers(node.initializer, TypeSelector.variable));
     }
 
     public visitForInStatement(node: ts.ForInStatement) {
         if (utils.isVariableDeclarationList(node.initializer))
-            this._checkVariableDeclarationList(node.initializer, this._getModifiers(node.initializer,
-                                                                                                                TypeSelector.variable));
+            this._checkVariableDeclarationList(node.initializer, this._getModifiers(node.initializer, TypeSelector.variable));
     }
 
     public visitVariableStatement(node: ts.VariableStatement) {

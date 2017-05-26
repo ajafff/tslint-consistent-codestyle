@@ -268,9 +268,8 @@ class NameChecker {
         // case checks
         if (this._format) {
             if (Array.isArray(this._format)) {
-                if (!matchesAnyFormat(identifier, this._format)) {
+                if (!matchesAnyFormat(identifier, this._format))
                     walker.addFailureAtNode(name, this._failMessage(FORMAT_FAIL + formatFormatList(this._format)));
-                }
             } else if (!matchesFormat(identifier, this._format)) {
                 walker.addFailureAtNode(name, this._failMessage(FORMAT_FAIL + this._format));
             }
@@ -278,19 +277,17 @@ class NameChecker {
     }
 
     private _checkPrefixes(identifier: string, name: ts.Identifier, prefixes: string[], walker: Lint.AbstractWalker<any>): string {
-        for (const prefix of prefixes) {
+        for (const prefix of prefixes)
             if (identifier.startsWith(prefix))
                 return identifier.slice(prefix.length);
-        }
         walker.addFailureAtNode(name, this._failMessage(PREFIX_FAIL_ARR + prefixes.toString()));
         return identifier;
     }
 
     private _checkSuffixes(identifier: string, name: ts.Identifier, suffixes: string[], walker: Lint.AbstractWalker<any>): string {
-        for (const suffix of suffixes) {
+        for (const suffix of suffixes)
             if (identifier.endsWith(suffix))
                 return identifier.slice(-suffix.length);
-        }
         walker.addFailureAtNode(name, this._failMessage(SUFFIX_FAIL_ARR + suffixes.toString()));
         return identifier;
     }
@@ -302,21 +299,18 @@ class IdentifierNameWalker extends Lint.AbstractWalker<NormalizedConfig[]> {
     private _cache = new Map<string, NameChecker | null>();
 
     private _checkTypeParameters(node: ts.DeclarationWithTypeParameters, modifiers: Modifiers) {
-        if (node.typeParameters !== undefined) {
-            for (const {name} of node.typeParameters) {
+        if (node.typeParameters !== undefined)
+            for (const {name} of node.typeParameters)
                 this._checkName(name, TypeSelector.genericTypeParameter, modifiers);
-            }
-        }
     }
 
     public visitEnumDeclaration(node: ts.EnumDeclaration) {
         let modifiers = this._getModifiers(node, TypeSelector.enum);
         this._checkName(node.name, TypeSelector.enum, modifiers);
         modifiers |= Modifiers.static | Modifiers.public | Modifiers.readonly; // treat enum members as public static readonly properties
-        for (const {name} of node.members) {
+        for (const {name} of node.members)
             if (utils.isIdentifier(name))
                 this._checkName(name, TypeSelector.enumMember, modifiers);
-        }
     }
 
     public visitTypeAliasDeclaration(node: ts.TypeAliasDeclaration) {
@@ -349,10 +343,9 @@ class IdentifierNameWalker extends Lint.AbstractWalker<NormalizedConfig[]> {
 
     public visitParameterDeclaration(node: ts.ParameterDeclaration) {
         if (isNameIdentifier(node)) {
-            if (node.name.originalKeywordKind === ts.SyntaxKind.ThisKeyword) {
+            if (node.name.originalKeywordKind === ts.SyntaxKind.ThisKeyword)
                 // exempt this parameter
                 return;
-            }
             // param properties cannot be destructuring assignments
             this._checkDeclaration(node, utils.isParameterProperty(node) ? TypeSelector.parameterProperty
                                                                          : TypeSelector.parameter);
@@ -410,9 +403,8 @@ class IdentifierNameWalker extends Lint.AbstractWalker<NormalizedConfig[]> {
 
     public visitVariableStatement(node: ts.VariableStatement) {
         // skip 'declare' keywords
-        if (!utils.hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword)) {
+        if (!utils.hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword))
             this._checkVariableDeclarationList(node.declarationList, this._getModifiers(node, TypeSelector.variable));
-        }
     }
 
     public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
@@ -597,9 +589,8 @@ function matchesAnyFormat(identifier: string, formats: Format[]): boolean {
 function formatFormatList(formats: Format[]): string {
     let result = formats[0];
     const lastIndex = formats.length - 1;
-    for (let i = 1; i < lastIndex; ++i) {
+    for (let i = 1; i < lastIndex; ++i)
         result += ', ' + formats[i];
-    }
     return result + ' or ' + formats[lastIndex];
 }
 
@@ -644,7 +635,7 @@ function validateUnderscores(name: string) {
     if (name[0] === '_')
         return false;
     let wasUnderscore = false;
-    for (let i = 1; i < name.length; ++i)
+    for (let i = 1; i < name.length; ++i) {
         if (name[i] === '_') {
             if (wasUnderscore)
                 return false;
@@ -652,6 +643,7 @@ function validateUnderscores(name: string) {
         } else {
             wasUnderscore = false;
         }
+    }
     return !wasUnderscore;
 }
 

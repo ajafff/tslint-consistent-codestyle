@@ -101,9 +101,8 @@ class ReturnWalker extends Lint.AbstractWalker<void> {
             if (utils.isPropertyAccessExpression(current)) {
                 if (utils.isIdentifier(current.expression)) {
                     const track = this._getEnumInScope(current.expression.text);
-                    if (track !== undefined && track.members.get(current.name.text)) {
+                    if (track !== undefined && track.members.get(current.name.text))
                         return;
-                    }
                 }
                 isConst = false;
             } else if (utils.isElementAccessExpression(current)) {

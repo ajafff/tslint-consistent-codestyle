@@ -7,6 +7,12 @@ do {
     foo();
     bar();
 } while (true);
+do {
+   ~
+    foo();
+~~~~~~~~~~
+} while (true);
+~ [0]
 
 if (foo) {
          ~

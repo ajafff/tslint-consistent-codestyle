@@ -6,6 +6,9 @@ do {
     foo();
     bar();
 } while (true);
+do
+    foo();
+while (true);
 
 if (foo)
     foo();

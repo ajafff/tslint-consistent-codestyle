@@ -1,6 +1,7 @@
 import * as ts from 'typescript';
 import * as Lint from 'tslint';
-import * as utils from 'tsutils';
+import { isBlock, isIterationStatement, isIfStatement, getNextToken, isSameLine } from 'tsutils';
+import { isElseIf } from '../src/utils';
 
 const FAIL_MESSAGE_MISSING = `statement must be braced`;
 const FAIL_MESSAGE_UNNECESSARY = `unnecessary curly braces`;
@@ -31,9 +32,9 @@ export class Rule extends Lint.Rules.AbstractRule {
 class ExtCurlyWalker extends Lint.AbstractWalker<IOptions> {
     public walk(sourceFile: ts.SourceFile) {
         const cb = (node: ts.Node): void => {
-            if (utils.isIterationStatement(node)) {
+            if (isIterationStatement(node)) {
                 this._checkLoop(node);
-            } else if (utils.isIfStatement(node)) {
+            } else if (isIfStatement(node)) {
                 this._checkIfStatement(node);
             }
             return ts.forEachChild(node, cb);
@@ -56,7 +57,7 @@ class ExtCurlyWalker extends Lint.AbstractWalker<IOptions> {
             if (node.thenStatement.kind !== ts.SyntaxKind.Block)
                 this.addFailureAtNode(node.thenStatement, FAIL_MESSAGE_MISSING);
         } else if (node.thenStatement.kind === ts.SyntaxKind.Block) {
-            this._reportUnnecessaryThen(node);
+            this._reportUnnecessary(<ts.Block>node.thenStatement);
         }
         if (otherwise) {
             if (node.elseStatement !== undefined &&
@@ -68,23 +69,23 @@ class ExtCurlyWalker extends Lint.AbstractWalker<IOptions> {
     }
 
     private _needsBraces(node: ts.Statement, allowIfElse?: boolean): boolean {
-        if (utils.isBlock(node))
+        if (isBlock(node))
             return node.statements.length !== 1 || this._needsBraces(node.statements[0], allowIfElse);
-        if (!allowIfElse && this.options.nestedIfElse && utils.isIfStatement(node) && node.elseStatement !== undefined)
+        if (!allowIfElse && this.options.nestedIfElse && isIfStatement(node) && node.elseStatement !== undefined)
             return true;
         if (!this.options.child)
             return false;
-        if (utils.isIfStatement(node)) {
+        if (isIfStatement(node)) {
             const result  = this._ifStatementNeedsBraces(node);
             return result[0] || result[1];
         }
-        if (utils.isIterationStatement(node))
+        if (isIterationStatement(node))
             return this._needsBraces(node.statement);
         return node.kind === ts.SyntaxKind.SwitchStatement;
     }
 
     private _ifStatementNeedsBraces(node: ts.IfStatement, excludeElse?: boolean): [boolean, boolean] {
-        if (this.options.else && (node.elseStatement !== undefined || getElseIfParent(node) !== undefined))
+        if (this.options.else && (node.elseStatement !== undefined || isElseIf(node)))
                 return [true, true];
         if (this.options.consistent) {
             if (this._needsBraces(node.thenStatement) ||
@@ -97,7 +98,7 @@ class ExtCurlyWalker extends Lint.AbstractWalker<IOptions> {
         if (node.elseStatement !== undefined) {
             const statement = unwrapBlock(node.thenStatement);
             return [
-                utils.isIfStatement(statement) && statement.elseStatement === undefined,
+                isIfStatement(statement) && statement.elseStatement === undefined || this._needsBraces(statement),
                 !excludeElse && this._needsBraces(node.elseStatement, true),
             ];
         }
@@ -105,26 +106,14 @@ class ExtCurlyWalker extends Lint.AbstractWalker<IOptions> {
     }
 
     private _reportUnnecessary(block: ts.Block) {
+        const closeBrace = block.getChildAt(2, this.sourceFile);
+        const nextTokenStart = getNextToken(closeBrace, this.sourceFile)!.getStart(this.sourceFile);
+        const closeFix = isSameLine(this.sourceFile, closeBrace.end, nextTokenStart)
+            ? Lint.Replacement.deleteFromTo(closeBrace.end - 1, nextTokenStart)
+            : Lint.Replacement.deleteFromTo(block.statements.end, block.end);
         this.addFailure(block.statements.pos - 1, block.end, FAIL_MESSAGE_UNNECESSARY, [
             Lint.Replacement.deleteFromTo(block.pos, block.statements.pos),
-            Lint.Replacement.deleteFromTo(block.statements.end, block.end),
-        ]);
-    }
-
-    private _reportUnnecessaryThen(node: ts.IfStatement) {
-        const block = <ts.Block>node.thenStatement;
-        let closeBraceFix: Lint.Replacement;
-        if (node.elseStatement !== undefined) {
-            closeBraceFix = Lint.Replacement.deleteFromTo(
-                node.getChildAt(4, this.sourceFile).end - 1,
-                node.getChildAt(5).getStart(this.sourceFile),
-            );
-        } else {
-            closeBraceFix = Lint.Replacement.deleteFromTo(block.statements.end, block.end);
-        }
-        this.addFailure(block.statements.pos - 1, block.end, FAIL_MESSAGE_UNNECESSARY, [
-            Lint.Replacement.deleteFromTo(block.pos, block.statements.pos),
-            closeBraceFix,
+            closeFix,
         ]);
     }
 }
@@ -140,7 +129,7 @@ function getElseIfParent(node: ts.Node): ts.IfStatement | undefined {
 }
 
 function unwrapBlock(node: ts.Statement): ts.Statement {
-    while (utils.isBlock(node) && node.statements.length === 1)
+    while (isBlock(node) && node.statements.length === 1)
         node = node.statements[0];
     return node;
 }

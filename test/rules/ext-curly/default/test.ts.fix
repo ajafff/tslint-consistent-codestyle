@@ -11,6 +11,23 @@ if (foo)
     foo();
 
 if (foo)
+    if (bar)
+        foo(bar);
+
+if (foo) {
+    if (bar)
+        foo(bar);
+} else
+    bar();
+
+if (foo)
+    if (bar)
+        foo(bar);
+    else
+        foo();
+else {}
+
+if (foo)
     foo();
 else
     bar();

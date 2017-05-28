@@ -56,7 +56,7 @@ class ExtCurlyWalker extends Lint.AbstractWalker<IOptions> {
             if (node.thenStatement.kind !== ts.SyntaxKind.Block)
                 this.addFailureAtNode(node.thenStatement, FAIL_MESSAGE_MISSING);
         } else if (node.thenStatement.kind === ts.SyntaxKind.Block) {
-            this._reportUnnecessary(<ts.Block>node.thenStatement);
+            this._reportUnnecessaryThen(node);
         }
         if (otherwise) {
             if (node.elseStatement !== undefined &&
@@ -84,7 +84,7 @@ class ExtCurlyWalker extends Lint.AbstractWalker<IOptions> {
     }
 
     private _ifStatementNeedsBraces(node: ts.IfStatement, excludeElse?: boolean): [boolean, boolean] {
-        if (this.options.else && node.elseStatement !== undefined || getElseIfParent(node) !== undefined)
+        if (this.options.else && (node.elseStatement !== undefined || getElseIfParent(node) !== undefined))
                 return [true, true];
         if (this.options.consistent) {
             if (this._needsBraces(node.thenStatement) ||
@@ -108,6 +108,23 @@ class ExtCurlyWalker extends Lint.AbstractWalker<IOptions> {
         this.addFailure(block.statements.pos - 1, block.end, FAIL_MESSAGE_UNNECESSARY, [
             Lint.Replacement.deleteFromTo(block.pos, block.statements.pos),
             Lint.Replacement.deleteFromTo(block.statements.end, block.end),
+        ]);
+    }
+
+    private _reportUnnecessaryThen(node: ts.IfStatement) {
+        const block = <ts.Block>node.thenStatement;
+        let closeBraceFix: Lint.Replacement;
+        if (node.elseStatement !== undefined) {
+            closeBraceFix = Lint.Replacement.deleteFromTo(
+                node.getChildAt(4, this.sourceFile).end - 1,
+                node.getChildAt(5).getStart(this.sourceFile),
+            );
+        } else {
+            closeBraceFix = Lint.Replacement.deleteFromTo(block.statements.end, block.end);
+        }
+        this.addFailure(block.statements.pos - 1, block.end, FAIL_MESSAGE_UNNECESSARY, [
+            Lint.Replacement.deleteFromTo(block.pos, block.statements.pos),
+            closeBraceFix,
         ]);
     }
 }

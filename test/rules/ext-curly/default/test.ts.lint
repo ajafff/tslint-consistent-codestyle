@@ -1,0 +1,45 @@
+for (;;) {}
+for (let foo of bar) ;
+for (let key in obj) {foo();}
+                     ~~~~~~~~ [0]
+while (true) doStuff();
+do {
+    foo();
+    bar();
+} while (true);
+
+if (foo)
+    foo();
+else
+    bar();
+
+if (foo) { foo(); } else {}
+         ~~~~~~~~~~ [0]
+
+if (foo)
+    foo();
+else {
+     ~
+    bar();
+~~~~~~~~~~
+}
+~ [0]
+
+if (foo) {
+         ~
+    foo();
+~~~~~~~~~~
+} else if (bar) {
+~ [0]
+                ~
+    bar();
+~~~~~~~~~~
+} else {
+~ [0]
+       ~
+    baz();
+~~~~~~~~~~
+}
+~ [0]
+
+[0]: unnecessary curly braces

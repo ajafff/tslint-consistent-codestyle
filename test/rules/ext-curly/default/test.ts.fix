@@ -1,0 +1,27 @@
+for (;;) {}
+for (let foo of bar) ;
+for (let key in obj)foo();
+while (true) doStuff();
+do {
+    foo();
+    bar();
+} while (true);
+
+if (foo)
+    foo();
+else
+    bar();
+
+if (foo) foo(); else {}
+
+if (foo)
+    foo();
+else
+    bar();
+
+if (foo)
+    foo();
+else if (bar)
+    bar();
+else
+    baz();

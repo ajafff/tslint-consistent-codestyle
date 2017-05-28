@@ -19,16 +19,16 @@ class CollapsibleIfWalker extends AbstractIfStatementWalker<void> {
             let then = node.thenStatement;
             if (utils.isBlockLike(then) && then.statements.length === 1)
                 then = then.statements[0];
-            if (utils.isIfStatement(then) && then.elseStatement === undefined) {
-                const end = utils.getChildOfKind(then, ts.SyntaxKind.CloseParenToken, this.sourceFile)!.end;
-                this.addFailure(node.getStart(this.sourceFile), end, FAIL_MERGE_IF);
-            }
-        } else if (utils.isBlockLike(node.elseStatement) &&
+            if (utils.isIfStatement(then) && then.elseStatement === undefined)
+                this.addFailure(node.getStart(this.sourceFile), then.thenStatement.pos, FAIL_MERGE_IF);
+        } else if (utils.isBlock(node.elseStatement) &&
                    node.elseStatement.statements.length === 1 &&
                    utils.isIfStatement(node.elseStatement.statements[0])) {
-            const start = utils.getChildOfKind(node, ts.SyntaxKind.ElseKeyword, this.sourceFile)!.getStart(this.sourceFile);
-            const end = utils.getChildOfKind(node.elseStatement.statements[0], ts.SyntaxKind.CloseParenToken, this.sourceFile)!.end;
-            this.addFailure(start, end, FAIL_MERGE_ELSE_IF);
+            this.addFailure(
+                node.elseStatement.pos - 4,
+                (<ts.IfStatement>node.elseStatement.statements[0]).thenStatement.pos,
+                FAIL_MERGE_ELSE_IF,
+            );
         }
     }
 }

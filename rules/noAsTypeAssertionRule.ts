@@ -21,8 +21,7 @@ export class AsExpressionWalker extends Lint.AbstractWalker<void> {
     }
 
     private _reportError(node: ts.AsExpression) {
-        const start = utils.getChildOfKind(node, ts.SyntaxKind.AsKeyword, this.sourceFile)!.getStart(this.sourceFile);
-        this.addFailure(start, node.end, FAIL_MESSAGE, [
+        this.addFailure(node.type.pos - 2, node.end, FAIL_MESSAGE, [
             Lint.Replacement.appendText(getInsertionPosition(node, this.sourceFile), `<${node.type.getText(this.sourceFile)}>`),
             Lint.Replacement.deleteFromTo(node.expression.end, node.end),
         ]);

@@ -54,12 +54,13 @@ class ReturnWalker extends Lint.AbstractWalker<void> {
         ts.forEachChild(sourceFile, cb);
 
         return this._enums.forEach((track) => {
-            if (!track.isConst && track.canBeConst) {
-                for (const occurence of track.occurences) {
-                    const start = occurence.getStart(sourceFile);
-                    this.addFailure(start, occurence.name.end, FAIL_MESSAGE, Lint.Replacement.appendText(start, 'const '));
-                }
-            }
+            if (!track.isConst && track.canBeConst)
+                for (const occurence of track.occurences)
+                    this.addFailure(
+                        occurence.name.pos - 4,
+                        occurence.name.end, FAIL_MESSAGE,
+                        Lint.Replacement.appendText(occurence.name.pos - 4, 'const '),
+                    );
         });
     }
 

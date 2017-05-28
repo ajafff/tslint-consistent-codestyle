@@ -9,6 +9,9 @@ do {
 
 if (foo)
     foo();
+
+if (foo)
+    foo();
 else
     bar();
 

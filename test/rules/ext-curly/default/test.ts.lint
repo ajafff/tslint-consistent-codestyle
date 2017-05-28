@@ -8,6 +8,13 @@ do {
     bar();
 } while (true);
 
+if (foo) {
+         ~
+    foo();
+~~~~~~~~~~
+}
+~ [0]
+
 if (foo)
     foo();
 else

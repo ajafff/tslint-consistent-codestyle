@@ -3,31 +3,49 @@ import * as Lint from 'tslint';
 import * as utils from 'tsutils';
 
 import { isUndefined } from '../src/utils';
-import { AbstractReturnStatementWalker } from '../src/walker';
 
 export class Rule extends Lint.Rules.AbstractRule {
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new ReturnWalker(sourceFile, this.ruleName, undefined));
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class ReturnWalker extends AbstractReturnStatementWalker<void> {
-    protected _checkReturnStatement(node: ts.ReturnStatement) {
-        if (node.expression !== undefined && utils.isIdentifier(node.expression)) {
-            const statement = utils.getPreviousStatement(node);
-            if (statement !== undefined && utils.isVariableStatement(statement)) {
-                const declarations = statement.declarationList.declarations;
-                const lastDeclaration = declarations[declarations.length - 1].name;
-                if (utils.isIdentifier(lastDeclaration)) {
-                    if (lastDeclaration.text !== node.expression.text)
-                        return;
-                } else if (!isSimpleDestructuringForName(lastDeclaration, node.expression.text)) {
-                    return;
+function walk(ctx: Lint.WalkContext<void>) {
+    return ts.forEachChild(ctx.sourceFile, cbNode, cbNodeArray);
+
+    function cbNode(node: ts.Node): void {
+        return ts.forEachChild(node, cbNode, cbNodeArray);
+    }
+
+    function cbNodeArray(nodes: ts.Node[]): void {
+        if (nodes.length === 0)
+            return;
+        ts.forEachChild(nodes[0], cbNode, cbNodeArray);
+        for (let i = 1; i < nodes.length; ++i) {
+            const node = nodes[i];
+            if (utils.isReturnStatement(node)) {
+                if (node.expression === undefined)
+                    continue;
+                if (!utils.isIdentifier(node.expression)) {
+                    ts.forEachChild(node.expression, cbNode, cbNodeArray);
+                    continue;
                 }
-                this.addFailureAtNode(node.expression, `don't declare variable ${node.expression.text} to return it immediately`);
+                const previous = nodes[i - 1];
+                if (utils.isVariableStatement(previous) && declaresVariable(previous, node.expression.text))
+                    ctx.addFailureAtNode(node.expression, `don't declare variable ${node.expression.text} to return it immediately`);
+            } else {
+                ts.forEachChild(node, cbNode, cbNodeArray);
             }
         }
     }
+}
+
+function declaresVariable(statement: ts.VariableStatement, name: string): boolean {
+    const declarations = statement.declarationList.declarations;
+    const lastDeclaration = declarations[declarations.length - 1].name;
+    if (utils.isIdentifier(lastDeclaration))
+        return lastDeclaration.text === name;
+    return isSimpleDestructuringForName(lastDeclaration, name);
 }
 
 function isSimpleDestructuringForName(pattern: ts.BindingPattern, name: string): boolean {

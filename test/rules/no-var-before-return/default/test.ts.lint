@@ -74,13 +74,11 @@ function foo(bar) {
 function foo(bar) {
     let [baz] = bar;
     return baz;
-           ~~~  [fail]
 }
 
 function foo(bar) {
     let [baz = undefined] = bar;
     return baz;
-           ~~~  [fail]
 }
 
 function foo(bar) {
@@ -91,13 +89,11 @@ function foo(bar) {
 function foo(bar) {
     let [[baz], bas] = bar;
     return baz;
-           ~~~  [fail]
 }
 
 function foo(bar) {
     let [{bar: [baz]}] = bar;
     return baz;
-           ~~~  [fail]
 }
 
 function foo(bar) {
@@ -136,7 +132,6 @@ function foo(bar) {
 function foo(bar) {
     let [, ...baz] = bar;
     return baz;
-           ~~~ [fail]
 }
 
 function foo(bar) {
@@ -194,6 +189,33 @@ function foo(bar) {
 function foo(bar) {
     let {[bar()]: baz} = {};
     return baz; // allow this for now
+}
+
+function foo(bar) {
+    let [{...baz}] = bar;
+    return bar;
+}
+
+function foo(bar) {
+    let [[...baz]] = bar;
+    return baz;
+}
+
+function foo(bar) {
+    let {foo: [foo], baz} = bar;
+    return baz;
+           ~~~ [fail]
+}
+
+function foo(bar) {
+    let {foo, [foo]: {baz}} = bar;
+    return baz;
+}
+
+function foo(bar) {
+    let {foo, [foo]: {bas}, baz} = bar;
+    return baz;
+           ~~~ [fail]
 }
 
 function foo(bar) {

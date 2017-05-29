@@ -50,29 +50,63 @@ function declaresVariable(statement: ts.VariableStatement, name: string): boolea
 
 function isSimpleDestructuringForName(pattern: ts.BindingPattern, name: string): boolean {
     const identifiersSeen = new Set<string>();
-    interface IResult {
-        result: boolean;
+    let inArray = 0;
+    let dependsOnVar = 0;
+
+    return recur(pattern) === true;
+
+    function recur(p: ts.BindingPattern): boolean | undefined {
+        if (p.kind === ts.SyntaxKind.ArrayBindingPattern) {
+            ++inArray;
+            for (const element of p.elements) {
+                if (element.kind !== ts.SyntaxKind.OmittedExpression) {
+                    const result = handleBindingElement(element);
+                    if (result !== undefined)
+                        return result;
+                }
+            }
+            --inArray;
+        } else {
+            for (const element of p.elements) {
+                const result = handleBindingElement(element);
+                if (result !== undefined)
+                    return result;
+            }
+        }
     }
-    const result = utils.forEachDestructuringIdentifier(pattern, (element): IResult | undefined => {
+    function handleBindingElement(element: ts.BindingElement): boolean | undefined {
+        if (element.name.kind !== ts.SyntaxKind.Identifier) {
+            if (dependsOnPrevious(element)) {
+                ++dependsOnVar;
+                const result = recur(element.name);
+                --dependsOnVar;
+                return result;
+            }
+            return recur(element.name);
+        }
         if (element.name.text !== name)
             return void identifiersSeen.add(element.name.text);
-        if (element.dotDotDotToken !== undefined &&
-            element.parent!.kind === ts.SyntaxKind.ObjectBindingPattern && element.parent!.elements.length > 1 ||
-            element.initializer !== undefined && !isUndefined(element.initializer))
-            return {result: false};
-
-        const property = element.propertyName;
-        if (property === undefined)
-            return {result: true};
-
-        if (utils.isComputedPropertyName(property)) {
-            if (utils.isIdentifier(property.expression))
-                return {result: !identifiersSeen.has(property.expression.text)};
-            if (utils.isLiteralExpression(property.expression))
-                return {result: true};
-            return {result: false};
+        if (dependsOnVar !== 0)
+            return false;
+        if (element.dotDotDotToken) {
+            if (element.parent!.elements.length > 1)
+                return false;
+            if (inArray > (element.parent!.kind === ts.SyntaxKind.ArrayBindingPattern ? 1 : 0))
+                return false;
+        } else if (inArray !== 0) {
+            return false;
         }
-        return {result: true};
-    });
-    return result !== undefined && result.result;
+        if (element.initializer !== undefined && !isUndefined(element.initializer))
+            return false;
+        return !dependsOnPrevious(element);
+    }
+    function dependsOnPrevious(element: ts.BindingElement): boolean {
+        if (element.propertyName === undefined || element.propertyName.kind !== ts.SyntaxKind.ComputedPropertyName)
+            return false;
+        if (utils.isIdentifier(element.propertyName.expression))
+            return identifiersSeen.has(element.propertyName.expression.text);
+        if (utils.isLiteralExpression(element.propertyName.expression))
+            return false;
+        return true; // TODO implement better check for expressions
+    }
 }

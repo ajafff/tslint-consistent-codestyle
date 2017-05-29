@@ -14,3 +14,8 @@ class Baz {
 class Bas {
     constructor(readonly baz) {}
 }
+
+class Quux {
+    constructor(readonly foo, private bar, public baz, bas) {}
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [don't mix parameter properties with regular parameters]
+}

@@ -85,9 +85,10 @@ class ExtCurlyWalker extends Lint.AbstractWalker<IOptions> {
     }
 
     private _ifStatementNeedsBraces(node: ts.IfStatement, excludeElse?: boolean): [boolean, boolean] {
-        if (this.options.else && (node.elseStatement !== undefined || isElseIf(node)))
+        if (this.options.else) {
+            if (node.elseStatement !== undefined || isElseIf(node))
                 return [true, true];
-        if (this.options.consistent) {
+        } else if (this.options.consistent) {
             if (this._needsBraces(node.thenStatement) ||
                 !excludeElse && node.elseStatement !== undefined && this._needsBraces(node.elseStatement, true))
                 return [true, true];

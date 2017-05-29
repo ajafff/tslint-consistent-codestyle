@@ -56,7 +56,8 @@ function isSimpleDestructuringForName(pattern: ts.BindingPattern, name: string):
     const result = utils.forEachDestructuringIdentifier(pattern, (element): IResult | undefined => {
         if (element.name.text !== name)
             return void identifiersSeen.add(element.name.text);
-        if (element.dotDotDotToken !== undefined ||
+        if (element.dotDotDotToken !== undefined &&
+            element.parent!.kind === ts.SyntaxKind.ObjectBindingPattern && element.parent!.elements.length > 1 ||
             element.initializer !== undefined && !isUndefined(element.initializer))
             return {result: false};
 

@@ -15,7 +15,7 @@ class ReturnWalker extends Lint.AbstractWalker<void> {
         const cb = (node: ts.Node): void => {
             if (utils.isBinaryExpression(node) &&
                 node.operatorToken.kind === ts.SyntaxKind.PercentToken &&
-                utils.isNumericliteral(node.right) &&
+                utils.isNumericLiteral(node.right) &&
                 node.right.text === '2') {
                 // TODO if this is part of a comparison with a negative value, this failure would be a false positive
                 const start = node.operatorToken.getStart(sourceFile);

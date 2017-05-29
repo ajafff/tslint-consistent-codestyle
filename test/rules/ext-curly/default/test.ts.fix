@@ -10,6 +10,14 @@ do
     foo();
 while (true);
 
+while (true)
+    switch (foo) {}
+while (false)
+    switch (foo) {}
+
+if (foo) foo();
+else try { doStuff(); } finally { doMoreStuff(); }
+
 if (foo)
     foo();
 

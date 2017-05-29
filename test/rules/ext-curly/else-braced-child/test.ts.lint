@@ -1,0 +1,13 @@
+while (true)
+    if (foo)
+        foo();
+
+for (;;)
+    if (foo) foo();
+    ~~~~~~~~~~~~~~~
+             ~~~~~~ [1]
+    else bar();
+~~~~~~~~~~~~~~~ [1]
+         ~~~~~~ [1]
+
+[1]: statement must be braced

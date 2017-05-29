@@ -1,0 +1,37 @@
+while (true)
+    switch (foo) {}
+    ~~~~~~~~~~~~~~~ [1]
+while (true) {
+    switch (foo) {}
+}
+
+if (foo)
+    for (;;) {}
+    ~~~~~~~~~~~ [1]
+
+do
+    if (foo)
+    ~~~~~~~~
+        foo();
+~~~~~~~~~~~~~~
+    else {
+~~~~~~~~~~
+        bar();
+~~~~~~~~~~~~~~
+        baz();
+~~~~~~~~~~~~~~
+    }
+~~~~~ [1]
+while (true):
+
+do if (foo) foo(); else bar(); while (true);
+
+if (foo)
+    try { doStuff(); } catch (e) {}
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [1]
+
+if (foo) foo();
+else try { doStuff(); } finally { doMoreStuff(); }
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [1]
+
+[1]: statement must be braced

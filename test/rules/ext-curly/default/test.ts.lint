@@ -14,6 +14,18 @@ do {
 } while (true);
 ~ [0]
 
+while (true)
+    switch (foo) {}
+while (false) {
+              ~
+    switch (foo) {}
+~~~~~~~~~~~~~~~~~~~
+}
+~ [0]
+
+if (foo) foo();
+else try { doStuff(); } finally { doMoreStuff(); }
+
 if (foo) {
          ~
     foo();

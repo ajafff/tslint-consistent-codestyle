@@ -81,7 +81,7 @@ class ExtCurlyWalker extends Lint.AbstractWalker<IOptions> {
         }
         if (isIterationStatement(node))
             return this._needsBraces(node.statement);
-        return node.kind === ts.SyntaxKind.SwitchStatement;
+        return node.kind === ts.SyntaxKind.SwitchStatement || node.kind === ts.SyntaxKind.TryStatement;
     }
 
     private _ifStatementNeedsBraces(node: ts.IfStatement, excludeElse?: boolean): [boolean, boolean] {

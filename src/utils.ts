@@ -6,7 +6,7 @@ export function isUndefined(expression: ts.Expression): boolean {
         expression.kind === ts.SyntaxKind.VoidExpression;
 }
 
-export function isElseIf(node: ts.IfStatement): boolean {
+export function isElseIf(node: ts.IfStatement): node is ts.IfStatement & { parent: ts.IfStatement & { elseStatement: ts.IfStatement } } {
     const parent = node.parent!;
     return utils.isIfStatement(parent) &&
          parent.elseStatement === node;

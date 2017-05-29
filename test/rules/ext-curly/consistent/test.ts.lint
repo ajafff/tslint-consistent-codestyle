@@ -1,0 +1,51 @@
+if (foo) { foo(); }
+         ~~~~~~~~~~ [0]
+if (foo) { foo(); bar(); }
+else bar();
+     ~~~~~~ [1]
+
+if (foo) {}
+else if (bar) bar();
+              ~~~~~~ [1]
+if (foo) {}
+else if (bar) bar();
+              ~~~~~~ [1]
+else baz();
+     ~~~~~~ [1]
+
+if (foo) foo();
+else if (bar) bar();
+else baz();
+
+if (foo) foo();
+         ~~~~~~ [1]
+else if (bar) bar();
+              ~~~~~~ [1]
+else if (baz) baz();
+              ~~~~~~ [1]
+else if (bas) bas();
+              ~~~~~~ [1]
+else {
+    doStuff();
+    doMoreStuff();
+}
+
+if (foo) foo();
+else if (bar) bar();
+else if (baz) baz();
+else if (bas) bas();
+else { doStuff(); }
+     ~~~~~~~~~~~~~~ [0]
+
+if (foo) foo();
+         ~~~~~~ [1]
+else if (bar) bar();
+              ~~~~~~ [1]
+else if (baz) {}
+else if (bas) bas();
+              ~~~~~~ [1]
+else doStuff();
+     ~~~~~~~~~~ [1]
+
+[0]: unnecessary curly braces
+[1]: statement must be braced

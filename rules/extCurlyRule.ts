@@ -76,7 +76,7 @@ class ExtCurlyWalker extends Lint.AbstractWalker<IOptions> {
         if (!this.options.child)
             return false;
         if (isIfStatement(node)) {
-            const result  = this._ifStatementNeedsBraces(node);
+            const result = this._ifStatementNeedsBraces(node);
             return result[0] || result[1];
         }
         if (isIterationStatement(node))
@@ -90,10 +90,12 @@ class ExtCurlyWalker extends Lint.AbstractWalker<IOptions> {
                 return [true, true];
         } else if (this.options.consistent) {
             if (this._needsBraces(node.thenStatement) ||
-                !excludeElse && node.elseStatement !== undefined && this._needsBraces(node.elseStatement, true))
+                !excludeElse && node.elseStatement !== undefined &&
+                (isIfStatement(node.elseStatement)
+                 ? this._ifStatementNeedsBraces(node.elseStatement)[0]
+                 : this._needsBraces(node.elseStatement, true)))
                 return [true, true];
-            const parentIf = getElseIfParent(node);
-            if (parentIf !== undefined && this._ifStatementNeedsBraces(parentIf, true)[0])
+            if (isElseIf(node) && this._ifStatementNeedsBraces(node.parent, true)[0])
                 return [true, true];
         }
         if (node.elseStatement !== undefined) {
@@ -117,16 +119,6 @@ class ExtCurlyWalker extends Lint.AbstractWalker<IOptions> {
             closeFix,
         ]);
     }
-}
-
-function getElseIfParent(node: ts.Node): ts.IfStatement | undefined {
-    let parent = node.parent!;
-    if (parent.kind === ts.SyntaxKind.Block && (<ts.Block>parent).statements.length === 1) {
-        node = parent;
-        parent = node.parent!;
-    }
-    if (parent.kind === ts.SyntaxKind.IfStatement && (<ts.IfStatement>parent).elseStatement === node)
-        return <ts.IfStatement>parent;
 }
 
 function unwrapBlock(node: ts.Statement): ts.Statement {

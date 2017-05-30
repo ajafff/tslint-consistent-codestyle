@@ -43,6 +43,18 @@ Now configure some of the new rules.
 
 # Rules
 
+## ext-curly
+Enforces (not) to use curly braces when necessary. If you only want `"always"` or `"never"`, use the `curly` rule of tslint core instead.
+
+This rule defaults to never allow curly bracen when not necessary. There are several options that let you specify when you want to use curly braces for consistency:
+
+* `"consistent"`: enforces curly braces on *all* branches of an `if-else` when one needs braces.
+* `"else"`: enforces curly braces on all branches of an `if` statement if it contains an else statement. This option is a superset of `"consistent"`.
+* `"braced-child"`: enforces curly braces if the child statement has or needs curly braces. That includes `try...catch`, `switch`, `while` or `for` loops and `if` statements where at least one branch has curly braces.
+* `"nested-if-else"`: enforces curly braces when the nested statement is an `if` statement with an `else` branch.
+
+This rule can automatically fix unnecessary curly braces.
+
 ## naming-convention
 Enforce consistent names for almost everything.
 
@@ -358,8 +370,8 @@ Works like [no-else-after-return](#no-else-after-return) with additional checks.
 > Declaring a variable only to immediately return it is a **bad practice**. Some developers argue that the practice improves code readability, because it enables them to explicitly name what is being returned. However, this variable is an internal implementation detail that is not exposed to the callers of the method. **The method name should be sufficient for callers to know exactly what will be returned.**
 
 This rule checks, if the last variable declared in a variable declaration right before the return statement contains the returned variable.
-Destructuring assignments are also checked because `let {foo} = bar; return foo;` can also be written as `return bar.foo;`.
-But if the destructuring assignment for this variable contains a default value other than `undefined` or `void`, there will be no error.
+Destructuring is also checked because `let {foo} = bar; return foo;` can also be written as `return bar.foo;`.
+If the destructuring of the variable has an initializer other than `void` or `undefined`, there will be no error.
 
 ## object-shorthand-properties-first
 By convention and for better readability, shorthand properties should precede regular property declarations.

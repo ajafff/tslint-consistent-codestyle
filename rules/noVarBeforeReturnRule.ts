@@ -89,9 +89,8 @@ function isSimpleDestructuringForName(pattern: ts.BindingPattern, name: string):
         if (dependsOnVar !== 0)
             return false;
         if (element.dotDotDotToken) {
-            if (element.parent!.elements.length > 1)
-                return false;
-            if (inArray > (element.parent!.kind === ts.SyntaxKind.ArrayBindingPattern ? 1 : 0))
+            if (element.parent!.elements.length > 1 ||
+                inArray > (element.parent!.kind === ts.SyntaxKind.ArrayBindingPattern ? 1 : 0))
                 return false;
         } else if (inArray !== 0) {
             return false;

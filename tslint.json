@@ -129,7 +129,6 @@
     "ext-curly": [
       true,
       "else",
-      "consistent",
       "nested-if-else",
       "braced-child"
     ],

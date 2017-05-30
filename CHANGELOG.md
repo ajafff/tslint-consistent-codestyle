@@ -1,5 +1,12 @@
 # Change Log
 
+## v1.4.0
+**Features:**
+* New rule `ext-curly` to enforce consistent use of curly braces.
+
+**Bugfixes:**
+* `no-var-before-return` now has an exception array destructuring because there could be an iterator being destructured.
+
 ## v1.3.0
 **Features:**
 * This package now contains an empty config that can easily be extended using `"extends": ["tslint-consistent-codestyle"]` in your `tslint.json`

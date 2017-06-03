@@ -1,0 +1,153 @@
+import { isBlock, isCaseOrDefaultClause, isIfStatement } from 'tsutils';
+import * as Lint from 'tslint';
+import * as ts from 'typescript';
+
+export class Rule extends Lint.Rules.AbstractRule {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+        const options = { 'max-length': 2, ...(<Partial<IOptions> | undefined> this.ruleArguments[0]) };
+        return this.applyWithFunction(sourceFile, walk, options);
+    }
+}
+
+function failureString(exit: string): string {
+    return `Remainder of block is inside 'if' statement. Prefer to invert the condition and '${exit}' early.`;
+}
+
+function failureStringSmall(exit: string, branch: 'else' | 'then'): string {
+    return `'${branch}' branch is small; prefer an early '${exit}' to a full if-else.`;
+}
+
+interface IOptions {
+    'max-length': number;
+}
+
+function walk(ctx: Lint.WalkContext<IOptions>): void {
+    const { sourceFile, options: { 'max-length': maxLineLength } } = ctx;
+
+    ts.forEachChild(sourceFile, function cb(node) {
+        if (isIfStatement(node))
+            check(node);
+        ts.forEachChild(node, cb);
+    });
+
+    function check(node: ts.IfStatement): void {
+        const exit = getExit(node);
+        if (exit === undefined)
+            return;
+
+        const { thenStatement, elseStatement } = node;
+        const thenSize = size(thenStatement, sourceFile);
+
+        if (elseStatement === undefined) {
+            if (isLarge(thenSize))
+                fail(failureString(exit));
+            return;
+        }
+
+        // Never fail if there's an `else if`.
+        if (isIfStatement(elseStatement))
+            return;
+
+        const elseSize = size(elseStatement, sourceFile);
+
+        if (isSmall(thenSize) && isLarge(elseSize)) {
+            fail(failureStringSmall(exit, 'then'));
+        } else if (isSmall(elseSize) && isLarge(thenSize)) {
+            fail(failureStringSmall(exit, 'else'));
+        }
+
+        function fail(failure: string) {
+            ctx.addFailureAtNode(Lint.childOfKind(node, ts.SyntaxKind.IfKeyword)!, failure);
+        }
+    }
+
+    function isSmall(size: number): boolean {
+        return size === 1;
+    }
+
+    function isLarge(size: number): boolean {
+        return size > maxLineLength;
+    }
+}
+
+function size(node: ts.Node, sourceFile: ts.SourceFile): number {
+    return isBlock(node)
+        ? node.statements.length === 0 ? 0 : diff(node.statements[0], last(node.statements), sourceFile)
+        : diff(node, node, sourceFile);
+}
+
+function diff(a: ts.Node, b: ts.Node, sourceFile: ts.SourceFile): number {
+    const start = sourceFile.getLineAndCharacterOfPosition(a.getStart()).line;
+    const end = sourceFile.getLineAndCharacterOfPosition(b.getEnd()).line;
+    return end - start + 1;
+}
+
+function getExit(node: ts.IfStatement): string | undefined {
+    const parent = node.parent!;
+    if (isBlock(parent)) {
+        const container = parent.parent!;
+        return isCaseOrDefaultClause(container) && container.statements.length === 1
+            ? getCaseClauseExit(container, parent, node)
+            // Must be the last statement in the block
+            : isLastStatement(node, parent.statements) ? getEarlyExitKind(container) : undefined;
+    }
+    return isCaseOrDefaultClause(parent)
+        ? getCaseClauseExit(parent, parent, node)
+        // This is the only statement in its container, so of course it's the final statement.
+        : getEarlyExitKind(parent);
+}
+
+function getCaseClauseExit(
+    clause: ts.CaseOrDefaultClause,
+    { statements }: ts.CaseOrDefaultClause | ts.Block,
+    node: ts.IfStatement): string | undefined {
+    return last(statements).kind === ts.SyntaxKind.BreakStatement
+        // Must be the last node before the break statement
+        ? isLastStatement(node, statements, statements.length - 2) ? 'break' : undefined
+        // If no 'break' statement, this is a fallthrough, unless we're at the last clause.
+        : last(clause.parent!.clauses) === clause && isLastStatement(node, statements) ? 'break' : undefined;
+}
+
+function getEarlyExitKind({ kind }: ts.Node): string | undefined {
+    switch (kind) {
+        case ts.SyntaxKind.FunctionDeclaration:
+        case ts.SyntaxKind.FunctionExpression:
+        case ts.SyntaxKind.ArrowFunction:
+        case ts.SyntaxKind.MethodDeclaration:
+        case ts.SyntaxKind.Constructor:
+        case ts.SyntaxKind.GetAccessor:
+        case ts.SyntaxKind.SetAccessor:
+            return 'return';
+
+        case ts.SyntaxKind.ForInStatement:
+        case ts.SyntaxKind.ForOfStatement:
+        case ts.SyntaxKind.ForStatement:
+        case ts.SyntaxKind.WhileStatement:
+        case ts.SyntaxKind.DoStatement:
+            return 'continue';
+
+        default:
+            // At any other location, we can't use an early exit.
+            // (TODO: maybe we could, but we would need more control flow information here.)
+            // (Cause clauses handled separately.)
+            return;
+    }
+}
+
+function isLastStatement(ifStatement: ts.IfStatement, statements: ReadonlyArray<ts.Statement>, i: number = statements.length - 1): boolean {
+    while (true) { // tslint:disable-line strict-boolean-expressions (Fixed in tslint 5.3)
+        const statement = statements[i];
+        if (statement === ifStatement)
+            return true;
+        if (statement.kind !== ts.SyntaxKind.FunctionDeclaration)
+            return false;
+        if (i === 0)
+            // ifStatement should have been in statements
+            throw new Error();
+        i--;
+    }
+}
+
+function last<T>(arr: ReadonlyArray<T>): T {
+    return arr[arr.length - 1];
+}

@@ -82,7 +82,7 @@ All formatting rules are optional. Formatting rules are inherited by the `type`'
 
 * `regex: string`: A regular expression, which is applied to the name. (without any regex flags)
 * `leadingUnderscore: string, trailingUnderscore: string`: Options `forbid`, `allow` and `require` can be used to forbid, allow or require _one_ leading or trailing underscore in the name. **If one option is specified, the leading or trailing underscore will be sliced off the name before any further checks are performed.**
-* `prefix: string|string[], suffix: string|string[]`: Specify one or more prefixes or suffixes. When given a single string, that string must match in the specified position. When given an array, one of the strings must match in the specified position. Matching is done in the given order. **If a prefix or suffix is specified, the matching portion of the name is sliced off before any further checks are performed:** If you enforce `camelCase` and a prefix `has`, the name `hasFoo` will not match. That's because the prefix `has` is removed and the remaining `Foo` is not valid `camelCase`  
+* `prefix: string|string[], suffix: string|string[]`: Specify one or more prefixes or suffixes. When given a single string, that string must match in the specified position. When given an array, one of the strings must match in the specified position. Matching is done in the given order. **If a prefix or suffix is specified, the matching portion of the name is sliced off before any further checks are performed:** If you enforce `camelCase` and a prefix `has`, the name `hasFoo` will not match. That's because the prefix `has` is removed and the remaining `Foo` is not valid `camelCase`
 * `format: string|string[]`: Valid options are `camelCase`, `PascalCase`, `UPPER_CASE` and `snake_case`. If an array is given, the name must match one format in that array. If the array is empty, no format check is made.
 
 ### "Inheritance" / Extending configurations:
@@ -277,7 +277,7 @@ Here you see an example of how everything explained above works together. This i
   {"type": "property", "modifiers": ["public", "static", "const"], "format": "UPPER_CASE"},
   // enforce PascalCase for classes, interfaces, enums, etc. Remember, there are still no underscores allowed.
   {"type": "type", "format": "PascalCase"},
-  // abstract classes must have the prefix "Abstract". The following part of the name must be valid PascalCase 
+  // abstract classes must have the prefix "Abstract". The following part of the name must be valid PascalCase
   {"type": "class", "modifiers": "abstract", "prefix": "Abstract"},
   // interface names must start with "I". The following part of the name must be valid PascalCase
   {"type": "interface", "prefix": "I"},
@@ -385,7 +385,7 @@ let foo = {
 };
 ```
 
-Passing: 
+Passing:
 ```javascript
 let foo = {
   bar,
@@ -418,6 +418,65 @@ __Current limitations:__
 ## prefer-while
 A `for`-loop without initializer and incrementer can also be rewritten as `while`-loop. That's what this rule does.
 It can also automatically fix any finding, if you set the `--fix` command line switch for `tslint`.
+
+## early-exit
+
+This recommends to use an early exit instead of a long `if` block.
+This means to `return` early from a function, `continue` early in loop, or `break` early in a switch case.
+
+So instead of:
+
+```ts
+function f() {
+  if (so) {
+    lots;
+    of;
+    code;
+  }
+}
+```
+
+Prefer:
+```ts
+function f() {
+  if (!so) return;
+  lots;
+  of;
+  code;
+}
+```
+
+This rule also warns for if-else blocks where one branch is large and the other is a single line.
+So instead of:
+
+```ts
+for (const x of xs) {
+  if (so) {
+    simple;
+  } else {
+    lots;
+    of;
+    code;
+  }
+}
+```
+
+Prefer:
+
+```ts
+for (const x of xs) {
+  if (so) {
+    simple;
+    continue;
+  }
+
+  lots;
+  of;
+  code;
+}
+```
+
+An options object as in `"early-exit": [true, { "max-length": 4 }}` may be provided to configure what makes a block count as "large". The default is 2 lines.
 
 # Recommendations
 

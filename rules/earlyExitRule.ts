@@ -21,13 +21,13 @@ interface IOptions {
     'max-length': number;
 }
 
-function walk(ctx: Lint.WalkContext<IOptions>): void {
+function walk(ctx: Lint.WalkContext<IOptions>) {
     const { sourceFile, options: { 'max-length': maxLineLength } } = ctx;
 
-    ts.forEachChild(sourceFile, function cb(node) {
+    return ts.forEachChild(sourceFile, function cb(node): void {
         if (isIfStatement(node))
             check(node);
-        ts.forEachChild(node, cb);
+        return ts.forEachChild(node, cb);
     });
 
     function check(node: ts.IfStatement): void {
@@ -45,7 +45,7 @@ function walk(ctx: Lint.WalkContext<IOptions>): void {
         }
 
         // Never fail if there's an `else if`.
-        if (isIfStatement(elseStatement))
+        if (elseStatement.kind === ts.SyntaxKind.IfStatement)
             return;
 
         const elseSize = size(elseStatement, sourceFile);
@@ -57,7 +57,7 @@ function walk(ctx: Lint.WalkContext<IOptions>): void {
         }
 
         function fail(failure: string) {
-            ctx.addFailureAtNode(Lint.childOfKind(node, ts.SyntaxKind.IfKeyword)!, failure);
+            ctx.addFailureAt(node.getStart(sourceFile), 2, failure);
         }
     }
 
@@ -72,14 +72,14 @@ function walk(ctx: Lint.WalkContext<IOptions>): void {
 
 function size(node: ts.Node, sourceFile: ts.SourceFile): number {
     return isBlock(node)
-        ? node.statements.length === 0 ? 0 : diff(node.statements[0], last(node.statements), sourceFile)
-        : diff(node, node, sourceFile);
+        ? node.statements.length === 0 ? 0 : diff(node.statements[0].getStart(sourceFile), node.statements.end, sourceFile)
+        : diff(node.getStart(sourceFile), node.end, sourceFile);
 }
 
-function diff(a: ts.Node, b: ts.Node, sourceFile: ts.SourceFile): number {
-    const start = sourceFile.getLineAndCharacterOfPosition(a.getStart()).line;
-    const end = sourceFile.getLineAndCharacterOfPosition(b.getEnd()).line;
-    return end - start + 1;
+function diff(start: number, end: number, sourceFile: ts.SourceFile): number {
+    return ts.getLineAndCharacterOfPosition(sourceFile, end).line
+        - ts.getLineAndCharacterOfPosition(sourceFile, start).line
+        + 1;
 }
 
 function getExit(node: ts.IfStatement): string | undefined {
@@ -101,11 +101,11 @@ function getCaseClauseExit(
     clause: ts.CaseOrDefaultClause,
     { statements }: ts.CaseOrDefaultClause | ts.Block,
     node: ts.IfStatement): string | undefined {
-    return last(statements).kind === ts.SyntaxKind.BreakStatement
+    return statements[statements.length - 1].kind === ts.SyntaxKind.BreakStatement
         // Must be the last node before the break statement
         ? isLastStatement(node, statements, statements.length - 2) ? 'break' : undefined
         // If no 'break' statement, this is a fallthrough, unless we're at the last clause.
-        : last(clause.parent!.clauses) === clause && isLastStatement(node, statements) ? 'break' : undefined;
+        : clause.parent!.clauses[clause.parent!.clauses.length - 1] === clause && isLastStatement(node, statements) ? 'break' : undefined;
 }
 
 function getEarlyExitKind({ kind }: ts.Node): string | undefined {
@@ -135,7 +135,7 @@ function getEarlyExitKind({ kind }: ts.Node): string | undefined {
 }
 
 function isLastStatement(ifStatement: ts.IfStatement, statements: ReadonlyArray<ts.Statement>, i: number = statements.length - 1): boolean {
-    while (true) { // tslint:disable-line strict-boolean-expressions (Fixed in tslint 5.3)
+    while (true) {
         const statement = statements[i];
         if (statement === ifStatement)
             return true;
@@ -146,8 +146,4 @@ function isLastStatement(ifStatement: ts.IfStatement, statements: ReadonlyArray<
             throw new Error();
         i--;
     }
-}
-
-function last<T>(arr: ReadonlyArray<T>): T {
-    return arr[arr.length - 1];
 }

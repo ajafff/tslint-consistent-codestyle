@@ -153,6 +153,7 @@
       "allow-void-expression"
     ],
     "no-unnecessary-else": true,
+    "no-unused": true,
     "no-var-before-return": true,
     "object-shorthand-properties-first": true,
     "parameter-properties": [

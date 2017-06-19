@@ -1,0 +1,9 @@
+export {};
+let foo = 1;
+    ~~~ [Variable 'foo' is only written and never read.]
+let baz = 1;
+    ~~~ [Variable 'baz' is only written and never read.]
+for (let i;; ++i) {
+    foo++;
+    console.log(baz = i);
+}

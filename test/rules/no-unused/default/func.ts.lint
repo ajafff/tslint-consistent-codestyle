@@ -1,0 +1,24 @@
+function func1(x: number, y: number) {
+    return x + y;
+}
+
+var func2 = () => {
+    ~~~~~           [Variable 'func2' is unused.]
+    //
+};
+
+function func3() {
+         ~~~~~     [Function 'func3' is unused.]
+    return func1(1, 2);
+}
+
+export function func4() {
+    return func1(2, 3);
+}
+
+declare function func5(): any;
+                 ~~~~~ [Function 'func5' is unused.]
+
+export default function () {
+    return 0;
+}

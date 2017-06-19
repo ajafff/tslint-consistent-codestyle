@@ -1,0 +1,16 @@
+interface Foo {}
+          ~~~ [Interface 'Foo' is unused.]
+class Foo {}
+
+export let foo = new Foo();
+
+interface Bar {}
+class Bar {}
+
+export let bar: Bar;
+
+interface Baz {}
+namespace Baz {}
+          ~~~ [Namespace 'Foo' is unused.]
+
+export let baz: Baz;

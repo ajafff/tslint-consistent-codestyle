@@ -7,18 +7,21 @@ var func2 = () => {
     //
 };
 
-function func3() {
+function func3({x, y}) {
          ~~~~~     [Function 'func3' is unused.]
-    return func1(1, 2);
+                   ~ [Variable 'y' is unused.]
+    return func1(x, 2);
 }
 
-export function func4() {
-    return func1(2, 3);
+export function func4(x, y) {
+                      ~ [Parameter 'x' is unused.]
+    return func1(y, 3);
 }
 
 declare function func5(): any;
                  ~~~~~ [Function 'func5' is unused.]
 
-export default function () {
+export default function (x, y = x) {
+                            ~ [Parameter 'y' is unused.]
     return 0;
 }

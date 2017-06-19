@@ -88,7 +88,6 @@ function isExcluded(variable: VariableInfo, sourceFile: ts.SourceFile): boolean 
                         return true;
                     break;
                 case ts.SyntaxKind.NamespaceImport:
-                case ts.SyntaxKind.NamedImports:
                 case ts.SyntaxKind.ImportSpecifier:
                 case ts.SyntaxKind.ImportClause:
                     return true;
@@ -115,7 +114,6 @@ function showKind(node: ts.Identifier): string {
             return 'Interface';
         case ts.SyntaxKind.ImportClause:
         case ts.SyntaxKind.NamespaceImport:
-        case ts.SyntaxKind.NamedImports:
         case ts.SyntaxKind.ImportSpecifier:
         case ts.SyntaxKind.ImportEqualsDeclaration:
             return 'Import';

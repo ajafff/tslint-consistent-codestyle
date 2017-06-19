@@ -25,6 +25,7 @@ class UnusedWalker extends Lint.AbstractWalker<void> {
             uses = filterWriteOnly(uses);
             if (uses.length === 0)
                 return this.addFailureAtNode(identifier, `${showKind(identifier)} '${identifier.text}' is only written and never read.`);
+            // TODO handle variables (references to functions) only used inside of their initializer
             // TODO error for classes / functions only used inside of their body
             // TODO error for classes / functions only used mutually recursive
         });
@@ -89,6 +90,7 @@ function isExcluded(variable: VariableInfo, sourceFile: ts.SourceFile): boolean 
                 case ts.SyntaxKind.NamespaceImport:
                 case ts.SyntaxKind.NamedImports:
                 case ts.SyntaxKind.ImportSpecifier:
+                case ts.SyntaxKind.ImportClause:
                     return true;
             }
         }
@@ -111,6 +113,7 @@ function showKind(node: ts.Identifier): string {
             return 'Class';
         case ts.SyntaxKind.InterfaceDeclaration:
             return 'Interface';
+        case ts.SyntaxKind.ImportClause:
         case ts.SyntaxKind.NamespaceImport:
         case ts.SyntaxKind.NamedImports:
         case ts.SyntaxKind.ImportSpecifier:

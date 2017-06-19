@@ -52,3 +52,6 @@ myFunc(bar);
 
 import a from "a";
 export { a };
+
+let foo, bar;
+export {foo, bar as baz};

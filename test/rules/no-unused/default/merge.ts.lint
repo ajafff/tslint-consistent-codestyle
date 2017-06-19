@@ -11,6 +11,35 @@ export let bar: Bar;
 
 interface Baz {}
 namespace Baz {}
-          ~~~ [Namespace 'Foo' is unused.]
+          ~~~ [Namespace 'Baz' is unused.]
 
 export let baz: Baz;
+
+interface Bas {
+          ~~~ [Interface 'Bas' is unused.]
+    T: any;
+}
+class Bas {
+      ~~~ [Class 'Bas' is unused.]
+    static T: any;
+}
+namespace Bas {
+    export type T = any;
+}
+
+export let bas: Bas.T;
+
+interface Moar {}
+          ~~~~ [Interface 'Moar' is unused.]
+class Moar {}
+namespace Moar {}
+          ~~~~ [Namespace 'Moar' is unused.]
+
+export class EvenMoreMoar extends Moar {}
+
+interface Base {}
+class Base {}
+namespace Base {}
+          ~~~~ [Namespace 'Base' is unused.]
+
+export interface Extended extends Base {}

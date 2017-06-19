@@ -2,5 +2,8 @@
     "rulesDirectory": "../../../../rules",
     "rules":{
         "no-unused": true
+    },
+    "jsRules":{
+        "no-unused": true
     }
 }

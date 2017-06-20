@@ -2,7 +2,7 @@ import * as ts from 'typescript';
 import * as Lint from 'tslint';
 import {
     isParameterDeclaration, isParameterProperty, isFunctionWithBody, isFunctionExpression, isExpressionValueUsed,
-    getDeclarationDomain, collectVariableUsage, VariableInfo, VariableUse, DeclarationDomain, UsageDomain,
+    collectVariableUsage, VariableInfo, VariableUse, UsageDomain,
 } from 'tsutils';
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -19,7 +19,7 @@ class UnusedWalker extends Lint.AbstractWalker<void> {
         usage.forEach((variableInfo, identifier) => {
             if (isExcluded(variableInfo, sourceFile))
                 return;
-            let uses = getUsesByDomain(variableInfo.uses, getDeclarationDomain(identifier)!);
+            let uses = variableInfo.uses;
             if (uses.length === 0)
                 return this.addFailureAtNode(identifier, `${showKind(identifier)} '${identifier.text}' is unused.`);
             uses = filterWriteOnly(uses);
@@ -30,14 +30,6 @@ class UnusedWalker extends Lint.AbstractWalker<void> {
             // TODO error for classes / functions only used mutually recursive
         });
     }
-}
-
-function getUsesByDomain(uses: VariableUse[], domain: DeclarationDomain): VariableUse[] {
-    const result = [];
-    for (const use of uses)
-        if (use.domain & domain)
-            result.push(use);
-    return result;
 }
 
 function filterWriteOnly(uses: VariableUse[]): VariableUse[] {

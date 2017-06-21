@@ -26,6 +26,6 @@ export default function (x, y = x) {
     return 0;
 }
 
-(function foo() {});
+(function foo<foo>(): foo {});
           ~~~ [Function 'foo' is unused.]
-(function foo() {})();
+(function foo<foo>(): foo {})();

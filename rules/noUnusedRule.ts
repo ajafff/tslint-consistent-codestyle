@@ -23,8 +23,8 @@ interface IOptions {
 }
 
 enum ExpressionKind {
-    Function = 'function',
-    Class = 'class',
+    Function = 'Function',
+    Class = 'Class',
 }
 
 class UnusedWalker extends Lint.AbstractWalker<IOptions> {
@@ -68,7 +68,7 @@ class UnusedWalker extends Lint.AbstractWalker<IOptions> {
     private _failNamedExpression(identifier: ts.Identifier, kind: ExpressionKind) {
         this.addFailureAtNode(
             identifier,
-            `${ExpressionKind[kind]} '${identifier.text}' is never used by its name. Convert it to an anonymous ${kind} expression.`,
+            `${kind} '${identifier.text}' is never used by its name. Convert it to an anonymous ${kind.toLocaleLowerCase()} expression.`,
             Lint.Replacement.deleteFromTo(identifier.pos, identifier.end),
         );
     }

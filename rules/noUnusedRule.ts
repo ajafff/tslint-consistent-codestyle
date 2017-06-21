@@ -52,6 +52,7 @@ class UnusedWalker extends Lint.AbstractWalker<IOptions> {
             // TODO handle variables (references to functions) only used inside of their initializer
             // TODO error for classes / functions only used inside of their body
             // TODO error for classes / functions only used mutually recursive
+            // TODO handle JSDoc references in JS files
         });
     }
 
@@ -102,7 +103,7 @@ function isExcluded(variable: VariableInfo, sourceFile: ts.SourceFile): boolean 
             parent.kind === ts.SyntaxKind.TypeParameter && parent.parent!.kind === ts.SyntaxKind.MappedType)
             return true;
         // exclude imports in TypeScript files, because is may be used implicitly by the declaration emitter
-        if (/\.tsx?$/.test(sourceFile.fileName) && !sourceFile.fileName.endsWith('.d.ts')) {
+        if (/\.tsx?$/.test(sourceFile.fileName) && !sourceFile.isDeclarationFile) {
             switch (parent.kind) {
                 case ts.SyntaxKind.ImportEqualsDeclaration:
                     if ((<ts.ImportEqualsDeclaration>parent).moduleReference.kind === ts.SyntaxKind.ExternalModuleReference)

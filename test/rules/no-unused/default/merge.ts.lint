@@ -6,6 +6,7 @@ export let foo = new Foo();
 
 interface Bar {}
 class Bar {}
+enum Bar {}
 
 export let bar: Bar;
 
@@ -18,6 +19,9 @@ export let baz: Baz;
 interface Bas {
           ~~~ [Interface 'Bas' is unused.]
     T: any;
+}
+enum Bas {
+    T,
 }
 class Bas {
       ~~~ [Class 'Bas' is unused.]
@@ -43,3 +47,15 @@ namespace Base {}
           ~~~~ [Namespace 'Base' is unused.]
 
 export interface Extended extends Base {}
+
+type T = object;
+     ~ [TypeAlias 'T' is unused.]
+namespace T {
+    export type V = any;
+}
+export let t: T.V;
+
+enum E {}
+     ~ [Enum 'E' is unused.]
+namespace E {}
+          ~ [Namespace 'E' is unused.]

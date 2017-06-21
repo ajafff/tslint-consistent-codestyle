@@ -4,7 +4,7 @@ import * as ts from 'typescript';
 
 export class Rule extends Lint.Rules.AbstractRule {
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const options = { 'max-length': 2, ...(<Partial<IOptions> | undefined> this.ruleArguments[0]) };
+        const options = { 'max-length': 2, ...this.ruleArguments[0] };
         return this.applyWithFunction(sourceFile, walk, options);
     }
 }

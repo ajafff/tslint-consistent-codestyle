@@ -57,9 +57,14 @@ let foo, bar;
 export {foo, bar as baz};
 
 (class T<T> {
-       ~ [Class 'T' is unused.]
     foo(): T {}
 });
 new (class T<T> {
+    foo(): T {}
+})();
+(class T {
+    foo(): T {}
+});
+new (class T {
     foo(): T {}
 })();

@@ -22,7 +22,7 @@ interface IOptions {
     classExpressionName: boolean;
 }
 
-enum ExpressionKind {
+const enum ExpressionKind {
     Function = 'Function',
     Class = 'Class',
 }
@@ -34,8 +34,18 @@ class UnusedWalker extends Lint.AbstractWalker<IOptions> {
             if (isExcluded(variableInfo, sourceFile))
                 return;
             let uses = variableInfo.uses;
+            switch (identifier.parent!.kind) {
+                case ts.SyntaxKind.FunctionExpression:
+                    if (uses.length === 0 && this.options.functionExpressionName)
+                        this._failNamedExpression(identifier, ExpressionKind.Function);
+                    return;
+                case ts.SyntaxKind.ClassExpression:
+                    if (uses.length === 0 && this.options.classExpressionName)
+                        this._failNamedExpression(identifier, ExpressionKind.Class);
+                    return;
+            }
             if (uses.length === 0)
-                return this._failUnused(identifier);
+                return this.addFailureAtNode(identifier, `${showKind(identifier)} '${identifier.text}' is unused.`);
             uses = filterWriteOnly(uses);
             if (uses.length === 0)
                 return this.addFailureAtNode(identifier, `${showKind(identifier)} '${identifier.text}' is only written and never read.`);
@@ -43,26 +53,6 @@ class UnusedWalker extends Lint.AbstractWalker<IOptions> {
             // TODO error for classes / functions only used inside of their body
             // TODO error for classes / functions only used mutually recursive
         });
-    }
-
-    private _failUnused(identifier: ts.Identifier) {
-        switch (identifier.parent!.kind) {
-            case ts.SyntaxKind.FunctionExpression:
-                if (isExpressionValueUsed(<ts.FunctionExpression>identifier.parent)) {
-                    if (this.options.functionExpressionName)
-                        this._failNamedExpression(identifier, ExpressionKind.Function);
-                    return;
-                }
-                break;
-            case ts.SyntaxKind.ClassExpression:
-                if (isExpressionValueUsed(<ts.ClassExpression>identifier.parent)) {
-                    if (this.options.classExpressionName)
-                        this._failNamedExpression(identifier, ExpressionKind.Class);
-                    return;
-                }
-                break;
-        }
-        this.addFailureAtNode(identifier, `${showKind(identifier)} '${identifier.text}' is unused.`);
     }
 
     private _failNamedExpression(identifier: ts.Identifier, kind: ExpressionKind) {
@@ -136,10 +126,8 @@ function showKind(node: ts.Identifier): string {
         case ts.SyntaxKind.Parameter:
             return 'Parameter';
         case ts.SyntaxKind.FunctionDeclaration:
-        case ts.SyntaxKind.FunctionExpression:
             return 'Function';
         case ts.SyntaxKind.ClassDeclaration:
-        case ts.SyntaxKind.ClassExpression:
             return 'Class';
         case ts.SyntaxKind.InterfaceDeclaration:
             return 'Interface';

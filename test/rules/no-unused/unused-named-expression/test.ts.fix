@@ -1,5 +1,15 @@
-(function foo() {});
+(function() {});
 (function() {})();
 
-(class Unused {});
+(function foo(): typeof foo {});
+(function foo(): typeof foo {})();
+
+(class {});
 new (class {})();
+
+(class Unused {
+    foo(): Unused {}
+});
+new (class Unused {
+    foo(): Unused {}
+})();

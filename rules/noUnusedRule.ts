@@ -65,9 +65,9 @@ function isExcluded(variable: VariableInfo, sourceFile: ts.SourceFile): boolean 
             }
         }
         if (isParameterDeclaration(parent) &&
-            (isParameterProperty(parent) || !isFunctionWithBody(parent.parent!)))
-            return true;
-        if (parent.kind === ts.SyntaxKind.VariableDeclaration && parent.parent!.kind === ts.SyntaxKind.CatchClause)
+            (isParameterProperty(parent) || !isFunctionWithBody(parent.parent!)) ||
+            parent.kind === ts.SyntaxKind.VariableDeclaration && parent.parent!.kind === ts.SyntaxKind.CatchClause ||
+            parent.kind === ts.SyntaxKind.TypeParameter && parent.parent!.kind === ts.SyntaxKind.MappedType)
             return true;
         // don't show any error on function expressions whose name is unused
         if (isFunctionExpression(parent) && isExpressionValueUsed(parent))

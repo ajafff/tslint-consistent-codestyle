@@ -25,3 +25,7 @@ export default function (x, y = x) {
                             ~ [Parameter 'y' is unused.]
     return 0;
 }
+
+(function foo() {});
+          ~~~ [Function 'foo' is unused.]
+(function foo() {})();

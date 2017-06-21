@@ -55,3 +55,6 @@ export { a };
 
 let foo, bar;
 export {foo, bar as baz};
+
+(class Unused {});
+       ~~~~~~ [Class 'Unused' is unused.]

@@ -1,27 +1,41 @@
 import * as ts from 'typescript';
 import * as Lint from 'tslint';
 import {
-    isParameterDeclaration, isParameterProperty, isFunctionWithBody, isFunctionExpression, isExpressionValueUsed,
+    isParameterDeclaration, isParameterProperty, isFunctionWithBody, isExpressionValueUsed,
     collectVariableUsage, VariableInfo, VariableUse, UsageDomain,
 } from 'tsutils';
 
+const OPTION_FUNCTION_EXPRESSION_NAME = 'unused-function-expression-name';
+const OPTION_CLASS_EXPRESSION_NAME = 'unused-class-expression-name';
+
 export class Rule extends Lint.Rules.AbstractRule {
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new UnusedWalker(sourceFile, this.ruleName, undefined));
+        return this.applyWithWalker(new UnusedWalker(sourceFile, this.ruleName, {
+            functionExpressionName: this.ruleArguments.indexOf(OPTION_FUNCTION_EXPRESSION_NAME) !== -1,
+            classExpressionName: this.ruleArguments.indexOf(OPTION_CLASS_EXPRESSION_NAME) !== -1,
+        }));
     }
 }
 
-class UnusedWalker extends Lint.AbstractWalker<void> {
+interface IOptions {
+    functionExpressionName: boolean;
+    classExpressionName: boolean;
+}
+
+enum ExpressionKind {
+    Function = 'function',
+    Class = 'class',
+}
+
+class UnusedWalker extends Lint.AbstractWalker<IOptions> {
     public walk(sourceFile: ts.SourceFile) {
-        if (sourceFile.isDeclarationFile)
-            return;
         const usage = collectVariableUsage(sourceFile);
         usage.forEach((variableInfo, identifier) => {
             if (isExcluded(variableInfo, sourceFile))
                 return;
             let uses = variableInfo.uses;
             if (uses.length === 0)
-                return this.addFailureAtNode(identifier, `${showKind(identifier)} '${identifier.text}' is unused.`);
+                return this._failUnused(identifier);
             uses = filterWriteOnly(uses);
             if (uses.length === 0)
                 return this.addFailureAtNode(identifier, `${showKind(identifier)} '${identifier.text}' is only written and never read.`);
@@ -29,6 +43,34 @@ class UnusedWalker extends Lint.AbstractWalker<void> {
             // TODO error for classes / functions only used inside of their body
             // TODO error for classes / functions only used mutually recursive
         });
+    }
+
+    private _failUnused(identifier: ts.Identifier) {
+        switch (identifier.parent!.kind) {
+            case ts.SyntaxKind.FunctionExpression:
+                if (isExpressionValueUsed(<ts.FunctionExpression>identifier.parent)) {
+                    if (this.options.functionExpressionName)
+                        this._failNamedExpression(identifier, ExpressionKind.Function);
+                    return;
+                }
+                break;
+            case ts.SyntaxKind.ClassExpression:
+                if (isExpressionValueUsed(<ts.ClassExpression>identifier.parent)) {
+                    if (this.options.classExpressionName)
+                        this._failNamedExpression(identifier, ExpressionKind.Class);
+                    return;
+                }
+                break;
+        }
+        this.addFailureAtNode(identifier, `${showKind(identifier)} '${identifier.text}' is unused.`);
+    }
+
+    private _failNamedExpression(identifier: ts.Identifier, kind: ExpressionKind) {
+        this.addFailureAtNode(
+            identifier,
+            `${ExpressionKind[kind]} '${identifier.text}' is never used by its name. Convert it to an anonymous ${kind} expression.`,
+            Lint.Replacement.deleteFromTo(identifier.pos, identifier.end),
+        );
     }
 }
 
@@ -69,11 +111,8 @@ function isExcluded(variable: VariableInfo, sourceFile: ts.SourceFile): boolean 
             parent.kind === ts.SyntaxKind.VariableDeclaration && parent.parent!.kind === ts.SyntaxKind.CatchClause ||
             parent.kind === ts.SyntaxKind.TypeParameter && parent.parent!.kind === ts.SyntaxKind.MappedType)
             return true;
-        // don't show any error on function expressions whose name is unused
-        if (isFunctionExpression(parent) && isExpressionValueUsed(parent))
-            return true;
         // exclude imports in TypeScript files, because is may be used implicitly by the declaration emitter
-        if (/.tsx?$/.test(sourceFile.fileName)) {
+        if (/\.tsx?$/.test(sourceFile.fileName) && !sourceFile.fileName.endsWith('.d.ts')) {
             switch (parent.kind) {
                 case ts.SyntaxKind.ImportEqualsDeclaration:
                     if ((<ts.ImportEqualsDeclaration>parent).moduleReference.kind === ts.SyntaxKind.ExternalModuleReference)

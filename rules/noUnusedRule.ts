@@ -2,7 +2,7 @@ import * as ts from 'typescript';
 import * as Lint from 'tslint';
 import {
     isParameterDeclaration, isParameterProperty, isFunctionWithBody, isExpressionValueUsed,
-    collectVariableUsage, VariableInfo, VariableUse, UsageDomain,
+    collectVariableUsage, VariableInfo, VariableUse, UsageDomain, isAssignmentKind,
 } from 'tsutils';
 
 const OPTION_FUNCTION_EXPRESSION_NAME = 'unused-function-expression-name';
@@ -46,13 +46,15 @@ class UnusedWalker extends Lint.AbstractWalker<IOptions> {
             }
             if (uses.length === 0)
                 return this.addFailureAtNode(identifier, `${showKind(identifier)} '${identifier.text}' is unused.`);
-            uses = filterWriteOnly(uses);
+            uses = filterWriteOnly(uses, identifier);
             if (uses.length === 0)
                 return this.addFailureAtNode(identifier, `${showKind(identifier)} '${identifier.text}' is only written and never read.`);
+            // TODO handle declare namespace
             // TODO handle variables (references to functions) only used inside of their initializer
             // TODO error for classes / functions only used inside of their body
             // TODO error for classes / functions only used mutually recursive
             // TODO handle JSDoc references in JS files
+            // TODO handle if (!foo) foo = 1;
         });
     }
 
@@ -65,13 +67,49 @@ class UnusedWalker extends Lint.AbstractWalker<IOptions> {
     }
 }
 
-function filterWriteOnly(uses: VariableUse[]): VariableUse[] {
-    // TODO handle foo = foo + 1;
+function filterWriteOnly(uses: VariableUse[], identifier: ts.Identifier): VariableUse[] {
     const result = [];
     for (const use of uses)
-        if (use.domain & UsageDomain.Type || isExpressionValueUsed(use.location))
+        if (use.domain & UsageDomain.Type || isExpressionValueUsed(use.location) && !isUpdate(use.location, identifier))
             result.push(use);
     return result;
+}
+
+// handle foo = foo + 1;
+function isUpdate(use: ts.Expression, identifier: ts.Identifier): boolean {
+    while (true) {
+        const parent = use.parent!;
+        switch (parent.kind) {
+            case ts.SyntaxKind.ParenthesizedExpression:
+            case ts.SyntaxKind.NonNullExpression:
+            case ts.SyntaxKind.TypeAssertionExpression:
+            case ts.SyntaxKind.AsExpression:
+            case ts.SyntaxKind.PrefixUnaryExpression:
+            case ts.SyntaxKind.PostfixUnaryExpression:
+            case ts.SyntaxKind.TypeOfExpression:
+            case ts.SyntaxKind.ConditionalExpression:
+            case ts.SyntaxKind.SpreadElement:
+            case ts.SyntaxKind.SpreadAssignment:
+            case ts.SyntaxKind.ObjectLiteralExpression:
+            case ts.SyntaxKind.ArrayLiteralExpression:
+                use = <ts.Expression>parent;
+                break;
+            case ts.SyntaxKind.PropertyAssignment:
+            case ts.SyntaxKind.ShorthandPropertyAssignment:
+            case ts.SyntaxKind.TemplateSpan:
+                use = <ts.Expression>parent.parent;
+                break;
+            case ts.SyntaxKind.BinaryExpression:
+                if (isAssignmentKind((<ts.BinaryExpression>parent).operatorToken.kind))
+                    return (<ts.BinaryExpression>parent).right === use &&
+                        (<ts.BinaryExpression>parent).left.kind === ts.SyntaxKind.Identifier &&
+                        (<ts.Identifier>(<ts.BinaryExpression>parent).left).text === identifier.text;
+                use = <ts.Expression>parent;
+                break;
+            default:
+                return false;
+        }
+    }
 }
 
 function isExcluded(variable: VariableInfo, sourceFile: ts.SourceFile): boolean {

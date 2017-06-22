@@ -7,3 +7,40 @@ for (let i;; ++i) {
     foo++;
     console.log(baz = i);
 }
+let bar = 1;
+    ~~~ [Variable 'bar' is only written and never read.]
+bar = bar + 1;
+bar = -(bar!);
+bar = 1 + bar;
+
+let a = "moar";
+
+let bas = ".";
+    ~~~ [Variable 'bas' is only written and never read.]
+bas += bas;
+bas = "a" + bas + "b";
+bas = a + bas;
+bas = `?${bas + "moar"}!`;
+bas = {prop: bas, bas};
+bas = {...(bas)};
+
+let obj = {foo: 1};
+obj.foo = obj.foo + 1;
+
+let b = true;
+    ~ [Variable 'b' is only written and never read.]
+for (let i = 0; i < 5; ++i)
+    b = !b;
+b = b && confirm("foo");
+b = b === false;
+
+let someVar = someFunc();
+    ~~~~~~~ [Variable 'someVar' is only written and never read.]
+someVar = someVar instanceof Object ? a : someVar || null
+someVar = someVar && a;
+
+let result = "";
+    ~~~~~~ [Variable 'result' is only written and never read.]
+let x = 0;
+while (true)
+    result = `${x+=1}`;

@@ -12,7 +12,9 @@
 
       "files.exclude": {
          "**/*.js": { "when": "$(basename).ts"},
-         "**/.git": true
+         "**/.git": true,
+	 "**/coverage": true,
+	 "**/.nyc_output": true
       },
 	// The folders to exclude when doing a full text search in the workspace.
 	"search.exclude": {
@@ -22,7 +24,9 @@
                 "bin": true,
 		"build": true,
                 "lib": true,
-		"node_modules": true
+		"node_modules": true,
+		"coverage": true,
+		".nyc_output": true
 	},
 
 	// Always use project's provided typescript compiler version

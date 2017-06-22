@@ -2,7 +2,7 @@ import * as ts from 'typescript';
 import * as Lint from 'tslint';
 import {
     isParameterDeclaration, isParameterProperty, isFunctionWithBody, isExpressionValueUsed,
-    collectVariableUsage, VariableInfo, VariableUse, UsageDomain, isAssignmentKind,
+    collectVariableUsage, VariableInfo, VariableUse, UsageDomain, isAssignmentKind, hasModifier,
 } from 'tsutils';
 
 const OPTION_FUNCTION_EXPRESSION_NAME = 'unused-function-expression-name';
@@ -135,10 +135,10 @@ function isExcluded(variable: VariableInfo, sourceFile: ts.SourceFile): boolean 
                         return true;
             }
         }
-        if (isParameterDeclaration(parent) &&
-            (isParameterProperty(parent) || !isFunctionWithBody(parent.parent!)) ||
+        if (isParameterDeclaration(parent) && (isParameterProperty(parent) || !isFunctionWithBody(parent.parent!)) ||
             parent.kind === ts.SyntaxKind.VariableDeclaration && parent.parent!.kind === ts.SyntaxKind.CatchClause ||
-            parent.kind === ts.SyntaxKind.TypeParameter && parent.parent!.kind === ts.SyntaxKind.MappedType)
+            parent.kind === ts.SyntaxKind.TypeParameter && parent.parent!.kind === ts.SyntaxKind.MappedType ||
+            parent.kind === ts.SyntaxKind.TypeParameter && typeParameterMayBeRequired(<ts.TypeParameterDeclaration>parent))
             return true;
         // exclude imports in TypeScript files, because is may be used implicitly by the declaration emitter
         if (/\.tsx?$/.test(sourceFile.fileName) && !sourceFile.isDeclarationFile) {
@@ -155,6 +155,38 @@ function isExcluded(variable: VariableInfo, sourceFile: ts.SourceFile): boolean 
         }
     }
     return false;
+}
+
+function typeParameterMayBeRequired(parameter: ts.TypeParameterDeclaration): boolean {
+    // TODO use variable usage data to determine if namespace/class/interface is exported
+    let parent: ts.Node = parameter.parent!;
+    switch (parent.kind) {
+        default:
+            return false;
+        case ts.SyntaxKind.InterfaceDeclaration:
+        case ts.SyntaxKind.ClassDeclaration:
+            if (!hasModifier(parent.modifiers, ts.SyntaxKind.ExportKeyword))
+                return parent.parent!.kind === ts.SyntaxKind.SourceFile && !ts.isExternalModule(<ts.SourceFile>parent);
+    }
+    parent = parent.parent!;
+    while (true) {
+        switch (parent.kind) {
+            case ts.SyntaxKind.SourceFile:
+                return !ts.isExternalModule(<ts.SourceFile>parent);
+            case ts.SyntaxKind.ModuleBlock:
+                parent = parent.parent!;
+                break;
+            case ts.SyntaxKind.ModuleDeclaration:
+                if ((parent.flags & ts.NodeFlags.NestedNamespace) === 0 &&
+                    !hasModifier(parent.modifiers, ts.SyntaxKind.ExportKeyword) &&
+                    parent.parent!.kind !== ts.SyntaxKind.SourceFile)
+                    return false;
+                parent = parent.parent!;
+                break;
+            default:
+                return false;
+        }
+    }
 }
 
 function showKind(node: ts.Identifier): string {

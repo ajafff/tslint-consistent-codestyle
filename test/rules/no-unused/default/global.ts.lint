@@ -12,3 +12,25 @@ enum Test {
     foo,
     bar,
 }
+
+interface I<T> {}
+
+class C<T> {}
+
+namespace Foo.Bar {
+    export namespace Baz {
+        class LocalC<T> {}
+              ~~~~~~ [Class 'LocalC' is unused.]
+                     ~ [TypeParameter 'T' is unused.]
+        export interface ExportI<T> {}
+        {
+            export class Nested<T> {}
+                                ~ [TypeParameter 'T' is unused.]
+        }
+    }
+    namespace Nested {
+              ~~~~~~ [Namespace 'Nested' is unused.]
+        export interface ExportI<T> {}
+                                 ~ [TypeParameter 'T' is unused.]
+    }
+}

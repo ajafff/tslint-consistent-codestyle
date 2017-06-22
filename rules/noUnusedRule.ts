@@ -31,7 +31,7 @@ class UnusedWalker extends Lint.AbstractWalker<IOptions> {
     public walk(sourceFile: ts.SourceFile) {
         const usage = collectVariableUsage(sourceFile);
         usage.forEach((variableInfo, identifier) => {
-            if (isExcluded(variableInfo, sourceFile))
+            if (isExcluded(variableInfo, sourceFile, usage))
                 return;
             let uses = variableInfo.uses;
             switch (identifier.parent!.kind) {
@@ -54,7 +54,6 @@ class UnusedWalker extends Lint.AbstractWalker<IOptions> {
             // TODO error for classes / functions only used inside of their body
             // TODO error for classes / functions only used mutually recursive
             // TODO handle JSDoc references in JS files
-            // TODO handle if (!foo) foo = 1;
         });
     }
 
@@ -112,7 +111,7 @@ function isUpdate(use: ts.Expression, identifier: ts.Identifier): boolean {
     }
 }
 
-function isExcluded(variable: VariableInfo, sourceFile: ts.SourceFile): boolean {
+function isExcluded(variable: VariableInfo, sourceFile: ts.SourceFile, usage: Map<ts.Identifier, VariableInfo>): boolean {
     if (variable.exported || variable.inGlobalScope)
         return true;
     for (const declaration of variable.declarations) {
@@ -138,7 +137,7 @@ function isExcluded(variable: VariableInfo, sourceFile: ts.SourceFile): boolean 
         if (isParameterDeclaration(parent) && (isParameterProperty(parent) || !isFunctionWithBody(parent.parent!)) ||
             parent.kind === ts.SyntaxKind.VariableDeclaration && parent.parent!.kind === ts.SyntaxKind.CatchClause ||
             parent.kind === ts.SyntaxKind.TypeParameter && parent.parent!.kind === ts.SyntaxKind.MappedType ||
-            parent.kind === ts.SyntaxKind.TypeParameter && typeParameterMayBeRequired(<ts.TypeParameterDeclaration>parent))
+            parent.kind === ts.SyntaxKind.TypeParameter && typeParameterMayBeRequired(<ts.TypeParameterDeclaration>parent, usage))
             return true;
         // exclude imports in TypeScript files, because is may be used implicitly by the declaration emitter
         if (/\.tsx?$/.test(sourceFile.fileName) && !sourceFile.isDeclarationFile) {
@@ -157,7 +156,7 @@ function isExcluded(variable: VariableInfo, sourceFile: ts.SourceFile): boolean 
     return false;
 }
 
-function typeParameterMayBeRequired(parameter: ts.TypeParameterDeclaration): boolean {
+function typeParameterMayBeRequired(parameter: ts.TypeParameterDeclaration, usage: Map<ts.Identifier, VariableInfo>): boolean {
     // TODO use variable usage data to determine if namespace/class/interface is exported
     let parent: ts.Node = parameter.parent!;
     switch (parent.kind) {
@@ -165,6 +164,8 @@ function typeParameterMayBeRequired(parameter: ts.TypeParameterDeclaration): boo
             return false;
         case ts.SyntaxKind.InterfaceDeclaration:
         case ts.SyntaxKind.ClassDeclaration:
+            if (typeParameterIsUsed(parameter, usage))
+                return true;
             if (!hasModifier(parent.modifiers, ts.SyntaxKind.ExportKeyword))
                 return parent.parent!.kind === ts.SyntaxKind.SourceFile && !ts.isExternalModule(<ts.SourceFile>parent);
     }
@@ -187,6 +188,30 @@ function typeParameterMayBeRequired(parameter: ts.TypeParameterDeclaration): boo
                 return false;
         }
     }
+}
+
+/** Check if TypeParameter is used in any of the merged declarations. */
+function typeParameterIsUsed(parameter: ts.TypeParameterDeclaration, usage: Map<ts.Identifier, VariableInfo>): boolean {
+    if (usage.get(parameter.name)!.uses.length !== 0)
+        return true;
+    const parent = parameter.parent!;
+    if (parent.name === undefined)
+        return false;
+    const index = parent.typeParameters!.indexOf(parameter);
+    for (const declaration of usage.get(<ts.Identifier>parent.name)!.declarations) {
+        const declarationParent = <ts.DeclarationWithTypeParameters>declaration.parent;
+        if (declarationParent === parent)
+            continue;
+        switch (declarationParent.kind) {
+            case ts.SyntaxKind.ClassDeclaration:
+            case ts.SyntaxKind.InterfaceDeclaration:
+                if (declarationParent.typeParameters !== undefined &&
+                    declarationParent.typeParameters.length > index &&
+                    usage.get(declarationParent.typeParameters[index].name)!.uses.length !== 0)
+                    return true;
+        }
+    }
+    return false;
 }
 
 function showKind(node: ts.Identifier): string {

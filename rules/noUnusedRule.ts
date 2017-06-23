@@ -2,7 +2,7 @@ import * as ts from 'typescript';
 import * as Lint from 'tslint';
 import {
     isParameterDeclaration, isParameterProperty, isFunctionWithBody, isExpressionValueUsed,
-    collectVariableUsage, VariableInfo, VariableUse, UsageDomain, isAssignmentKind, hasModifier,
+    collectVariableUsage, VariableInfo, VariableUse, UsageDomain, isAssignmentKind,
 } from 'tsutils';
 
 const OPTION_FUNCTION_EXPRESSION_NAME = 'unused-function-expression-name';
@@ -157,7 +157,6 @@ function isExcluded(variable: VariableInfo, sourceFile: ts.SourceFile, usage: Ma
 }
 
 function typeParameterMayBeRequired(parameter: ts.TypeParameterDeclaration, usage: Map<ts.Identifier, VariableInfo>): boolean {
-    // TODO use variable usage data to determine if namespace/class/interface is exported
     let parent: ts.Node = parameter.parent!;
     switch (parent.kind) {
         default:
@@ -166,22 +165,24 @@ function typeParameterMayBeRequired(parameter: ts.TypeParameterDeclaration, usag
         case ts.SyntaxKind.ClassDeclaration:
             if (typeParameterIsUsed(parameter, usage))
                 return true;
-            if (!hasModifier(parent.modifiers, ts.SyntaxKind.ExportKeyword))
-                return parent.parent!.kind === ts.SyntaxKind.SourceFile && !ts.isExternalModule(<ts.SourceFile>parent);
+            if ((<ts.NamedDeclaration>parent).name === undefined)
+                return false;
+            const variable = usage.get(<ts.Identifier>(<ts.NamedDeclaration>parent).name)!;
+            if (!variable.exported)
+                return variable.inGlobalScope;
     }
     parent = parent.parent!;
     while (true) {
         switch (parent.kind) {
-            case ts.SyntaxKind.SourceFile:
-                return !ts.isExternalModule(<ts.SourceFile>parent);
             case ts.SyntaxKind.ModuleBlock:
                 parent = parent.parent!;
                 break;
             case ts.SyntaxKind.ModuleDeclaration:
-                if ((parent.flags & ts.NodeFlags.NestedNamespace) === 0 &&
-                    !hasModifier(parent.modifiers, ts.SyntaxKind.ExportKeyword) &&
-                    parent.parent!.kind !== ts.SyntaxKind.SourceFile)
-                    return false;
+                if ((<ts.ModuleDeclaration>parent).name.kind !== ts.SyntaxKind.Identifier)
+                    return true;
+                const variable = usage.get(<ts.Identifier>(<ts.ModuleDeclaration>parent).name)!;
+                if (!variable.exported)
+                    return variable.inGlobalScope;
                 parent = parent.parent!;
                 break;
             default:

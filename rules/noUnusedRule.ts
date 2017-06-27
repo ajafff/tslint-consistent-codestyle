@@ -7,12 +7,16 @@ import {
 
 const OPTION_FUNCTION_EXPRESSION_NAME = 'unused-function-expression-name';
 const OPTION_CLASS_EXPRESSION_NAME = 'unused-class-expression-name';
+const OPTION_IGNORE_PARAMETERS = 'ignore-parameters';
+const OPTION_IGNORE_IMPORTS = 'ignore-imports';
 
 export class Rule extends Lint.Rules.AbstractRule {
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new UnusedWalker(sourceFile, this.ruleName, {
             functionExpressionName: this.ruleArguments.indexOf(OPTION_FUNCTION_EXPRESSION_NAME) !== -1,
             classExpressionName: this.ruleArguments.indexOf(OPTION_CLASS_EXPRESSION_NAME) !== -1,
+            ignoreParameters: this.ruleArguments.indexOf(OPTION_IGNORE_PARAMETERS) !== -1,
+            ignoreImports: this.ruleArguments.indexOf(OPTION_IGNORE_IMPORTS) !== -1,
         }));
     }
 }
@@ -20,6 +24,8 @@ export class Rule extends Lint.Rules.AbstractRule {
 interface IOptions {
     functionExpressionName: boolean;
     classExpressionName: boolean;
+    ignoreParameters: boolean;
+    ignoreImports: boolean;
 }
 
 const enum ExpressionKind {
@@ -31,7 +37,7 @@ class UnusedWalker extends Lint.AbstractWalker<IOptions> {
     public walk(sourceFile: ts.SourceFile) {
         const usage = collectVariableUsage(sourceFile);
         usage.forEach((variableInfo, identifier) => {
-            if (isExcluded(variableInfo, sourceFile, usage))
+            if (isExcluded(variableInfo, sourceFile, usage, this.options))
                 return;
             let uses = variableInfo.uses;
             switch (identifier.parent!.kind) {
@@ -111,7 +117,7 @@ function isUpdate(use: ts.Expression, identifier: ts.Identifier): boolean {
     }
 }
 
-function isExcluded(variable: VariableInfo, sourceFile: ts.SourceFile, usage: Map<ts.Identifier, VariableInfo>): boolean {
+function isExcluded(variable: VariableInfo, sourceFile: ts.SourceFile, usage: Map<ts.Identifier, VariableInfo>, opts: IOptions): boolean {
     if (variable.exported || variable.inGlobalScope)
         return true;
     for (const declaration of variable.declarations) {
@@ -134,13 +140,14 @@ function isExcluded(variable: VariableInfo, sourceFile: ts.SourceFile, usage: Ma
                         return true;
             }
         }
-        if (isParameterDeclaration(parent) && (isParameterProperty(parent) || !isFunctionWithBody(parent.parent!)) ||
+        if (isParameterDeclaration(parent) &&
+                (opts.ignoreParameters || isParameterProperty(parent) || !isFunctionWithBody(parent.parent!)) ||
             parent.kind === ts.SyntaxKind.VariableDeclaration && parent.parent!.kind === ts.SyntaxKind.CatchClause ||
             parent.kind === ts.SyntaxKind.TypeParameter && parent.parent!.kind === ts.SyntaxKind.MappedType ||
             parent.kind === ts.SyntaxKind.TypeParameter && typeParameterMayBeRequired(<ts.TypeParameterDeclaration>parent, usage))
             return true;
         // exclude imports in TypeScript files, because is may be used implicitly by the declaration emitter
-        if (/\.tsx?$/.test(sourceFile.fileName) && !sourceFile.isDeclarationFile) {
+        if (/\.tsx?$/.test(sourceFile.fileName) && !sourceFile.isDeclarationFile && opts.ignoreImports) {
             switch (parent.kind) {
                 case ts.SyntaxKind.ImportEqualsDeclaration:
                     if ((<ts.ImportEqualsDeclaration>parent).moduleReference.kind === ts.SyntaxKind.ExternalModuleReference)

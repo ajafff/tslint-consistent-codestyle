@@ -62,8 +62,6 @@ class UnusedWalker extends Lint.AbstractWalker<IOptions> {
                     `${showKind(identifier)} '${identifier.text}' is only ${filtered ? 'written or ' : ''}used inside of its declaration.`,
                 );
             // TODO handle declare namespace
-            // TODO handle variables (references to functions) only used inside of their initializer
-            // TODO error for classes / functions only used inside of their body
             // TODO error for classes / functions only used mutually recursive
             // TODO handle JSDoc references in JS files
         });
@@ -82,7 +80,8 @@ function filterUsesInDeclaration(uses: VariableUse[], declarations: ts.Identifie
     const result = [];
     outer: for (const use of uses) {
         for (const declaration of declarations)
-            if (use.location.pos > declaration.parent!.pos && use.location.end < declaration.parent!.end)
+            if (declaration.parent!.kind !== ts.SyntaxKind.VariableDeclaration &&
+                use.location.pos > declaration.parent!.pos && use.location.end < declaration.parent!.end)
                 continue outer;
         result.push(use);
     }

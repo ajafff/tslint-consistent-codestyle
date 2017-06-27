@@ -20,8 +20,6 @@ function cb(node): void {
 }
 
 let fn = (i) => fn(i + 1);
-    ~~ [Variable 'fn' is only written or used inside of its declaration.] 
-fn = () => {};
 
 function self(): typeof self {
          ~~~~ [Function 'self' is only used inside of its declaration.]

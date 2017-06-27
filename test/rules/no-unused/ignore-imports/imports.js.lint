@@ -3,8 +3,3 @@ import * as ts from 'typescript';
 import storageHelper, {removeItem as remove} from 'storage-helper';
        ~~~~~~~~~~~~~ [Import 'storageHelper' is unused.]
                                      ~~~~~~ [Import 'remove' is unused.]
-
-import Foo = Bar.Foo;
-       ~~~ [Import 'Foo' is unused.]
-import fs = require('fs');
-       ~~ [Import 'fs' is unused.]

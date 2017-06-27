@@ -1,0 +1,29 @@
+export {};
+class Foo {
+      ~~~ [Class 'Foo' is only used inside of its declaration.]
+    getFoo(): Foo {
+        return this;
+    }
+}
+class Foo {
+      ~~~ [Class 'Foo' is only used inside of its declaration.]
+    private _foo: Foo;
+
+    storeFoo(foo: Foo) {
+        this._foo = foo;
+    }
+}
+
+function cb(node): void {
+         ~~ [Function 'cb' is only used inside of its declaration.]
+    return ts.forEachChild(node, cb);
+}
+
+let fn = (i) => fn(i + 1);
+    ~~ [Variable 'fn' is only written or used inside of its declaration.] 
+fn = () => {};
+
+function self(): typeof self {
+         ~~~~ [Function 'self' is only used inside of its declaration.]
+    return self;
+}

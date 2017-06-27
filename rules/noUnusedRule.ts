@@ -36,25 +36,31 @@ const enum ExpressionKind {
 class UnusedWalker extends Lint.AbstractWalker<IOptions> {
     public walk(sourceFile: ts.SourceFile) {
         const usage = collectVariableUsage(sourceFile);
-        usage.forEach((variableInfo, identifier) => {
-            if (isExcluded(variableInfo, sourceFile, usage, this.options))
+        usage.forEach((variable, identifier) => {
+            if (isExcluded(variable, sourceFile, usage, this.options))
                 return;
-            let uses = variableInfo.uses;
             switch (identifier.parent!.kind) {
                 case ts.SyntaxKind.FunctionExpression:
-                    if (uses.length === 0 && this.options.functionExpressionName)
+                    if (variable.uses.length === 0 && this.options.functionExpressionName)
                         this._failNamedExpression(identifier, ExpressionKind.Function);
                     return;
                 case ts.SyntaxKind.ClassExpression:
-                    if (uses.length === 0 && this.options.classExpressionName)
+                    if (variable.uses.length === 0 && this.options.classExpressionName)
                         this._failNamedExpression(identifier, ExpressionKind.Class);
                     return;
             }
-            if (uses.length === 0)
+            if (variable.uses.length === 0)
                 return this.addFailureAtNode(identifier, `${showKind(identifier)} '${identifier.text}' is unused.`);
-            uses = filterWriteOnly(uses, identifier);
+            let uses = filterWriteOnly(variable.uses, identifier);
             if (uses.length === 0)
                 return this.addFailureAtNode(identifier, `${showKind(identifier)} '${identifier.text}' is only written and never read.`);
+            const filtered = uses.length !== variable.uses.length;
+            uses = filterUsesInDeclaration(uses, variable.declarations);
+            if (uses.length === 0)
+                return this.addFailureAtNode(
+                    identifier,
+                    `${showKind(identifier)} '${identifier.text}' is only ${filtered ? 'written or ' : ''}used inside of its declaration.`,
+                );
             // TODO handle declare namespace
             // TODO handle variables (references to functions) only used inside of their initializer
             // TODO error for classes / functions only used inside of their body
@@ -72,10 +78,22 @@ class UnusedWalker extends Lint.AbstractWalker<IOptions> {
     }
 }
 
+function filterUsesInDeclaration(uses: VariableUse[], declarations: ts.Identifier[]): VariableUse[] {
+    const result = [];
+    outer: for (const use of uses) {
+        for (const declaration of declarations)
+            if (use.location.pos > declaration.parent!.pos && use.location.end < declaration.parent!.end)
+                continue outer;
+        result.push(use);
+    }
+    return result;
+}
+
 function filterWriteOnly(uses: VariableUse[], identifier: ts.Identifier): VariableUse[] {
     const result = [];
     for (const use of uses)
-        if (use.domain & UsageDomain.Type || isExpressionValueUsed(use.location) && !isUpdate(use.location, identifier))
+        if (use.domain & (UsageDomain.Type | UsageDomain.TypeQuery) ||
+            isExpressionValueUsed(use.location) && !isUpdate(use.location, identifier))
             result.push(use);
     return result;
 }

@@ -1,0 +1,6 @@
+import * as ts from 'typescript';
+import storageHelper, {removeItem as remove} from 'storage-helper';
+
+import Foo = Bar.Foo;
+       ~~~ [Import 'Foo' is unused.]
+import fs = require('fs');

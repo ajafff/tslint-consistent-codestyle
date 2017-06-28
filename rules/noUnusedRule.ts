@@ -61,7 +61,6 @@ class UnusedWalker extends Lint.AbstractWalker<IOptions> {
                     identifier,
                     `${showKind(identifier)} '${identifier.text}' is only ${filtered ? 'written or ' : ''}used inside of its declaration.`,
                 );
-            // TODO handle declare namespace
             // TODO error for classes / functions only used mutually recursive
             // TODO handle JSDoc references in JS files
         });
@@ -79,13 +78,43 @@ class UnusedWalker extends Lint.AbstractWalker<IOptions> {
 function filterUsesInDeclaration(uses: VariableUse[], declarations: ts.Identifier[]): VariableUse[] {
     const result = [];
     outer: for (const use of uses) {
-        for (const declaration of declarations)
-            if (declaration.parent!.kind !== ts.SyntaxKind.VariableDeclaration &&
-                use.location.pos > declaration.parent!.pos && use.location.end < declaration.parent!.end)
+        for (const declaration of declarations) {
+            const parent = declaration.parent!;
+            if (use.location.pos > parent.pos && use.location.pos < parent.end &&
+                (parent.kind !== ts.SyntaxKind.VariableDeclaration ||
+                 initializerHasNoSideEffect(<ts.VariableDeclaration>parent, use.location)))
                 continue outer;
+
+        }
         result.push(use);
     }
     return result;
+}
+
+function initializerHasNoSideEffect(declaration: ts.VariableDeclaration, use: ts.Identifier): boolean {
+    if (declaration.initializer === undefined)
+        return true;
+    const enum Result {
+        HasSideEffect = 1,
+        NoSideEffect = 2,
+    }
+    return (function cb(node: ts.Expression): Result | undefined {
+        if (node.pos > use.pos)
+            return Result.NoSideEffect;
+        if (node.end <= use.pos)
+            return;
+        switch (node.kind) {
+            case ts.SyntaxKind.CallExpression:
+            case ts.SyntaxKind.NewExpression:
+            case ts.SyntaxKind.TaggedTemplateExpression:
+                return Result.HasSideEffect;
+            case ts.SyntaxKind.ArrowFunction:
+            case ts.SyntaxKind.FunctionExpression:
+            case ts.SyntaxKind.ClassExpression:
+                return Result.NoSideEffect;
+        }
+        return ts.forEachChild(node, cb);
+    })(declaration.initializer) !== Result.HasSideEffect;
 }
 
 function filterWriteOnly(uses: VariableUse[], identifier: ts.Identifier): VariableUse[] {

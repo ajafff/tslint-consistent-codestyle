@@ -4,7 +4,6 @@
     "module": "commonjs",
     "removeComments": true,
     "inlineSourceMap": true,
-    "preserveConstEnums": true,
     "noImplicitAny": true,
     "noImplicitThis": true,
     "suppressImplicitAnyIndexErrors": true,

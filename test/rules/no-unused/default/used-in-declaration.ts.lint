@@ -13,6 +13,16 @@ class Foo {
         this._foo = foo;
     }
 }
+class Foo {
+      ~~~ [Class 'Foo' is only used inside of its declaration.]
+    static createFoo(): Foo {
+        return new Foo();
+    }
+
+    foo(foo: Foo) {
+        foo.storeFoo(Foo.createFoo())
+    }
+}
 
 function cb(node): void {
          ~~ [Function 'cb' is only used inside of its declaration.]

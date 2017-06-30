@@ -55,6 +55,7 @@ Rule | Description
 [no-return-undefined](https://github.com/ajafff/tslint-consistent-codestyle/blob/master/docs/no-return-undefined.md) | Just `return;` instead of `return undefined;`.
 [no-static-this](https://github.com/ajafff/tslint-consistent-codestyle/blob/master/docs/no-static-this.md) | Ban the use of `this` in static methods.
 [no-unnecessary-else](https://github.com/ajafff/tslint-consistent-codestyle/blob/master/docs/no-unnecesary-else.md) | Like `no-else-after-return` but better.
+[no-unused](https://github.com/ajafff/tslint-consistent-codestyle/blob/master/docs/no-unused.md) | Find dead code and unused declarations.
 [no-var-before-return](https://github.com/ajafff/tslint-consistent-codestyle/blob/master/docs/no-var-before-return.md) | Checks if the returned variable is declared right before the `return` statement.
 [object-shorthand-properties-first](https://github.com/ajafff/tslint-consistent-codestyle/blob/master/docs/object-shorthand-properties-first.md) | Shorthand properties should precede regular properties.
 [parameter-properties](https://github.com/ajafff/tslint-consistent-codestyle/blob/master/docs/parameter-properties.md) | Configure how and where to declare parameter properties.

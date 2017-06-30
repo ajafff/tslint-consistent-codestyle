@@ -1,5 +1,10 @@
 # Change Log
 
+## v1.5.0
+**Features:**
+* :sparkles: New rule [`no-unused`](https://github.com/ajafff/tslint-consistent-codestyle/blob/master/docs/no-unused.md) to find dead code and unused declarations.
+* New rule [`early-exit`](https://github.com/ajafff/tslint-consistent-codestyle/blob/master/docs/early-exit.md) recommends to use an early exit instead of a long `if` block. Big thanks to @andy-hanson for this great contribution.
+
 ## v1.4.0
 **Features:**
 * New rule `ext-curly` to enforce consistent use of curly braces.

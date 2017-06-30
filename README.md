@@ -6,6 +6,8 @@
 
 # Purpose
 
+[![Join the chat at https://gitter.im/ajafff/tslint-consistent-codestyle](https://badges.gitter.im/ajafff/tslint-consistent-codestyle.svg)](https://gitter.im/ajafff/tslint-consistent-codestyle?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 The rules in this package can be used to enforce consistent code style.
 
 # Usage

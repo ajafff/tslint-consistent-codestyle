@@ -1,0 +1,60 @@
+interface Foo {}
+          ~~~ [Interface 'Foo' is unused.]
+class Foo {}
+
+export let foo = new Foo();
+
+interface Bar {}
+class Bar {}
+enum Bar {}
+
+export let bar: Bar;
+
+interface Baz {}
+namespace Baz {}
+          ~~~ [Namespace 'Baz' is unused.]
+
+export let baz: Baz;
+
+interface Bas {
+          ~~~ [Interface 'Bas' is unused.]
+    T: any;
+}
+enum Bas {
+    T,
+}
+class Bas {
+      ~~~ [Class 'Bas' is unused.]
+    static T: any;
+}
+namespace Bas {
+    export type T = any;
+}
+
+export let bas: Bas.T;
+
+interface Moar {}
+          ~~~~ [Interface 'Moar' is unused.]
+class Moar {}
+namespace Moar {}
+
+export class EvenMoreMoar extends Moar {}
+
+interface Base {}
+class Base {}
+namespace Base {}
+          ~~~~ [Namespace 'Base' is unused.]
+
+export interface Extended extends Base {}
+
+type T = object;
+     ~ [TypeAlias 'T' is unused.]
+namespace T {
+    export type V = any;
+}
+export let t: T.V;
+
+enum E {}
+     ~ [Enum 'E' is unused.]
+namespace E {}
+          ~ [Namespace 'E' is unused.]

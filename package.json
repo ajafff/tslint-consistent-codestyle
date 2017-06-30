@@ -30,16 +30,17 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "tsutils": "^2.2.0"
+    "tsutils": "^2.5.0"
   },
   "devDependencies": {
     "coveralls": "^2.13.0",
     "nyc": "^10.2.0",
     "tslint": "^5.3.2",
-    "typescript": "^2.3.0"
+    "tsutils": "^2.5.0",
+    "typescript": "^2.4.1"
   },
   "peerDependencies": {
     "tslint": "^5.0.0",
-    "typescript": "^2.1.4 || >=2.1.0-dev || >=2.2.0-dev || >=2.3.0-dev || >= 2.4.0-dev"
+    "typescript": "^2.1.4 || >=2.1.0-dev || >=2.2.0-dev || >=2.3.0-dev || >= 2.4.0-dev || >= 2.5.0 || >= 2.6.0"
   }
 }

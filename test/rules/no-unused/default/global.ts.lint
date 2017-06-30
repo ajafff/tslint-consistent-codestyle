@@ -1,0 +1,64 @@
+let foo = 1;
+var bar = null;
+function fn(){}
+{
+    let foo = 1;
+        ~~~ [Variable 'foo' is unused.]
+    var baz = {};
+    class Clazz {}
+          ~~~~~ [Class 'Clazz' is unused.]
+}
+enum Test {
+    foo,
+    bar,
+}
+
+interface I<T> {}
+
+class C<T> {}
+
+namespace Foo.Bar {
+    export namespace Baz {
+        class LocalC<T> {}
+              ~~~~~~ [Class 'LocalC' is unused.]
+                     ~ [TypeParameter 'T' is unused.]
+        export interface ExportI<T> {}
+        {
+            export class Nested<T> {}
+                                ~ [TypeParameter 'T' is unused.]
+        }
+    }
+    namespace Nested {
+              ~~~~~~ [Namespace 'Nested' is unused.]
+        export interface ExportI<T> {}
+                                 ~ [TypeParameter 'T' is unused.]
+    }
+
+    namespace Another {
+              ~~~~~~~ [Namespace 'Another' is unused.]
+        interface F<T> {}
+                  ~ [Interface 'F' is unused.]
+                    ~ [TypeParameter 'T' is unused.]
+        class F<U> {}
+              ~ [Class 'F' is unused.]
+                ~ [TypeParameter 'U' is unused.]
+
+        interface P<T> {
+                  ~ [Interface 'P' is unused.]
+            foo: T;
+        }
+        class P<U> {}
+              ~ [Class 'P' is unused.]
+
+        export interface P2<T, U, V> {
+            foo: T,
+            bar: U,
+        }
+    }
+    namespace Another {
+              ~~~~~~~ [Namespace 'Another' is unused.]
+        export class P2<X, Y, Z> {
+            baz(param: Z): Z {return param;}
+        }
+    }
+}

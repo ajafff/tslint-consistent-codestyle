@@ -1,0 +1,6 @@
+{
+    "rulesDirectory": "../../../../rules",
+    "rules":{
+        "no-unused": [true, "unused-function-expression-name", "unused-class-expression-name"]
+    }
+}

@@ -1,0 +1,5 @@
+import * as ts from 'typescript';
+            ~~ [Import 'ts' is unused.]
+import storageHelper, {removeItem as remove} from 'storage-helper';
+       ~~~~~~~~~~~~~ [Import 'storageHelper' is unused.]
+                                     ~~~~~~ [Import 'remove' is unused.]

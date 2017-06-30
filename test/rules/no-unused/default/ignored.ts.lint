@@ -1,0 +1,45 @@
+function _fn(_param, {_destructured}) {
+         ~~~ [Function '_fn' is unused.]
+                      ~~~~~~~~~~~~~ [Variable '_destructured' is unused.]
+}
+let {a: _a, ...rest} = {} as any;
+let {b: _b, c} = {} as any;
+        ~~ [Variable '_b' is unused.]
+export = c;
+let [_c, ...d] = [] as any;
+     ~~ [Variable '_c' is unused.]
+let {..._e} = rest;
+        ~~ [Variable '_e' is unused.]
+
+let _i = 0;
+    ~~ [Variable '_i' is only written and never read.]
+for (const _key in rest)
+    ++_i;
+for (const _ of d)
+    ++_i;
+
+try {
+} catch (e) {
+    // e is unused but that's ok
+}
+
+let some_variable = 1;
+    ~~~~~~~~~~~~~ [Variable 'some_variable' is unused.]
+class _Clazz {
+      ~~~~~~ [Class '_Clazz' is unused.]
+      constructor(private _foo, private bar, protected baz, public bas, readonly moar) {}
+}
+
+export type Foo<T> = {
+    [K in keyof T]: any
+}
+export type Bar<T> = {
+    [K in T]: T
+}
+export type Baz<T> = {
+    [K in keyof T]: T[K]
+}
+export type Bas<T> = {
+                ~ [TypeParameter 'T' is unused.]
+    [K in keyof Object]: K
+}

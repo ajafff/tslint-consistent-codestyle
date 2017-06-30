@@ -1,0 +1,53 @@
+export {};
+class Foo {
+      ~~~ [Class 'Foo' is only used inside of its declaration.]
+    getFoo(): Foo {
+        return this;
+    }
+}
+class Foo {
+      ~~~ [Class 'Foo' is only used inside of its declaration.]
+    private _foo: Foo;
+
+    storeFoo(foo: Foo) {
+        this._foo = foo;
+    }
+}
+class Foo {
+      ~~~ [Class 'Foo' is only used inside of its declaration.]
+    static createFoo(): Foo {
+        return new Foo();
+    }
+
+    foo(foo: Foo) {
+        foo.storeFoo(Foo.createFoo())
+    }
+}
+
+function cb(node): void {
+         ~~ [Function 'cb' is only used inside of its declaration.]
+    return ts.forEachChild(node, cb);
+}
+
+let fn = (i) => fn(i + 1);
+    ~~ [Variable 'fn' is only written or used inside of its declaration.]
+fn = () => {};
+
+function self(): typeof self {
+         ~~~~ [Function 'self' is only used inside of its declaration.]
+    return self;
+}
+
+// should never fail
+let connection = connect(() => {
+    doStuffWithConnection(connection);
+});
+
+let bogus: typeof bogus = 1;
+    ~~~~~ [Variable 'bogus' is only used inside of its declaration.]
+let bogus2: typeof bogus2;
+    ~~~~~~ [Variable 'bogus2' is only used inside of its declaration.]
+
+let func = condition ? () => func(condition) : (param) => func(param);
+    ~~~~ [Variable 'func' is only used inside of its declaration.]
+    

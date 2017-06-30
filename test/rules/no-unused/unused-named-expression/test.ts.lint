@@ -1,0 +1,19 @@
+(function foo() {});
+          ~~~ [Function 'foo' is never used by its name. Convert it to an anonymous function expression.]
+(function foo() {})();
+          ~~~ [Function 'foo' is never used by its name. Convert it to an anonymous function expression.]
+
+(function foo(): typeof foo {});
+(function foo(): typeof foo {})();
+
+(class Unused {});
+       ~~~~~~ [Class 'Unused' is never used by its name. Convert it to an anonymous class expression.]
+new (class Unused {})();
+           ~~~~~~ [Class 'Unused' is never used by its name. Convert it to an anonymous class expression.]
+
+(class Unused {
+    foo(): Unused {}
+});
+new (class Unused {
+    foo(): Unused {}
+})();

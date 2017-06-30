@@ -7,7 +7,7 @@
 			"request": "launch",
 			"program": "${workspaceRoot}/node_modules/.bin/tslint",
 			"stopOnEntry": false,
-			"args": ["--test", "test/rules/no-var-before-return/default"],
+			"args": ["--test", "test/rules/no-unused/default"],
 			"cwd": "${workspaceRoot}",
 			"preLaunchTask": "build",
 			"runtimeExecutable": null,

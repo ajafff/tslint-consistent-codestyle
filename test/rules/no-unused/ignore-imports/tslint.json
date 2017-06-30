@@ -1,0 +1,9 @@
+{
+    "rulesDirectory": "../../../../rules",
+    "rules":{
+        "no-unused": [true, "ignore-imports"]
+    },
+    "jsRules":{
+        "no-unused": [true, "ignore-imports"]
+    }
+}

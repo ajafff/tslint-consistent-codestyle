@@ -1,0 +1,25 @@
+import * as ts from 'typescript';
+            ~~ [Import 'ts' is unused.]
+interface VariableInfo {
+          ~~~~~~~~~~~~ [Interface 'VariableInfo' is unused.]
+    domain: DeclarationDomain;
+}
+export interface VariableUse {
+    domain: UsageDomain;
+}
+declare const enum DeclarationDomain {
+    Namespace = 1,
+    Type = 2,
+    Value = 4,
+    Any = 7,
+}
+export declare const enum UsageDomain {
+    Namespace = 1,
+    Type = 2,
+    Value = 4,
+    ValueOrNamespace = 5,
+    Any = 7,
+    TypeQuery = 8,
+}
+export declare function getUsageDomain(node: any): UsageDomain | undefined;
+export declare function getDeclarationDomain(node: any): DeclarationDomain | undefined;

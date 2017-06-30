@@ -1,0 +1,70 @@
+// case 1
+const fs = require("fs");
+
+namespace Foo {
+          ~~~   [Namespace 'Foo' is unused.]
+    const path = require("path");
+
+    console.log(fs);
+    console.log(path);
+}
+
+// case 2
+class HelloWorld {
+    constructor(public name: string) { }
+    sayHello() {
+        return `Hello, ${this.name}!`;
+    }
+};
+
+let hello = new HelloWorld("TSLint");
+hello.sayHello();
+
+// case 3
+import Bar = whatever.that.Foo;
+
+namespace some.module.blah {
+          ~~~~               [Namespace 'some' is unused.]
+    export class bar {
+        private bar: Bar;
+        constructor() {
+            console.log(this.bar);
+        }
+    }
+}
+
+// case 4
+import DateTimeOpts = Intl.DateTimeFormatOptions;
+
+interface MyDateTimeOpts extends DateTimeOpts {
+    timezoneOffset: number;
+}
+
+let opts: MyDateTimeOpts;
+console.log(opts.timezoneOffset - 1);
+
+import * as myLib from 'a';
+export { myLib };
+
+import foo from 'a';
+const bar = {foo};
+myFunc(bar);
+
+import a from "a";
+export { a };
+
+let foo, bar;
+export {foo, bar as baz};
+
+(class T<T> {
+    foo(): T {}
+});
+new (class T<T> {
+    foo(): T {}
+})();
+(class T {
+    foo(): T {}
+});
+new (class T {
+    foo(): T {}
+})();

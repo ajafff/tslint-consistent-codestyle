@@ -12,6 +12,7 @@
     "strictNullChecks": true,
     "stripInternal": true,
     "lib": ["es6"],
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "importHelpers": true
   }
 }

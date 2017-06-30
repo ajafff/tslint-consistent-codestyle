@@ -2,6 +2,8 @@
 
 Disallows unused imports, variables, functions, classes, type parameters and more. Similar to `tsc`’s `--noUnusedParameters` and `--noUnusedLocals` options and the `tslint` core rule `no-unused-variable`.
 
+Use `no-unused-expression` in addition to this rule to uncover even more dead code.
+
 #### Differences to `--noUnusedParameters` and `--noUnusedLocals`
 
 * Errors can be disabled and don't fail compilation.

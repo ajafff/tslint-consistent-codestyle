@@ -248,11 +248,11 @@ function typeParameterMayBeRequired(parameter: ts.TypeParameterDeclaration, usag
 function typeParameterIsUsed(parameter: ts.TypeParameterDeclaration, usage: Map<ts.Identifier, VariableInfo>): boolean {
     if (usage.get(parameter.name)!.uses.length !== 0)
         return true;
-    const parent = parameter.parent!;
+    const parent = <ts.ClassDeclaration | ts.InterfaceDeclaration>parameter.parent;
     if (parent.name === undefined)
         return false;
     const index = parent.typeParameters!.indexOf(parameter);
-    for (const declaration of usage.get(<ts.Identifier>parent.name)!.declarations) {
+    for (const declaration of usage.get(parent.name)!.declarations) {
         const declarationParent = <ts.DeclarationWithTypeParameters>declaration.parent;
         if (declarationParent === parent)
             continue;

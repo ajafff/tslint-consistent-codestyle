@@ -224,4 +224,21 @@ function foo(bar) {
            ~~~ [fail]
 }
 
+function foo(bar) {
+    var baz = {
+        fn() {console.log(baz);}
+    };
+    return baz;
+}
+
+function foo(bar) {
+    var baz = {
+        doStuff,
+    };
+    return baz;
+    function doStuff() {
+        return baz.doStuff();
+    }
+}
+
 [fail]: don't declare variable baz to return it immediately

@@ -1,131 +1,151 @@
 import * as ts from 'typescript';
 import * as Lint from 'tslint';
-import * as utils from 'tsutils';
-
-const FAIL_MESSAGE = `enum can be declared const`;
+import {
+    collectVariableUsage, hasModifier, VariableUse, getPropertyName, isIdentifier, isPropertyAccessExpression, isElementAccessExpression,
+    isStringLiteral, isBinaryExpression, isAssignmentKind, UsageDomain,
+} from 'tsutils';
 
 export class Rule extends Lint.Rules.AbstractRule {
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new ReturnWalker(sourceFile, this.ruleName, undefined));
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
 interface IEnum {
     name: string;
     isConst: boolean;
-    occurences: ts.EnumDeclaration[];
+    declarations: ts.EnumDeclaration[];
     members: Map<string, boolean>;
     canBeConst: boolean;
+    uses: VariableUse[];
 }
 
-class ReturnWalker extends Lint.AbstractWalker<void> {
-    private _enums = new Map<string, IEnum>();
+interface IDeclaration {
+    track: IEnum;
+    declaration: ts.EnumDeclaration;
+}
 
-    private _getEnumInScope(name: string) {
-        return this._enums.get(name);
-    }
-
-    private _addEnum(node: ts.EnumDeclaration): IEnum {
-        let trackingStructure = this._enums.get(node.name.text);
-        if (trackingStructure === undefined) {
-            trackingStructure = {
-                name: node.name.text,
-                isConst: utils.hasModifier(node.modifiers, ts.SyntaxKind.ConstKeyword),
-                occurences: [],
-                members: new Map<string, boolean>(),
-                canBeConst: true,
-            };
-            this._enums.set(node.name.text, trackingStructure);
-        }
-        trackingStructure.occurences.push(node);
-        return trackingStructure;
-    }
-
-    public walk(sourceFile: ts.SourceFile) {
-        const cb = (node: ts.Node): void => {
-            switch (node.kind) {
-                case ts.SyntaxKind.Identifier:
-                    return this._checkUsage(<ts.Identifier>node);
-                case ts.SyntaxKind.EnumDeclaration:
-                    return this._visitEnumDeclaration(<ts.EnumDeclaration>node);
-            }
-            return ts.forEachChild(node, cb);
-        };
-        ts.forEachChild(sourceFile, cb);
-
-        return this._enums.forEach((track) => {
-            if (!track.isConst && track.canBeConst)
-                for (const occurence of track.occurences)
-                    this.addFailure(
-                        occurence.name.pos - 4,
-                        occurence.name.end, FAIL_MESSAGE,
-                        Lint.Replacement.appendText(occurence.name.pos - 4, 'const '),
-                    );
-        });
-    }
-
-    private _visitEnumDeclaration(node: ts.EnumDeclaration) {
-        const track = this._addEnum(node);
-        for (const member of node.members) {
-            const isConstMember = track.isConst ||
-                    member.initializer === undefined ||
-                    this._isConstInitializer(member.initializer, track.members);
-            track.canBeConst = track.canBeConst && isConstMember;
-            track.members.set(utils.getPropertyName(member.name)!, isConstMember);
-        }
-
-        // ignore exported enums for now
-        track.canBeConst = track.canBeConst && !utils.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword);
-    }
-
-    private _checkUsage(node: ts.Identifier) {
-        const parent = node.parent!;
-        if (parent.kind === ts.SyntaxKind.PropertyAccessExpression ||
-            parent.kind === ts.SyntaxKind.ExportAssignment ||
-            utils.isElementAccessExpression(parent) &&
-            parent.expression === node && parent.argumentExpression !== undefined &&
-            parent.argumentExpression.kind === ts.SyntaxKind.StringLiteral)
+function walk(ctx: Lint.WalkContext<void>) {
+    const seen = new Set<ts.Identifier>();
+    const enums: IEnum[] = [];
+    const declarations: IDeclaration[] = [];
+    const variables = collectVariableUsage(ctx.sourceFile);
+    variables.forEach((variable, identifier) => {
+        if (identifier.parent!.kind !== ts.SyntaxKind.EnumDeclaration || seen.has(identifier))
             return;
-        const track = this._getEnumInScope(node.text);
-        if (track !== undefined)
-            track.canBeConst = false;
-    }
-
-    private _isConstInitializer(initializer: ts.Expression, members: Map<string, boolean>): boolean {
-        let isConst = true;
-        const cb = (current: ts.Expression): void => {
-            if (utils.isIdentifier(current)) {
-                if (!members.get(current.text))
-                    isConst = false;
-                return;
-            }
-            if (utils.isPropertyAccessExpression(current)) {
-                if (utils.isIdentifier(current.expression)) {
-                    const track = this._getEnumInScope(current.expression.text);
-                    if (track !== undefined && track.members.get(current.name.text))
-                        return;
-                }
-                isConst = false;
-            } else if (utils.isElementAccessExpression(current)) {
-                if (utils.isIdentifier(current.expression)) {
-                    const track = this._getEnumInScope(current.expression.text);
-                    if (track !== undefined) {
-                        if (current.argumentExpression !== undefined &&
-                            utils.isStringLiteral(current.argumentExpression)) {
-                            if (track.members.get(current.argumentExpression.text))
-                                return;
-                        } else {
-                            track.canBeConst = false;
-                        }
-                    }
-                }
-                isConst = false;
-            }
-
-            return ts.forEachChild(current, cb);
+        const track: IEnum = {
+            name: identifier.text,
+            isConst: hasModifier(identifier.parent!.modifiers, ts.SyntaxKind.ConstKeyword),
+            declarations: [],
+            members: new Map(),
+            canBeConst: !variable.inGlobalScope && !variable.exported,
+            uses: variable.uses,
         };
-
-        cb(initializer);
-        return isConst;
+        for (const declaration of variable.declarations) {
+            seen.add(declaration);
+            if (declaration.parent!.kind !== ts.SyntaxKind.EnumDeclaration) {
+                // TODO review with ts>=2.5.0, maybe const enum can merge with namespace
+                // https://github.com/Microsoft/TypeScript/issues/16804
+                track.canBeConst = false;
+            } else {
+                track.declarations.push(<ts.EnumDeclaration>declaration.parent);
+                declarations.push({
+                    track,
+                    declaration: <ts.EnumDeclaration>declaration.parent},
+                );
+            }
+        }
+        enums.push(track);
+    });
+    declarations.sort((a, b) => a.declaration.pos - b.declaration.pos);
+    for (const {track, declaration} of declarations) {
+        for (const member of declaration.members) {
+            const isConst = track.isConst ||
+                member.initializer === undefined ||
+                isConstInitializer(member.initializer, track.members, findEnum);
+            track.members.set(getPropertyName(member.name)!, isConst);
+            if (!isConst)
+                track.canBeConst = false;
+        }
     }
+    for (const track of enums) {
+        if (track.isConst || !track.canBeConst || !onlyConstUses(track))
+            continue;
+        for (const declaration of track.declarations)
+            ctx.addFailure(
+                declaration.name.pos - 4,
+                declaration.name.end,
+                `Enum '${track.name}' can be a 'const enum'.`,
+                Lint.Replacement.appendText(declaration.name.pos - 4, 'const '),
+            );
+    }
+
+    function findEnum(name: ts.Identifier): IEnum | undefined {
+        for (const track of enums) {
+            if (track.name !== name.text)
+                continue;
+            for (const use of track.uses)
+                if (use.location === name)
+                    return track;
+        }
+    }
+}
+
+function onlyConstUses(track: IEnum): boolean {
+    for (const use of track.uses) {
+        if (use.domain & UsageDomain.Type || use.domain === UsageDomain.Namespace)
+            continue;
+        if (use.domain & UsageDomain.TypeQuery)
+            return false;
+        const parent = use.location.parent!;
+        switch (parent.kind) {
+            default:
+                return false;
+            case ts.SyntaxKind.ElementAccessExpression:
+                if ((<ts.ElementAccessExpression>parent).argumentExpression === undefined ||
+                    (<ts.ElementAccessExpression>parent).argumentExpression!.kind !== ts.SyntaxKind.StringLiteral)
+                    return false;
+                break;
+            case ts.SyntaxKind.PropertyAccessExpression:
+        }
+    }
+    return true;
+}
+
+type FindEnum = (name: ts.Identifier) => IEnum | undefined;
+
+function isConstInitializer(initializer: ts.Expression, members: Map<string, boolean>, findEnum: FindEnum): boolean {
+    return (function isConst(node: ts.Expression): boolean {
+        switch (node.kind) {
+            case ts.SyntaxKind.Identifier:
+                return members.get((<ts.Identifier>node).text) === true;
+            case ts.SyntaxKind.StringLiteral:
+            case ts.SyntaxKind.NumericLiteral:
+                return true;
+            case ts.SyntaxKind.PrefixUnaryExpression:
+                return isConst((<ts.PrefixUnaryExpression>node).operand);
+            case ts.SyntaxKind.ParenthesizedExpression:
+                return isConst((<ts.ParenthesizedExpression>node).expression);
+        }
+        if (isPropertyAccessExpression(node)) {
+            if (!isIdentifier(node.expression))
+                return false;
+            const track = findEnum(node.expression);
+            return track !== undefined && track.members.get(node.name.text) === true;
+        }
+        if (isElementAccessExpression(node)) {
+            if (!isIdentifier(node.expression) || node.argumentExpression === undefined || !isStringLiteral(node.argumentExpression))
+                return false;
+            const track = findEnum(node.expression);
+            return track !== undefined && track.members.get(node.argumentExpression.text) === true;
+        }
+        if (isBinaryExpression(node))
+            // TODO revisit 1 ** 2 in later versions of typescript
+            return node.operatorToken.kind !== ts.SyntaxKind.AsteriskAsteriskToken &&
+                node.operatorToken.kind !== ts.SyntaxKind.AmpersandAmpersandToken &&
+                node.operatorToken.kind !== ts.SyntaxKind.BarBarToken &&
+                !isAssignmentKind(node.operatorToken.kind) &&
+                isConst(node.left) && isConst(node.right);
+        return false;
+    })(initializer);
 }

@@ -1,16 +1,18 @@
 enum Empty {}
-~~~~~~~~~~ [fail]
+~~~~~~~~~~ [fail % ('Empty')]
 
 enum Foo {
-~~~~~~~~ [fail]
+~~~~~~~~ [fail % ('Foo')]
     bar,
     baz,
 }
 bar = Foo.bar;
 baz = Foo['baz'];
+let f: Foo;
+let b: Foo.bar;
 
 enum Foo {
-~~~~~~~~ [fail]
+~~~~~~~~ [fail % ('Foo')]
     foo = 2,
 }
 
@@ -24,7 +26,7 @@ enum Foo2 {
 }
 
 enum Bar {
-~~~~~~~~ [fail]
+~~~~~~~~ [fail % ('Bar')]
     foo = 1,
     bar = 1 + 1,
     baz = 1 << 1,
@@ -34,7 +36,7 @@ const enum ConstBar {
 }
 
 enum Baz {
-~~~~~~~~ [fail]
+~~~~~~~~ [fail % ('Baz')]
     'foo',
     bar = foo,
     ['baz'] = Baz.bar,
@@ -57,17 +59,15 @@ enum Bas2 {
 export enum ExportedEnum {}
 
 enum Split {
-~~~~~~~~~~ [fail]
+~~~~~~~~~~ [fail % ('Split')]
     Foo,
     Bar,
 }
 
 enum Split {
-~~~~~~~~~~ [fail]
+~~~~~~~~~~ [fail % ('Split')]
     Baz = Foo,
 }
-
-export = Split;
 
 enum NumberAccess {
     Foo,
@@ -95,4 +95,45 @@ enum Paren2 {
 }
 foo = (Paren2).Bar;
 
-[fail]: enum can be declared const
+enum Exported {}
+export {Exported};
+
+enum StringValued {
+~~~~~~~~~~~~~~~~~ [fail % ('StringValued')]
+    Foo = "FOO",
+    Bar = 'Bar',
+    Baz = Foo,
+}
+
+enum Mixed {
+~~~~~~~~~~ [fail % ('Mixed)]
+    foo = StringValued.Foo,
+    bar = Foo.bar,
+}
+
+enum TypeOf {}
+let t: typeof TypeOf;
+
+enum TypeOfMember {
+    member,
+}
+let m: typeof TypeOfMember.member;
+
+enum NonConst {
+    foo = "foo",
+    bar = `foo = ${foo}`,
+}
+enum NonConst2 {
+    foo,
+    bar,
+    baz,
+    bas = foo ? bar : baz,
+}
+enum NonConst3 {
+    foo,
+    bar,
+    baz = foo && bar,
+    bas = foo || bar,
+}
+
+[fail]: Enum '%s' can be a 'const enum'.

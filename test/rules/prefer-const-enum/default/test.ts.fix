@@ -6,6 +6,8 @@ const enum Foo {
 }
 bar = Foo.bar;
 baz = Foo['baz'];
+let f: Foo;
+let b: Foo.bar;
 
 const enum Foo {
     foo = 2,
@@ -60,8 +62,6 @@ const enum Split {
     Baz = Foo,
 }
 
-export = Split;
-
 enum NumberAccess {
     Foo,
 }
@@ -87,3 +87,43 @@ enum Paren2 {
     Bar,
 }
 foo = (Paren2).Bar;
+
+enum Exported {}
+export {Exported};
+
+const enum StringValued {
+    Foo = "FOO",
+    Bar = 'Bar',
+    Baz = Foo,
+}
+
+const enum Mixed {
+    foo = StringValued.Foo,
+    bar = Foo.bar,
+}
+
+enum TypeOf {}
+let t: typeof TypeOf;
+
+enum TypeOfMember {
+    member,
+}
+let m: typeof TypeOfMember.member;
+
+enum NonConst {
+    foo = "foo",
+    bar = `foo = ${foo}`,
+}
+enum NonConst2 {
+    foo,
+    bar,
+    baz,
+    bas = foo ? bar : baz,
+}
+enum NonConst3 {
+    foo,
+    bar,
+    baz = foo && bar,
+    bas = foo || bar,
+}
+

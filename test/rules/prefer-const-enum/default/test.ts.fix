@@ -127,3 +127,9 @@ enum NonConst3 {
     bas = foo || bar,
 }
 
+enum UnknownInitializer {
+    Foo = _FooBarBaz_,
+    Bar = _FooBarBaz_.Bar,
+    Baz = _FooBarBaz_['Foo'],
+}
+

@@ -15,9 +15,14 @@ interface IEnum {
     name: string;
     isConst: boolean;
     declarations: ts.EnumDeclaration[];
-    members: Map<string, boolean>;
+    members: Map<string, IEnumMember>;
     canBeConst: boolean;
     uses: VariableUse[];
+}
+
+interface IEnumMember {
+    isConst: boolean;
+    stringValued: boolean;
 }
 
 interface IDeclaration {
@@ -63,7 +68,10 @@ function walk(ctx: Lint.WalkContext<void>) {
             const isConst = track.isConst ||
                 member.initializer === undefined ||
                 isConstInitializer(member.initializer, track.members, findEnum);
-            track.members.set(getPropertyName(member.name)!, isConst);
+            track.members.set(getPropertyName(member.name)!, {
+                isConst,
+                stringValued: isConst && member.initializer !== undefined && isStringValued(member.initializer, track.members, findEnum),
+            });
             if (!isConst)
                 track.canBeConst = false;
         }
@@ -114,30 +122,38 @@ function onlyConstUses(track: IEnum): boolean {
 
 type FindEnum = (name: ts.Identifier) => IEnum | undefined;
 
-function isConstInitializer(initializer: ts.Expression, members: Map<string, boolean>, findEnum: FindEnum): boolean {
-    return (function isConst(node: ts.Expression): boolean {
+function isConstInitializer(initializer: ts.Expression, members: Map<string, IEnumMember>, findEnum: FindEnum): boolean {
+    return (function isConst(node: ts.Expression, allowStrings: boolean): boolean {
         switch (node.kind) {
             case ts.SyntaxKind.Identifier:
-                return members.get((<ts.Identifier>node).text) === true;
+                const member = members.get((<ts.Identifier>node).text);
+                return member !== undefined && member.isConst && (allowStrings || !member.stringValued);
             case ts.SyntaxKind.StringLiteral:
+                return allowStrings;
             case ts.SyntaxKind.NumericLiteral:
                 return true;
             case ts.SyntaxKind.PrefixUnaryExpression:
-                return isConst((<ts.PrefixUnaryExpression>node).operand);
+                return isConst((<ts.PrefixUnaryExpression>node).operand, false);
             case ts.SyntaxKind.ParenthesizedExpression:
-                return isConst((<ts.ParenthesizedExpression>node).expression);
+                return isConst((<ts.ParenthesizedExpression>node).expression, allowStrings);
         }
         if (isPropertyAccessExpression(node)) {
             if (!isIdentifier(node.expression))
                 return false;
             const track = findEnum(node.expression);
-            return track !== undefined && track.members.get(node.name.text) === true;
+            if (track === undefined)
+                return false;
+            const member = track.members.get(node.name.text);
+            return member !== undefined && member.isConst && (allowStrings || !member.stringValued);
         }
         if (isElementAccessExpression(node)) {
             if (!isIdentifier(node.expression) || node.argumentExpression === undefined || !isStringLiteral(node.argumentExpression))
                 return false;
             const track = findEnum(node.expression);
-            return track !== undefined && track.members.get(node.argumentExpression.text) === true;
+            if (track === undefined)
+                return false;
+            const member = track.members.get(node.argumentExpression.text);
+            return member !== undefined && member.isConst && (allowStrings || !member.stringValued);
         }
         if (isBinaryExpression(node))
             // TODO revisit 1 ** 2 in later versions of typescript
@@ -145,7 +161,26 @@ function isConstInitializer(initializer: ts.Expression, members: Map<string, boo
                 node.operatorToken.kind !== ts.SyntaxKind.AmpersandAmpersandToken &&
                 node.operatorToken.kind !== ts.SyntaxKind.BarBarToken &&
                 !isAssignmentKind(node.operatorToken.kind) &&
-                isConst(node.left) && isConst(node.right);
+                isConst(node.left, false) && isConst(node.right, false);
         return false;
+    })(initializer, true);
+}
+
+function isStringValued(initializer: ts.Expression, members: Map<string, IEnumMember>, findEnum: FindEnum): boolean {
+    return (function stringValued(node: ts.Expression): boolean {
+        switch (node.kind) {
+            case ts.SyntaxKind.ParenthesizedExpression:
+                return stringValued((<ts.ParenthesizedExpression>node).expression);
+            case ts.SyntaxKind.Identifier:
+                return members.get((<ts.Identifier>node).text)!.stringValued;
+            case ts.SyntaxKind.PropertyAccessExpression:
+                return findEnum(<ts.Identifier>(<ts.PropertyAccessExpression>node).expression)!
+                    .members.get((<ts.PropertyAccessExpression>node).name.text)!.stringValued;
+            case ts.SyntaxKind.ElementAccessExpression:
+                return findEnum(<ts.Identifier>(<ts.ElementAccessExpression>node).expression)!
+                    .members.get((<ts.Identifier>(<ts.ElementAccessExpression>node).argumentExpression).text)!.stringValued;
+            default: // StringLiteral
+                return true;
+        }
     })(initializer);
 }

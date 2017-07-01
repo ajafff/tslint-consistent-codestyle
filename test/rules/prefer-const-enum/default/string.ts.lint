@@ -1,0 +1,34 @@
+export {};
+
+const enum Base {
+    Foo = "foo",
+    Bar = Foo,
+}
+
+enum Parens {
+~~~~~~~~~~~ [fail % ('Parens')]
+    Foo = ((Base.Foo)),
+}
+
+enum Literal {
+    Foo = +("Foo"),
+}
+
+enum StringEnumInitializer {
+~~~~~~~~~~~~~~~~~~~~~~~~~~ [fail % ('StringEnumInitializer')]
+    Foo = Base.Foo,
+}
+
+enum StringConcat {
+    FooBar = Base.Foo + Base.Bar,
+}
+
+enum StringConcat2 {
+    FooBar = Base.Foo + "Bar",
+}
+
+enum StringArithmetic {
+    Foo = -(Base.Bar),
+}
+
+[fail]: Enum '%s' can be a 'const enum'.

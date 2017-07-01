@@ -10,7 +10,8 @@ Use `no-unused-expression` in addition to this rule to uncover even more dead co
 
 #### Differences to `no-unused-variable`
 
-* Works without the type checker and therefore without `--project` option
+* Works without the type checker and therefore without `--project` option.
+* Works for .js files.
 * No false positives with parameters of abstract methods.
 * No false positives with destructuring. See [tslint#2876](https://github.com/palantir/tslint/issues/2876)
 * No side effects on typescript's type system. See [tslint#2736](https://github.com/palantir/tslint/issues/2736) [tslint#2649](https://github.com/palantir/tslint/issues/2649) [tslint#2571](https://github.com/palantir/tslint/issues/2571)

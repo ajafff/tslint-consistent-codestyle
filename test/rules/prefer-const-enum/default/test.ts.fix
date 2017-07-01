@@ -6,6 +6,8 @@ const enum Foo {
 }
 bar = Foo.bar;
 baz = Foo['baz'];
+let f: Foo;
+let b: Foo.bar;
 
 const enum Foo {
     foo = 2,
@@ -98,5 +100,18 @@ const enum StringValued {
 const enum Mixed {
     foo = StringValued.Foo,
     bar = Foo.bar,
+}
+
+enum TypeOf {}
+let t: typeof TypeOf;
+
+enum TypeOfMember {
+    member,
+}
+let m: typeof TypeOfMember.member;
+
+enum NonConst {
+    foo = "foo",
+    bar = `foo = ${foo}`,
 }
 

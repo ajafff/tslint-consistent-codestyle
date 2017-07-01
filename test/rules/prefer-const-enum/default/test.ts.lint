@@ -8,6 +8,8 @@ enum Foo {
 }
 bar = Foo.bar;
 baz = Foo['baz'];
+let f: Foo;
+let b: Foo.bar;
 
 enum Foo {
 ~~~~~~~~ [fail % ('Foo')]
@@ -107,6 +109,19 @@ enum Mixed {
 ~~~~~~~~~~ [fail % ('Mixed)]
     foo = StringValued.Foo,
     bar = Foo.bar,
+}
+
+enum TypeOf {}
+let t: typeof TypeOf;
+
+enum TypeOfMember {
+    member,
+}
+let m: typeof TypeOfMember.member;
+
+enum NonConst {
+    foo = "foo",
+    bar = `foo = ${foo}`,
 }
 
 [fail]: Enum '%s' can be a 'const enum'.

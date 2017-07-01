@@ -93,8 +93,10 @@ function walk(ctx: Lint.WalkContext<void>) {
 
 function onlyConstUses(track: IEnum): boolean {
     for (const use of track.uses) {
-        if (use.domain & (UsageDomain.Type | UsageDomain.TypeQuery))
+        if (use.domain & UsageDomain.Type || use.domain === UsageDomain.Namespace)
             continue;
+        if (use.domain & UsageDomain.TypeQuery)
+            return false;
         const parent = use.location.parent!;
         switch (parent.kind) {
             default:

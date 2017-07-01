@@ -1,0 +1,10 @@
+enum Foo {}
+enum Bar {
+    foo,
+}
+
+{
+    enum Baz {}
+    ~~~~~~~~ [Enum 'Baz' can be a 'const enum'.]
+    const enum Bas {}
+}

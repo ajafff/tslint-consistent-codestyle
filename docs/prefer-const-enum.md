@@ -1,10 +1,8 @@
 ## prefer-const-enum
 
 An enum that is never dynamically accessed, can be declared as `const enum`.
-Const enums are replaces with their number or string values by the compiler.
+Const enums are replaced with their number or string values during compilation.
 That can yield a significant performance increase for heavily used enums.
 This rule identifies enums that could be const enums and can automatically fix them.
 
-__:exclamation: This rule is still a work in progress. Current limitations:__
-* no support for scopes
-* exported enums are ignored
+Enums that are exported or available in the global scope are ignored.

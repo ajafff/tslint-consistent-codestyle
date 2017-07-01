@@ -60,8 +60,6 @@ const enum Split {
     Baz = Foo,
 }
 
-export = Split;
-
 enum NumberAccess {
     Foo,
 }
@@ -87,3 +85,18 @@ enum Paren2 {
     Bar,
 }
 foo = (Paren2).Bar;
+
+enum Exported {}
+export {Exported};
+
+const enum StringValued {
+    Foo = "FOO",
+    Bar = 'Bar',
+    Baz = Foo,
+}
+
+const enum Mixed {
+    foo = StringValued.Foo,
+    bar = Foo.bar,
+}
+

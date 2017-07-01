@@ -123,5 +123,17 @@ enum NonConst {
     foo = "foo",
     bar = `foo = ${foo}`,
 }
+enum NonConst2 {
+    foo,
+    bar,
+    baz,
+    bas = foo ? bar : baz,
+}
+enum NonConst3 {
+    foo,
+    bar,
+    baz = foo && bar,
+    bas = foo || bar,
+}
 
 [fail]: Enum '%s' can be a 'const enum'.

@@ -142,6 +142,8 @@ function isConstInitializer(initializer: ts.Expression, members: Map<string, boo
         if (isBinaryExpression(node))
             // TODO revisit 1 ** 2 in later versions of typescript
             return node.operatorToken.kind !== ts.SyntaxKind.AsteriskAsteriskToken &&
+                node.operatorToken.kind !== ts.SyntaxKind.AmpersandAmpersandToken &&
+                node.operatorToken.kind !== ts.SyntaxKind.BarBarToken &&
                 !isAssignmentKind(node.operatorToken.kind) &&
                 isConst(node.left) && isConst(node.right);
         return false;

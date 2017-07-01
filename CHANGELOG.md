@@ -1,5 +1,16 @@
 # Change Log
 
+## v1.5.1
+**Bugfixes:**
+* `no-var-before-return` now detects if variable is used by a closure.
+* `prefer-const-enum` is now stable:
+  * Correct handling of scopes
+  * Handle enums merging with namespace
+  * Exclude enums in global scope
+  * Handle string valued enums
+  * Bugfix for enum used as type
+  * Stricter checks for initializer
+
 ## v1.5.0
 **Features:**
 * :sparkles: New rule [`no-unused`](https://github.com/ajafff/tslint-consistent-codestyle/blob/master/docs/no-unused.md) to find dead code and unused declarations.

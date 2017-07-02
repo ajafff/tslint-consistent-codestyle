@@ -22,6 +22,7 @@ Use `no-unused-expression` in addition to this rule to uncover even more dead co
 
 * Can optionally complain about named function and class expressions that are never used by name with options `"unused-function-expression-name"` and `"unused-class-expression-name"`
 * Does not check private class members.
+* Does not check for unused labels.
 * Needs to be more liberal with variables in global scope, e.g. top level variable declarations if the file has no imports or exports.
 * Flags write only variables as error.
 * Flags functions and classes that are only used inside of their declaration as error.

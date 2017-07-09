@@ -1,0 +1,6 @@
+machine:
+  node:
+    version: node
+test:
+  override:
+    - npm run verify

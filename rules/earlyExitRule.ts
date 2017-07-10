@@ -61,12 +61,12 @@ function walk(ctx: Lint.WalkContext<IOptions>) {
         }
     }
 
-    function isSmall(size: number): boolean {
-        return size === 1;
+    function isSmall(length: number): boolean {
+        return length === 1;
     }
 
-    function isLarge(size: number): boolean {
-        return size > maxLineLength;
+    function isLarge(length: number): boolean {
+        return length > maxLineLength;
     }
 }
 

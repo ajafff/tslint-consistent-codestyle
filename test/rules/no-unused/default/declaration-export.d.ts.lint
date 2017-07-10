@@ -1,6 +1,7 @@
 import * as ts from 'typescript';
             ~~ [Import 'ts' is unused.]
 interface VariableInfo {
+          ~~~~~~~~~~~~ [Interface 'VariableInfo' is unused.]
     domain: DeclarationDomain;
 }
 export interface VariableUse {
@@ -22,3 +23,5 @@ export declare const enum UsageDomain {
 }
 export declare function getUsageDomain(node: any): UsageDomain | undefined;
 export declare function getDeclarationDomain(node: any): DeclarationDomain | undefined;
+
+export {};

@@ -99,6 +99,6 @@ let result = (function fac(i) {
 })(5);
 ```
 
-#### `"no-unused-class-expression-name"`
+#### `"unused-class-expression-name"`
 
 Basically the same as `"unused-function-expression-name"` but for class expressions.

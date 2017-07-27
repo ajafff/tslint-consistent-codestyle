@@ -6,11 +6,13 @@ import { AbstractConfigDependentRule } from '../src/rules';
 
 const ALL_OR_NONE_OPTION = 'all-or-none';
 const LEADING_OPTION = 'leading';
+const TRAILING_OPTION = 'trailing';
 const READONLY_OPTION = 'readonly';
 const MEMBER_ACCESS_OPTION = 'member-access';
 
 const ALL_OR_NONE_FAIL = 'don\'t mix parameter properties with regular parameters';
 const LEADING_FAIL = 'parameter properties must precede regular parameters';
+const TRAILING_FAIL = 'regular parameters must precede parameter properties';
 const READONLY_FAIL = 'parameter property must be readonly';
 const MEMBER_ACCESS_FAIL = 'parameter property must have access modifier';
 
@@ -26,6 +28,7 @@ const MEMBER_ACCESS_FAIL = 'parameter property must have access modifier';
 interface IOptions {
     allOrNone: boolean;
     leading: boolean;
+    trailing: boolean;
     readOnly: boolean;
     memberAccess: boolean;
 }
@@ -35,6 +38,7 @@ export class Rule extends AbstractConfigDependentRule {
         return this.applyWithWalker(new ParameterPropertyWalker(sourceFile, this.ruleName, {
             allOrNone: this.ruleArguments.indexOf(ALL_OR_NONE_OPTION) !== -1,
             leading: this.ruleArguments.indexOf(LEADING_OPTION) !== -1,
+            trailing: this.ruleArguments.indexOf(TRAILING_OPTION) !== -1,
             readOnly: this.ruleArguments.indexOf(READONLY_OPTION) !== -1,
             memberAccess: this.ruleArguments.indexOf(MEMBER_ACCESS_OPTION) !== -1,
         }));
@@ -90,6 +94,10 @@ class ParameterPropertyWalker extends Lint.AbstractWalker<IOptions> {
                     regular = true;
                 }
             }
+        } else if (this.options.trailing) {
+            for (let i = index; i < length; ++i)
+                if (!utils.isParameterProperty(parameters[i]))
+                    this.addFailureAtNode(parameters[i], TRAILING_FAIL);
         }
 
         if (this.options.memberAccess) {

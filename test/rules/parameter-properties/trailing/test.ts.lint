@@ -1,0 +1,27 @@
+class Foo {
+    constructor(foo: string, public bar: number, readonly baz?) {}
+}
+
+class Bar {
+    constructor() {}
+}
+
+class Baz {
+    constructor(bas) {}
+}
+
+class Bas {
+    constructor(readonly baz) {}
+}
+
+class Quux {
+    constructor(protected foo, bar) {}
+                               ~~~ [fail]
+}
+
+class Ajaff {
+    constructor(private foo, bar, public baz) {}
+                             ~~~ [fail]
+}
+
+[fail]: regular parameters must precede parameter properties

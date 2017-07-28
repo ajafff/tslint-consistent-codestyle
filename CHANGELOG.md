@@ -1,5 +1,13 @@
 # Change Log
 
+## v1.6.0
+**Bugfixes:**
+* `prefer-const-enum` bail on string to number conversion
+* `no-unused` fixed false positive with index signature
+
+**Features:**
+* `parameter-properties` adds `"trailing"` option
+
 ## v1.5.1
 **Bugfixes:**
 * `no-var-before-return` now detects if variable is used by a closure.

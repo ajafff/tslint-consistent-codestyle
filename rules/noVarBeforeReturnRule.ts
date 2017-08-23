@@ -24,7 +24,7 @@ function walk(ctx: Lint.WalkContext<void>) {
         return ts.forEachChild(node, cbNode, cbNodeArray);
     }
 
-    function cbNodeArray(nodes: ts.Node[]): void {
+    function cbNodeArray(nodes: ReadonlyArray<ts.Node>): void {
         if (nodes.length === 0)
             return;
         ts.forEachChild(nodes[0], cbNode, cbNodeArray);

@@ -37,10 +37,10 @@
     "coveralls": "^2.13.0",
     "nyc": "^11.0.3",
     "tslint": "^5.5.0",
-    "typescript": "^2.4.1"
+    "typescript": "^2.5.1"
   },
   "peerDependencies": {
     "tslint": "^5.0.0",
-    "typescript": "^2.1.4 || >=2.1.0-dev || >=2.2.0-dev || >=2.3.0-dev || >= 2.4.0-dev || >= 2.5.0 || >= 2.6.0"
+    "typescript": "^2.1.4 || >=2.1.0-dev || >=2.2.0-dev || >=2.3.0-dev || >= 2.4.0-dev || >= 2.5.0-dev || >= 2.6.0-dev || >= 2.7.0-dev"
   }
 }

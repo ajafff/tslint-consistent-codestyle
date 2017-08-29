@@ -68,3 +68,7 @@ new (class T<T> {
 new (class T {
     foo(): T {}
 })();
+
+declare global {
+    interface Foo {}
+}

@@ -1,0 +1,63 @@
+function fn(foo) {
+    foo++;
+}
+function fn(/**@constant*/foo) {
+    foo++;
+    ~~~ [err % ('foo')]
+}
+function fn(/** @const */ foo, bar) {
+    foo++;
+    ~~~ [err % ('foo')]
+    bar++;
+}
+function fn(/** @const */ foo, bar) {
+    bar = foo;
+}
+function fn(/**@const some text*/foo) {
+    foo++;
+    ~~~ [err % ('foo')]
+}
+function fn({/**@const*/foo}) {
+    foo++;
+    ~~~ [err % ('foo')]
+}
+function fn({bar: /**@const*/foo}) {
+    foo++;
+    ~~~ [err % ('foo')]
+}
+function fn({/**@const*/foo, bar}) {
+    foo++;
+    ~~~ [err % ('foo')]
+    bar++;
+}
+class Clazz {
+    constructor(/**@const*/foo, /**@const*/ private bar, /**@const*/ readonly baz) {
+        foo++;
+        ~~~ [err % ('foo')]
+        bar++;
+        ~~~ [err % ('bar')]
+        baz++;
+        ~~~ [err % ('baz')]
+        this.bar++;
+        this.baz++;
+    }
+}
+function fn(
+    /** some description */
+    /** @constant */
+    foo,
+) {
+    foo++;
+    ~~~ [err % ('foo')]
+}
+function fn(/** foo */foo) {
+    foo++;
+}
+function fn(/**const*/foo) {
+    foo++;
+}
+function fn(/**@param*/foo) {
+    foo++;
+}
+
+[err]: Cannot reassign constant parameter '%s'.

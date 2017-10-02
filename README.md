@@ -46,6 +46,7 @@ Now configure some of the new rules.
 
 Rule | Description
 ---- | ----
+[const-parameters](https://github.com/ajafff/tslint-consistent-codestyle/blob/master/docs/const-parameters.md) | Declare parameters as `const` with JsDoc `/** @const */`
 [early-exit](https://github.com/ajafff/tslint-consistent-codestyle/blob/master/docs/early-exit.md) | Recommends to use an early exit instead of a long `if` block.
 [ext-curly](https://github.com/ajafff/tslint-consistent-codestyle/blob/master/docs/ext-curly.md) |Enforces where to consistently use curly braces where not strictly necessary.
 [naming-convention](https://github.com/ajafff/tslint-consistent-codestyle/blob/master/docs/naming-convention.md) | Fine grained configuration to enfoce consistent naming for almost everything. E.g. variables, functions, classes, methods, parameters, enums, etc.

@@ -1,0 +1,6 @@
+{
+  "rulesDirectory": "../../../../rules",
+  "rules": {
+    "const-parameters": true
+  }
+}

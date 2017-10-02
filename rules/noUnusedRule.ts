@@ -7,6 +7,7 @@ import {
 
 const OPTION_FUNCTION_EXPRESSION_NAME = 'unused-function-expression-name';
 const OPTION_CLASS_EXPRESSION_NAME = 'unused-class-expression-name';
+const OPTION_CATCH_BINDING = 'unused-catch-binding';
 const OPTION_IGNORE_PARAMETERS = 'ignore-parameters';
 const OPTION_IGNORE_IMPORTS = 'ignore-imports';
 
@@ -17,6 +18,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             classExpressionName: this.ruleArguments.indexOf(OPTION_CLASS_EXPRESSION_NAME) !== -1,
             ignoreParameters: this.ruleArguments.indexOf(OPTION_IGNORE_PARAMETERS) !== -1,
             ignoreImports: this.ruleArguments.indexOf(OPTION_IGNORE_IMPORTS) !== -1,
+            catchBinding: this.ruleArguments.indexOf(OPTION_CATCH_BINDING) !== -1,
         }));
     }
 }
@@ -26,6 +28,7 @@ interface IOptions {
     classExpressionName: boolean;
     ignoreParameters: boolean;
     ignoreImports: boolean;
+    catchBinding: boolean;
 }
 
 const enum ExpressionKind {
@@ -188,7 +191,7 @@ function isExcluded(variable: VariableInfo, sourceFile: ts.SourceFile, usage: Ma
         }
         if (isParameterDeclaration(parent) &&
                 (opts.ignoreParameters || isParameterProperty(parent) || !isFunctionWithBody(parent.parent!)) ||
-            parent.kind === ts.SyntaxKind.VariableDeclaration && parent.parent!.kind === ts.SyntaxKind.CatchClause ||
+            !opts.catchBinding && parent.kind === ts.SyntaxKind.VariableDeclaration && parent.parent!.kind === ts.SyntaxKind.CatchClause ||
             parent.kind === ts.SyntaxKind.TypeParameter && parent.parent!.kind === ts.SyntaxKind.MappedType ||
             parent.kind === ts.SyntaxKind.TypeParameter && typeParameterMayBeRequired(<ts.TypeParameterDeclaration>parent, usage))
             return true;

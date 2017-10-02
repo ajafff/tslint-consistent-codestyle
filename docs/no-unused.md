@@ -21,10 +21,11 @@ Use `no-unused-expression` in addition to this rule to uncover even more dead co
 #### Differences to both
 
 * Can optionally complain about named function and class expressions that are never used by name with options `"unused-function-expression-name"` and `"unused-class-expression-name"`
+* Can optionally complain about unused catch bindings (supported since typescript@2.5.1) with option `"unused-catch-binding"`
 * Does not check private class members.
 * Does not check for unused labels.
 * Needs to be more liberal with variables in global scope, e.g. top level variable declarations if the file has no imports or exports.
-* Flags write only variables as error.
+* Flags write only variables as error. (Also supported by typescript@2.6.0)
 * Flags functions and classes that are only used inside of their declaration as error.
 * Handles declarations in different domains separately:
 
@@ -102,3 +103,28 @@ let result = (function fac(i) {
 #### `"unused-class-expression-name"`
 
 Basically the same as `"unused-function-expression-name"` but for class expressions.
+
+#### `"unused-catch-binding"`
+
+As of TypeScript@2.5.1 you can omit the catch binding if you're not going to use it. This option helps you identify such cases.
+
+**Not Passing**
+
+```ts
+try {
+  JSON.parse(foo);
+} catch (e) {
+      // ~ [Variable 'e' is unused.]
+  console.log('invalid json');
+}
+```
+
+**Passing**
+
+```ts
+try {
+  JSON.parse(foo);
+} catch {
+  console.log('invalid json');
+}
+```

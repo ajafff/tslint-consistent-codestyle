@@ -1,0 +1,10 @@
+try {
+    foo();
+} catch(err) {}
+        ~~~ [Variable 'err' is unused.]
+
+try {
+    foo();
+} catch(err) {
+    console.log(err);
+}

@@ -1,4 +1,4 @@
-## ext-curly
+## const-parameters
 
 Disallows reassigning parameters that are considered constants. This rule is similar to tslint's [`no-parameter-reassignent`](https://palantir.github.io/tslint/rules/no-parameter-reassignment/) but allows you to explicitly declare which parameter is a constant with JsDoc `/** @const */`
 

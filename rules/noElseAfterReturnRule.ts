@@ -34,7 +34,7 @@ function isLastStatementReturn(statement: ts.Statement | ts.BlockLike | ts.Defau
     return endsControlFlow(statement) === StatementType.Return;
 }
 
-function endsControlFlow(statement: ts.Statement|ts.BlockLike|ts.DefaultClause): StatementType {
+function endsControlFlow(statement: ts.Statement | ts.BlockLike | ts.DefaultClause): StatementType {
     // recurse into nested blocks
     while (utils.isBlockLike(statement)) {
         if (statement.statements.length === 0)

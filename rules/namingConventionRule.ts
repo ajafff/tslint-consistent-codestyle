@@ -129,12 +129,12 @@ interface IRuleScope {
 type RuleConfig = IRuleScope & Partial<IFormat>;
 
 interface IFormat {
-    format: Format|Format[]|undefined;
-    leadingUnderscore: UnderscoreOption|undefined;
-    trailingUnderscore: UnderscoreOption|undefined;
-    prefix: string|string[]|undefined;
-    suffix: string|string[]|undefined;
-    regex: string|undefined;
+    format: Format | Format[] | undefined;
+    leadingUnderscore: UnderscoreOption | undefined;
+    trailingUnderscore: UnderscoreOption | undefined;
+    prefix: string | string[] | undefined;
+    suffix: string | string[] | undefined;
+    regex: string | undefined;
 }
 
 export class Rule extends AbstractConfigDependentRule {
@@ -149,7 +149,7 @@ export class Rule extends AbstractConfigDependentRule {
 
 class NormalizedConfig {
     private _type: Types;
-    private _filter: RegExp|undefined;
+    private _filter: RegExp | undefined;
     private _format: Partial<IFormat>;
     private _modifiers: number;
     private _specifity: number;
@@ -200,12 +200,12 @@ class NormalizedConfig {
 }
 
 class NameChecker {
-    private _format: Format|Format[]|undefined;
-    private _leadingUnderscore: UnderscoreOption|undefined;
-    private _trailingUnderscore: UnderscoreOption|undefined;
-    private _prefix: string|string[]|undefined;
-    private _suffix: string|string[]|undefined;
-    private _regex: RegExp|undefined;
+    private _format: Format | Format[] | undefined;
+    private _leadingUnderscore: UnderscoreOption | undefined;
+    private _trailingUnderscore: UnderscoreOption | undefined;
+    private _prefix: string | string[] | undefined;
+    private _suffix: string | string[] | undefined;
+    private _regex: RegExp | undefined;
     constructor(private readonly _type: TypeSelector, format: IFormat) {
         this._leadingUnderscore = format.leadingUnderscore;
         this._trailingUnderscore = format.trailingUnderscore;
@@ -433,7 +433,7 @@ class IdentifierNameWalker extends Lint.AbstractWalker<NormalizedConfig[]> {
             matchingChecker.check(name, this);
     }
 
-    private _getMatchingChecker(type: TypeSelector, modifiers: number, name: string): NameChecker|null {
+    private _getMatchingChecker(type: TypeSelector, modifiers: number, name: string): NameChecker | null {
         const key = `${type},${modifiers}`;
         const cached = this._cache.get(key);
         if (cached !== undefined)
@@ -445,7 +445,7 @@ class IdentifierNameWalker extends Lint.AbstractWalker<NormalizedConfig[]> {
         return checker;
     }
 
-    private _createChecker(type: TypeSelector, modifiers: number, name: string): [NameChecker|null, boolean] {
+    private _createChecker(type: TypeSelector, modifiers: number, name: string): [NameChecker | null, boolean] {
         let hasFilter = false;
         const config = this.options.reduce(
             (format: IFormat, rule) => {
@@ -560,7 +560,7 @@ class IdentifierNameWalker extends Lint.AbstractWalker<NormalizedConfig[]> {
     }
 }
 
-function parseOptionArray<T>(option?: T|T[]): T|T[]|undefined {
+function parseOptionArray<T>(option?: T | T[]): T | T[] | undefined {
     if (!Array.isArray(option) || option.length > 1)
         return option;
     return option[0];

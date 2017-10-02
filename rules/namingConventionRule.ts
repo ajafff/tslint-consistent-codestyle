@@ -454,7 +454,7 @@ class IdentifierNameWalker extends Lint.AbstractWalker<NormalizedConfig[]> {
                     return format;
                 if (filterUsed)
                     hasFilter = true;
-                return Object.assign(format, rule.getFormat());
+                return Object.assign(format, rule.getFormat()); // tslint:disable-line:prefer-object-spread
             },
             {
                 leadingUnderscore: undefined,

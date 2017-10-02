@@ -42,6 +42,7 @@
     "no-construct": true,
     "no-debugger": true,
     "no-default-export": true,
+    "no-duplicate-imports": true,
     "no-empty-interface": true,
     "no-eval": true,
     "no-import-side-effect": true,
@@ -56,7 +57,9 @@
     "no-shadowed-variable": true,
     "no-sparse-arrays": true,
     "no-string-literal": true,
+    "no-submodule-imports": true,
     "no-switch-case-fall-through": true,
+    "no-this-assignment": true,
     "no-trailing-whitespace": true,
     "no-unnecessary-callback-wrapper": true,
     "no-unnecessary-initializer": true,
@@ -83,10 +86,12 @@
     "prefer-const": true,
     "prefer-for-of": true,
     "prefer-function-over-method": true,
+    "prefer-object-spread": true,
     "prefer-switch": [true, {"min-cases": 3}],
     "quotemark": [
-      true, 
-      "single"
+      true,
+      "single",
+      "avoid-escape"
     ],
     "radix": true,
     "semicolon": [true, "always"],
@@ -100,6 +105,8 @@
         "constructor": false
       }
     ],
+    "space-within-parens": [true, 0],
+    "switch-final-break": true,
     "trailing-comma": [true, {
       "singleline": "never",
       "multiline": "always"
@@ -123,9 +130,16 @@
       "check-decl",
       "check-operator",
       "check-separator",
-      "check-type"
+      "check-type",
+      "check-type-operator",
+      "check-rest-spread"
     ],
     /* custom rules */
+    "no-unused": [
+      true,
+      "unused-class-expression-name",
+      "unused-function-expression-name"
+    ],
     "ext-curly": [
       true,
       "else",
@@ -153,7 +167,6 @@
       "allow-void-expression"
     ],
     "no-unnecessary-else": true,
-    "no-unused": true,
     "no-var-before-return": true,
     "object-shorthand-properties-first": true,
     "parameter-properties": [

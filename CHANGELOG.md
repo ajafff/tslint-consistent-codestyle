@@ -1,5 +1,9 @@
 # Change Log
 
+## v1.7.0
+**Features:**
+* new rule [`const-parameters`](https://github.com/ajafff/tslint-consistent-codestyle/blob/master/docs/const-parameters.md)
+
 ## v1.6.0
 **Bugfixes:**
 * `prefer-const-enum` bail on string to number conversion

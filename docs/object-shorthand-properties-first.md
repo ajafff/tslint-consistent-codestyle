@@ -3,6 +3,7 @@
 By convention and for better readability, shorthand properties should precede regular property declarations.
 
 Not passing:
+
 ```ts
 let obj = {
   foo: foo,
@@ -12,6 +13,7 @@ let obj = {
 ```
 
 Passing:
+
 ```ts
 let obj = {
   bar,

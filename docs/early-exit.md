@@ -16,6 +16,7 @@ function f() {
 ```
 
 Prefer:
+
 ```ts
 function f() {
   if (!so) return;

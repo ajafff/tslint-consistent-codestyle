@@ -5,7 +5,8 @@ Enforce consistent names for almost everything.
 This rule is configured with an array of configuration objects. All of those objects are made up of 2 parts. The first could be called the "selector", because it describes, *what* is affected by this config. The second part consists of one or more formatting rules.
 
 So for example, if you want to force every local variable to be in camelCase, you simply write the config as shown below:
-```javascript
+
+```js
 {
   "type": "variable",
   "modifiers": "local",
@@ -13,14 +14,14 @@ So for example, if you want to force every local variable to be in camelCase, yo
 }
 ```
 
-### Selector:
+### Selector
 
 * `type: string`: The selector consists of a required field `type`, which identifies the type of thing this configuration applies to.
 * `modifiers?: string|string[]`: To further specify your selection you can provide one or more `modifiers`. All of those modifiers must match an identifier, to activate this config. That means `["global", "const"]` will match every constant in global scope. It will not match any not-const global. Some of those modifiers are mutually exclusive, so you will never match anything if you specify more than one of them, for example `global` and `local` or the access modifiers `private`, `protected` and `public`.
 * `final?: boolean`: If set to true, this configuration will not contribute to the composition of any subtype's configuration.
 * `filter?: string`: Regular expression to limit the scope of this configuration to names that match this regex.
 
-### Formatting rules:
+### Formatting rules
 
 All formatting rules are optional. Formatting rules are inherited by the `type`'s parent type. You can shadow the parent config by setting a new rule for the desired check or even disable the check by setting any falsy value.
 
@@ -29,7 +30,7 @@ All formatting rules are optional. Formatting rules are inherited by the `type`'
 * `prefix: string|string[], suffix: string|string[]`: Specify one or more prefixes or suffixes. When given a single string, that string must match in the specified position. When given an array, one of the strings must match in the specified position. Matching is done in the given order. **If a prefix or suffix is specified, the matching portion of the name is sliced off before any further checks are performed:** If you enforce `camelCase` and a prefix `has`, the name `hasFoo` will not match. That's because the prefix `has` is removed and the remaining `Foo` is not valid `camelCase`
 * `format: string|string[]`: Valid options are `camelCase`, `PascalCase`, `UPPER_CASE` and `snake_case`. If an array is given, the name must match one format in that array. If the array is empty, no format check is made.
 
-### "Inheritance" / Extending configurations:
+### "Inheritance" / Extending configurations
 
 As mentioned above, a type's configuration is used as base for the configuration of all of it's subtypes. Of course the subtype can override any inherited configuration option by providing a new value or disable it by setting any falsy value.
 
@@ -63,11 +64,11 @@ Second, we filter by modifiers. All configs match, that have no excess modifiers
 After filtering the formatting rules are reduced from the first to the last. Remember, the most generic base type config is first and the most specific subtype config is last. After that, all formatting rules, that have no falsy values, are applied to the identifier name.
 
 ### Types
+
 #### default
 
 * Scope: is the base for everything
 * Valid modifiers: refer to subtypes
-
 
 #### variable
 
@@ -79,7 +80,6 @@ After filtering the formatting rules are reduced from the first to the last. Rem
   * `export`
   * `rename` // if you rename a property in a destructuring assignment, e.g. `let {foo: myFoo} = bar`
 
-
 #### function
 
 * Scope: every function and named function expression
@@ -88,7 +88,6 @@ After filtering the formatting rules are reduced from the first to the last. Rem
   * `global` or `local`
   * `export`
 
-
 #### parameter
 
 * Scope: parameters
@@ -96,13 +95,11 @@ After filtering the formatting rules are reduced from the first to the last. Rem
 * Valid modifiers:
   * `rename`
 
-
 #### member
 
 * Scope: used as superclass for `property`, `method`, ...
 * Extends: `default`
 * Valid modifiers: refer to subtypes
-
 
 #### property
 
@@ -114,7 +111,6 @@ After filtering the formatting rules are reduced from the first to the last. Rem
   * `const` == `readonly` // can be used interchangeably. internally both are handled as `const`
   * `abstract` // for abstract property accessors
 
-
 #### parameterProperty
 
 * Scope: class constructor's parameter properties
@@ -123,14 +119,12 @@ After filtering the formatting rules are reduced from the first to the last. Rem
   * `private`, `protected` or `public`
   * `const` == `readonly`
 
-
 #### enumMember
 
 * Scope: all members of enums
 * Extends: `property`, always has `public`, `static`, `const`/`readonly` modifiers
 * Valid modifiers:
   * everything from type `enum`
-
 
 #### method
 
@@ -141,13 +135,11 @@ After filtering the formatting rules are reduced from the first to the last. Rem
   * `static`
   * `abstract`
 
-
 #### type
 
 * Scope: used as superclass for `class`, `interface`, ...
 * Extends: `default`
 * Valid modifiers: refer to subtypes
-
 
 #### class
 
@@ -158,7 +150,6 @@ After filtering the formatting rules are reduced from the first to the last. Rem
   * `abstract`
   * `export`
 
-
 #### interface
 
 * Scope: all interfaces
@@ -166,7 +157,6 @@ After filtering the formatting rules are reduced from the first to the last. Rem
 * Valid modifiers:
   * `global` or `local`
   * `export`
-
 
 #### typeAlias
 
@@ -176,14 +166,12 @@ After filtering the formatting rules are reduced from the first to the last. Rem
   * `global` or `local`
   * `export`
 
-
 #### genericTypeParameter
 
 * Scope: all generic type parameters, e.g. `class Foo<T, U> {}` or `function<T>(v: T): T {}`
 * Extends: `type`
 * Valid modifiers:
   * `global` _if found on a class_ or `local` _if found on a function_
-
 
 #### enum
 
@@ -195,9 +183,10 @@ After filtering the formatting rules are reduced from the first to the last. Rem
   * `export`
 
 ### Examples
+
 Here you see an example of how everything explained above works together. This is the configuration used in this project.
 
-```javascript
+```js
 "naming-convention": [
   true,
   // forbid leading and trailing underscores and enforce camelCase on EVERY name. will be overridden by subtypes if needed

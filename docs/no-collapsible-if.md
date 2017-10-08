@@ -23,6 +23,7 @@ if (foo) {
   }
 }
 ```
+
 Passing:
 
 ```ts

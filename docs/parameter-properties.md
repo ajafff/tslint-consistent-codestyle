@@ -7,7 +7,8 @@ Configure how and where to declare parameter properties.
 All rule options are optional, but without any option this rule does nothing.
 
 Usage:
-```javascript
+
+```js
 "parameter-properties": [
   true,
   "all-or-none",   // forces all or none of a constructors parameters to be parameter properties

@@ -1,6 +1,6 @@
 {
   "name": "tslint-consistent-codestyle",
-  "version": "1.7.0",
+  "version": "1.8.0",
   "description": "Additional rules to enforce constistent code style with tslint",
   "repository": {
     "type": "git",
@@ -31,7 +31,7 @@
   "license": "MIT",
   "dependencies": {
     "tslib": "^1.7.1",
-    "tsutils": "^2.11.1"
+    "tsutils": "^2.12.0"
   },
   "devDependencies": {
     "coveralls": "^2.13.0",

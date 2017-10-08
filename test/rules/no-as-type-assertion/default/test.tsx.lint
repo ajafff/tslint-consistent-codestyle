@@ -1,0 +1,1 @@
+foo = bar as number; // it's OK in tsx and jsx files

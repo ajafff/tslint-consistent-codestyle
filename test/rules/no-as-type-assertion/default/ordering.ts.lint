@@ -1,0 +1,6 @@
+foo = bar as boolean as number;
+          ~~~~~~~~~~~~~~~~~~~~ [fail]
+foo = bar as number as boolean;
+          ~~~~~~~~~~~~~~~~~~~~ [fail]
+
+[fail]: use <Type> instead of `as Type`

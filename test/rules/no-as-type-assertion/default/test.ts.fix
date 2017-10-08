@@ -1,26 +1,23 @@
 foo = <number>bar;
-foo = <number>bar;
 
 foo = <number>(<any>bar);
-foo = <number>(<any>bar);
 
-foo = <any><number>bar;
-foo = <any><number>bar;
+foo = <number><any>bar;
 
-foo = <number><any><string>bar;
-foo = <number><any><string>bar;
+foo = <string><number><any>bar;
 
-foo = <{foo: number}>bar;
 foo = <{foo: number}>bar;
 
 foo = <number|undefined>bar;
-foo = <number|undefined>bar;
 
 foo = <number><any>bar;
-foo = <number><any>bar;
 
-foo = <number><any><string>bar;
-foo = <number><any><string>bar;
+foo = <any><string><number>bar;
 
-foo = <boolean><number><any><string>bar;
-foo = <boolean><number><any><string>bar;
+foo = <any><string><boolean><number>bar;
+
+foo = <any><A>bar;
+foo = <A><any>bar;
+foo = <any><AsyncIterableIterator>bar;
+foo = <AsyncIterableIterator><any>bar;
+

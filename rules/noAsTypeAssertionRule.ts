@@ -1,37 +1,32 @@
 import * as ts from 'typescript';
 import * as Lint from 'tslint';
-import * as utils from 'tsutils';
+import {isAsExpression} from 'tsutils';
 
 const FAIL_MESSAGE = 'use <Type> instead of `as Type`';
 
 export class Rule extends Lint.Rules.AbstractRule {
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new AsExpressionWalker(sourceFile, this.ruleName, undefined));
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-export class AsExpressionWalker extends Lint.AbstractWalker<void> {
-    public walk(sourceFile: ts.SourceFile) {
-        const cb = (node: ts.Node): void => {
-            if (node.kind === ts.SyntaxKind.AsExpression)
-                this._reportError(<ts.AsExpression>node);
-            return ts.forEachChild(node, cb);
-        };
-        return ts.forEachChild(sourceFile, cb);
-    }
-
-    private _reportError(node: ts.AsExpression) {
-        this.addFailure(node.type.pos - 2, node.end, FAIL_MESSAGE, [
-            Lint.Replacement.appendText(getInsertionPosition(node, this.sourceFile), `<${node.type.getText(this.sourceFile)}>`),
-            Lint.Replacement.deleteFromTo(node.expression.end, node.end),
-        ]);
-    }
-
-}
-
-function getInsertionPosition(node: ts.AsExpression, sourceFile: ts.SourceFile): number {
-        let expression = node.expression;
-        while (utils.isAssertionExpression(expression))
-            expression = expression.expression;
-        return expression.getStart(sourceFile);
+function walk(ctx: Lint.WalkContext<void>) {
+    if (ctx.sourceFile.languageVariant === ts.LanguageVariant.JSX)
+        return;
+    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+        if (isAsExpression(node)) {
+            let {type, expression} = node;
+            let replacement = `<${type.getText(ctx.sourceFile)}>`;
+            while (isAsExpression(expression)) {
+                ({type, expression} = expression);
+                replacement += `<${type.getText(ctx.sourceFile)}>`;
+            }
+            ctx.addFailure(type.pos - 2, node.end, FAIL_MESSAGE, [
+                Lint.Replacement.appendText(expression.getStart(ctx.sourceFile), replacement),
+                Lint.Replacement.deleteFromTo(expression.end, node.end),
+            ]);
+            return cb(expression);
+        }
+        return ts.forEachChild(node, cb);
+    });
 }

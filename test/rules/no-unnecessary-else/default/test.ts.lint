@@ -111,7 +111,7 @@ for (;;) {
                 continue;
             } else {}
               ~~~~ [fail]
-            
+
             if (foo) {
                 break;
             } else {}
@@ -164,5 +164,166 @@ if (true) {
     } else {}
       ~~~~ [fail]
 }
+
+if (true) {
+    try {
+    } catch {
+        return;
+    }
+} else {}
+  ~~~~ [fail]
+
+if (true) {
+    try {
+        return;
+    } catch {
+    }
+} else {}
+
+if (true) {
+    try {
+    } catch {
+    } finally {
+        return;
+    }
+} else {}
+  ~~~~ [fail]
+
+if (true) {
+    try {
+        return;
+    } catch {
+    } finally {
+    }
+} else {}
+
+if (true) {
+    try {
+    } finally {
+        return;
+    }
+} else {}
+  ~~~~ [fail]
+
+if (true) {
+    try {
+        return;
+    } finally {
+    }
+} else {}
+  ~~~~ [fail]
+
+if (true) {
+    for (;;) {
+        try {
+            return;
+        } catch {
+            return;
+        } finally {
+            break;
+        }
+    }
+} else {}
+
+if (true) {
+    for (;;) {
+        try {
+            return;
+        } finally {
+            break;
+        }
+    }
+} else {}
+
+if (true) {
+    for (;;) {
+        try {
+            break;
+        } finally {
+            return;
+        }
+    }
+} else {}
+  ~~~~ [fail]
+
+if (true) {
+    for (;;) {
+        try {
+            break;
+        } finally {
+            continue;
+        }
+    }
+} else {}
+
+if (true) {
+    foo: for (;;) {
+        if (true) {
+            continue;
+        } else {
+          ~~~~ [fail]
+            break;
+        }
+    }
+} else {}
+
+if (true) {
+    foo: for (;;) {
+        if (true)
+            while (true) {
+                if (true) {
+                    continue foo;
+                } else {
+                  ~~~~ [fail]
+                    break foo;
+                }
+            }
+        else {}
+        ~~~~ [fail]
+    }
+} else {}
+
+if (true) {
+    foo: for (;;) {
+        if (true)
+            while (true) {
+                if (true)
+                    continue; // TODO
+                if (true) {
+                    continue foo;
+                } else {
+                  ~~~~ [fail]
+                    break foo;
+                }
+            }
+        else {}
+    }
+} else {}
+
+foo: for (;;) {
+    if (true)
+        switch (v) {
+            case 1:
+                if (true) {
+                    break;
+                } else {}
+                  ~~~~ [fail]
+            default:
+                continue foo;
+        }
+    else {}
+}
+
+foo: for (;;)
+    if (true)
+        for (;;)
+            try {
+                break foo;
+            } catch {
+                continue foo;
+            } finally {
+                break;
+            }
+    else {}
 
 [fail]: unnecessary else

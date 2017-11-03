@@ -1,0 +1,34 @@
+export {};
+
+let foo1: number = 1;
+        ~~~~~~~~ [fail]
+let foo2: 1 = 1;
+const foo3: number = 1;
+          ~~~~~~~~ [fail]
+const foo4: 1 = 1;
+          ~~~ [fail]
+const foo5: string[] = [];
+const foo6: string[] = ["foo", "bar"];
+          ~~~~~~~~~~ [fail]
+const foo7 = "foo";
+let foo8 = "foo";
+
+const fn = function(a: string, b: number) {};
+
+declare function take<T>(cb: T): void;
+declare function generic<T>(cb: (param: T, i: number) => T);
+
+take<() => void>((a?: boolean) => a);
+take<(a: string, b: number) => void>((a: string, b: number) => a);
+                                       ~~~~~~~~ [fail]
+                                                  ~~~~~~~~ [fail]
+take<(a: string, b: number) => void>((a: string, b) => a);
+                                       ~~~~~~~~ [fail]
+take<(a: string, b: number) => void>((a, b) => a);
+take<(a: "a", b: number) => void>((a: string, b: {}) => a);
+generic((a: string) => a);
+generic((a: string, i: number) => a);
+                     ~~~~~~~~ [fail]
+take<((() => void) | ((a: string) => void))>((a: string) => a); // TODO find correct signature
+
+[fail]: type annotation is redundant

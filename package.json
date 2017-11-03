@@ -11,8 +11,8 @@
     "test": "tslint --test test/rules/*/*",
     "build": "rm -rf {src,rules}/*.js; tsc -p .",
     "prepublishOnly": "npm run verify",
-    "lint": "tslint '{rules,src}/**/*.ts'",
-    "lint:fix": "tslint --fix '{rules,src}/**/*.ts'",
+    "lint": "tslint -p .",
+    "lint:fix": "tslint --fix -p .",
     "verify": "npm run build && npm run lint && npm run coverage",
     "coverage": "rm -rf coverage .nyc_output && nyc npm test",
     "report-coverage": "cat ./coverage/lcov.info | coveralls"

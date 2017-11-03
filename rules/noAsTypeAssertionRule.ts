@@ -13,7 +13,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 function walk(ctx: Lint.WalkContext<void>) {
     if (ctx.sourceFile.languageVariant === ts.LanguageVariant.JSX)
         return;
-    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+    return ts.forEachChild(ctx.sourceFile, function cb(node): void {
         if (isAsExpression(node)) {
             let {type, expression} = node;
             let replacement = `<${type.getText(ctx.sourceFile)}>`;

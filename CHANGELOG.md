@@ -1,5 +1,14 @@
 # Change Log
 
+## v1.9.0
+
+**Features:**
+
+* new *experimental* rule [`no-unnecessary-type-annotation`](https://github.com/ajafff/tslint-consistent-codestyle/blob/master/docs/no-unnecessary-type-annotation.md)
+* `naming-convention` adds `unused` modifier -> this enables you to allow leading underscore only for unused variables and parameters
+* `no-var-before-return` adds option `"allow-destructuring"`
+* `early-exit` adds special handling for `{"max-length": 0}`
+
 ## v1.8.0
 
 **Bugfixes:**

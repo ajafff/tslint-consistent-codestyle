@@ -13,6 +13,14 @@ const foo6: string[] = ["foo", "bar"];
 const foo7 = "foo";
 let foo8 = "foo";
 
+interface Foo {
+    foo: number;
+}
+
+const foo9: Foo = {foo: 1};
+const foo10: Foo[] = [foo9, foo9];
+           ~~~~~~~ [fail]
+
 const fn = function(a: string, b: number) {};
 
 declare function take<T>(cb: T): void;

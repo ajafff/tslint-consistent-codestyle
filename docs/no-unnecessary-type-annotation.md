@@ -2,6 +2,10 @@
 
 Finds type annotations of variables and parameters that can be removed because the compiler can infer the type.
 
+**Known limitation:** sometimes removing a type annotation can cause circular inference and therefore a compiler error.
+
+This rule is still a work in progress. Please report any unexpected behavior.
+
 **Failing:**
 
 ```ts

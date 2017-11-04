@@ -142,7 +142,8 @@
     "no-unused": [
       true,
       "unused-class-expression-name",
-      "unused-function-expression-name"
+      "unused-function-expression-name",
+      "unused-catch-binding"
     ],
     "ext-curly": [
       true,

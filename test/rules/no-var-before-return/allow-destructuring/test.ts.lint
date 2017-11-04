@@ -1,0 +1,18 @@
+(bar) => {
+    let baz = bar;
+    return baz;
+           ~~~  [fail]
+}
+
+function foo(bar) {
+    let baz = bar;
+    return baz;
+           ~~~  [fail]
+}
+
+function foo(bar) {
+    let {baz} = bar;
+    return baz;
+}
+
+[fail]: don't declare variable baz to return it immediately

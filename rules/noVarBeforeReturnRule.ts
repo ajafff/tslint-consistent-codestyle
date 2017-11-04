@@ -4,13 +4,21 @@ import { collectVariableUsage, VariableInfo, isReturnStatement, isVariableStatem
 
 import { isUndefined } from '../src/utils';
 
+const OPTION_ALLOW_DESTRUCTURING = 'allow-destructuring';
+
+interface IOptions {
+    allowDestructuring: boolean;
+}
+
 export class Rule extends Lint.Rules.AbstractRule {
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk);
+        return this.applyWithFunction(sourceFile, walk, {
+            allowDestructuring: this.ruleArguments.indexOf(OPTION_ALLOW_DESTRUCTURING) !== -1,
+        });
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>) {
+function walk(ctx: Lint.WalkContext<IOptions>) {
     let variables: Map<ts.Identifier, VariableInfo> | undefined;
     return ts.forEachChild(ctx.sourceFile, cbNode, cbNodeArray);
 
@@ -38,7 +46,7 @@ function walk(ctx: Lint.WalkContext<void>) {
                     continue;
                 }
                 const previous = nodes[i - 1];
-                if (isVariableStatement(previous) && declaresVariable(previous, node.expression.text, isUnused))
+                if (isVariableStatement(previous) && declaresVariable(previous, node.expression.text, isUnused, ctx.options))
                     ctx.addFailureAtNode(node.expression, `don't declare variable ${node.expression.text} to return it immediately`);
             } else {
                 ts.forEachChild(node, cbNode, cbNodeArray);
@@ -47,12 +55,17 @@ function walk(ctx: Lint.WalkContext<void>) {
     }
 }
 
-function declaresVariable(statement: ts.VariableStatement, name: string, isUnused: (node: ts.Identifier) => boolean): boolean {
+function declaresVariable(
+    statement: ts.VariableStatement,
+    name: string,
+    isUnused: (node: ts.Identifier) => boolean,
+    options: IOptions,
+): boolean {
     const declarations = statement.declarationList.declarations;
     const lastDeclaration = declarations[declarations.length - 1].name;
     if (lastDeclaration.kind === ts.SyntaxKind.Identifier)
         return lastDeclaration.text === name && isUnused(lastDeclaration);
-    return isSimpleDestructuringForName(lastDeclaration, name, isUnused);
+    return !options.allowDestructuring && isSimpleDestructuringForName(lastDeclaration, name, isUnused);
 }
 
 function isSimpleDestructuringForName(pattern: ts.BindingPattern, name: string, isUnused: (node: ts.Identifier) => boolean): boolean {

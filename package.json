@@ -9,12 +9,12 @@
   "main": "rules/index.js",
   "scripts": {
     "test": "tslint --test test/rules/*/*",
-    "build": "rm -rf {src,rules}/*.js; tsc -p .",
+    "build": "rimraf '{src,rules}/*.js'; tsc -p .",
     "prepublishOnly": "npm run verify",
     "lint": "tslint '{rules,src}/**/*.ts'",
     "lint:fix": "tslint --fix '{rules,src}/**/*.ts'",
     "verify": "npm run build && npm run lint && npm run coverage",
-    "coverage": "rm -rf coverage .nyc_output && nyc npm test",
+    "coverage": "rimraf coverage .nyc_output && nyc npm test",
     "report-coverage": "cat ./coverage/lcov.info | coveralls"
   },
   "keywords": [
@@ -36,6 +36,7 @@
   "devDependencies": {
     "coveralls": "^2.13.0",
     "nyc": "^11.0.3",
+    "rimraf": "^2.6.2",
     "tslint": "^5.8.0",
     "typescript": "^2.6.1"
   },

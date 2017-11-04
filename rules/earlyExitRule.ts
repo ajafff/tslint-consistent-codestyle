@@ -17,6 +17,10 @@ function failureStringSmall(exit: string, branch: 'else' | 'then'): string {
     return `'${branch}' branch is small; prefer an early '${exit}' to a full if-else.`;
 }
 
+function failureStringAlways(exit: string): string {
+    return `Prefer an early '${exit}' to a full if-else.`;
+}
+
 interface IOptions {
     'max-length': number;
 }
@@ -47,6 +51,9 @@ function walk(ctx: Lint.WalkContext<IOptions>) {
         // Never fail if there's an `else if`.
         if (elseStatement.kind === ts.SyntaxKind.IfStatement)
             return;
+
+        if (maxLineLength === 0)
+            return fail(failureStringAlways(exit));
 
         const elseSize = size(elseStatement, sourceFile);
 

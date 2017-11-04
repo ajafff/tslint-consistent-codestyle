@@ -1,0 +1,60 @@
+// Tests for 'if-else' statements.
+
+function f() {
+    if (so)
+    ~~ [ALWAYS]
+        1;
+    else {
+        1;
+        2;
+        3;
+    }
+}
+
+function f() {
+    if (so) {
+    ~~ [ALWAYS]
+        1;
+        2;
+        3;
+    } else
+        1;
+}
+
+function f() {
+    if (so) {
+    ~~ [ALWAYS]
+        1;
+        2;
+        3;
+    } else {
+        1;
+        2;
+        3;
+    }
+}
+
+function f() {
+    if (so)
+    ~~ [ALWAYS]
+        1;
+    else
+        1;
+}
+
+function f() {
+    if (so)
+        1;
+    else if (os)
+        1;
+}
+
+function f() {
+    if (so) {
+    ~~ [ALWAYS]
+    } else {
+        f;
+    }
+}
+
+[ALWAYS]: Prefer an early 'return' to a full if-else.

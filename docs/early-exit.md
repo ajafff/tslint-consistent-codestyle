@@ -57,3 +57,36 @@ for (const x of xs) {
 ```
 
 An options object as in `"early-exit": [true, { "max-length": 4 }}` may be provided to configure what makes a block count as "large". The default is 2 lines.
+
+If you set `"max-length"` to `0`, the rule will always suggest an early return, regardless of the line count. For example:
+
+```ts
+// instead of
+function f() {
+  if (so) {
+    singleLine();
+  }
+}
+// prefer
+function f() {
+  if (!so) return;
+  singleLine();
+}
+
+// and instead of
+for (const x of xs) {
+  if (so) {
+    foo();
+  } else {
+    bar();
+  }
+}
+// prefer
+for (const x of xs) {
+  if (so) {
+    foo();
+    continue;
+  }
+  bar();
+}
+```

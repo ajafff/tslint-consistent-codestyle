@@ -62,3 +62,8 @@ namespace Foo.Bar {
         }
     }
 }
+
+declare module "foo" {
+    class Foo<T> {}
+              ~ [TypeParameter 'T' is unused.]
+}

@@ -1,0 +1,8 @@
+export {}
+
+declare module "foo" {
+    class Foo<T> {}
+}
+
+export default class <T> {}
+                      ~ [TypeParameter 'T' is unused.]

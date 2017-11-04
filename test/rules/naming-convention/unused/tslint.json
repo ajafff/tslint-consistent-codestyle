@@ -1,0 +1,10 @@
+{
+  "rulesDirectory": ["../../../../rules"],
+  "rules": {
+    "naming-convention": [
+       true,
+       {"type": "default", "leadingUnderscore": "forbid"},
+       {"type": "default", "modifiers": "unused", "leadingUnderscore": "allow"}
+    ]
+  }
+}

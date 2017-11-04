@@ -5,10 +5,7 @@ import * as utils from 'tsutils';
 import { AbstractConfigDependentRule } from '../src/rules';
 
 // TODO don't flag inherited members
-// TODO check renamed imports
 // TODO skip all ambient declarations
-// TODO async modifier
-// TODO public protected private as modifier on class or just final for private
 
 const PASCAL_OPTION = 'PascalCase';
 const CAMEL_OPTION  = 'camelCase';
@@ -78,6 +75,7 @@ enum Modifiers {
     export = 1 << 8,
     import = 1 << 9,
     rename = 1 << 10,
+    unused = 1 << 11,
     // tslint:enable:naming-convention
 }
 
@@ -95,17 +93,18 @@ enum Specifity {
     export = 1 << 4,
     import = 1 << 5,
     rename = 1 << 6,
-    filter = 1 << 7,
-    default = 1 << 8,
-    variable = 2 << 8,
-    function = 3 << 8,
-    parameter = 4 << 8,
-    member = 5 << 8,
-    property = 6 << 8,
+    unused = 1 << 7,
+    filter = 1 << 8,
+    default = 1 << 9,
+    variable = 2 << 9,
+    function = 3 << 9,
+    parameter = 4 << 9,
+    member = 5 << 9,
+    property = 6 << 9,
     method = Specifity.property,
-    enumMember = 7 << 8,
-    type = 8 << 8,
-    class = 9 << 8,
+    enumMember = 7 << 9,
+    type = 8 << 9,
+    class = 9 << 9,
     interface = Specifity.class,
     typeAlias = Specifity.class,
     genericTypeParameter = Specifity.class,
@@ -115,7 +114,7 @@ enum Specifity {
 
 type Format = 'camelCase' | 'PascalCase' | 'snake_case' | 'UPPER_CASE';
 type IdentifierType = keyof typeof Types;
-type Modifier = keyof typeof Modifiers;
+type Modifier = keyof typeof Modifiers | 'unused';
 
 type UnderscoreOption = 'allow' | 'require' | 'forbid';
 
@@ -297,6 +296,13 @@ class NameChecker {
 class IdentifierNameWalker extends Lint.AbstractWalker<NormalizedConfig[]> {
     private _depth = 0;
     private _cache = new Map<string, NameChecker | null>();
+    private _usage: Map<ts.Identifier, utils.VariableInfo> | undefined = undefined;
+
+    private _isUnused(name: ts.Identifier): boolean {
+        if (this._usage === undefined)
+            this._usage = utils.collectVariableUsage(this.sourceFile);
+        return this._usage.get(name)!.uses.length === 0;
+    }
 
     private _checkTypeParameters(node: ts.DeclarationWithTypeParameters, modifiers: Modifiers) {
         if (node.typeParameters !== undefined)
@@ -318,15 +324,9 @@ class IdentifierNameWalker extends Lint.AbstractWalker<NormalizedConfig[]> {
         this._checkTypeParameters(node, Modifiers.global);
     }
 
-    public visitClassExpression(node: ts.ClassExpression) {
+    public visitClassLikeDeclaration(node: ts.ClassLikeDeclaration) {
         if (node.name !== undefined)
-            this._checkDeclaration(<ts.ClassExpression & {name: ts.Identifier}>node, TypeSelector.class);
-        this._checkTypeParameters(node, Modifiers.global);
-    }
-
-    public visitClassDeclaration(node: ts.ClassDeclaration) {
-        if (node.name !== undefined)
-            this._checkDeclaration(<ts.ClassDeclaration & {name: ts.Identifier}>node, TypeSelector.class);
+            this._checkDeclaration(<ts.ClassLikeDeclaration & {name: ts.Identifier}>node, TypeSelector.class);
         this._checkTypeParameters(node, Modifiers.global);
     }
 
@@ -342,19 +342,28 @@ class IdentifierNameWalker extends Lint.AbstractWalker<NormalizedConfig[]> {
     }
 
     public visitParameterDeclaration(node: ts.ParameterDeclaration) {
+        if (node.parent!.kind === ts.SyntaxKind.IndexSignature)
+            return;
         if (isNameIdentifier(node)) {
             if (node.name.originalKeywordKind === ts.SyntaxKind.ThisKeyword)
                 // exempt this parameter
                 return;
             // param properties cannot be destructuring assignments
-            this._checkDeclaration(node, utils.isParameterProperty(node) ? TypeSelector.parameterProperty
-                                                                         : TypeSelector.parameter);
+            const parameterProperty = utils.isParameterProperty(node);
+            this._checkDeclaration(
+                node,
+                parameterProperty ? TypeSelector.parameterProperty : TypeSelector.parameter,
+                utils.isFunctionWithBody(node.parent!) && !parameterProperty && this._isUnused(node.name) ? Modifiers.unused : 0,
+            );
         } else {
             // handle destructuring
             utils.forEachDestructuringIdentifier(<ts.BindingPattern>node.name, (declaration) => {
-                this._checkName(declaration.name,
-                                TypeSelector.parameter,
-                                Modifiers.local | (isEqualName(declaration.name, declaration.propertyName) ? 0 : Modifiers.rename));
+                let modifiers = Modifiers.local;
+                if (!isEqualName(declaration.name, declaration.propertyName))
+                    modifiers |= Modifiers.rename;
+                if (utils.isFunctionWithBody(node.parent!) && this._isUnused(declaration.name))
+                    modifiers |= Modifiers.unused;
+                this._checkName(declaration.name, TypeSelector.parameter, modifiers);
             });
         }
 
@@ -380,9 +389,12 @@ class IdentifierNameWalker extends Lint.AbstractWalker<NormalizedConfig[]> {
         if ((list.flags & ts.NodeFlags.Const) !== 0)
             modifiers |= Modifiers.const;
         utils.forEachDeclaredVariable(list, (declaration) => {
-            this._checkName(declaration.name,
-                            TypeSelector.variable,
-                            modifiers | (isEqualName(declaration.name, declaration.propertyName) ? 0 : Modifiers.rename));
+            let currentModifiers = modifiers;
+            if (!isEqualName(declaration.name, declaration.propertyName))
+                currentModifiers |= Modifiers.rename;
+            if (this._isUnused(declaration.name))
+                currentModifiers |= Modifiers.unused;
+            this._checkName(declaration.name, TypeSelector.variable, currentModifiers);
         });
     }
 
@@ -407,15 +419,9 @@ class IdentifierNameWalker extends Lint.AbstractWalker<NormalizedConfig[]> {
             this._checkVariableDeclarationList(node.declarationList, this._getModifiers(node, TypeSelector.variable));
     }
 
-    public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
+    public visitFunction(node: ts.FunctionDeclaration | ts.FunctionExpression) {
         if (node.name !== undefined)
-            this._checkDeclaration(<ts.FunctionDeclaration & {name: ts.Identifier}>node, TypeSelector.function);
-        this._checkTypeParameters(node, Modifiers.local);
-    }
-
-    public visitFuncitonExpression(node: ts.FunctionExpression) {
-        if (node.name !== undefined)
-            this._checkDeclaration(<ts.FunctionExpression & {name: ts.Identifier}>node, TypeSelector.function);
+            this._checkDeclaration(<(ts.FunctionDeclaration | ts.FunctionDeclaration) & {name: ts.Identifier}>node, TypeSelector.function);
         this._checkTypeParameters(node, Modifiers.local);
     }
 
@@ -423,8 +429,8 @@ class IdentifierNameWalker extends Lint.AbstractWalker<NormalizedConfig[]> {
         this._checkTypeParameters(node, Modifiers.local);
     }
 
-    private _checkDeclaration(node: DeclarationWithIdentifierName, type: TypeSelector) {
-        this._checkName(node.name, type, this._getModifiers(node, type));
+    private _checkDeclaration(node: DeclarationWithIdentifierName, type: TypeSelector, initialModifiers?: Modifiers) {
+        this._checkName(node.name, type, this._getModifiers(node, type, initialModifiers));
     }
 
     private _checkName(name: ts.Identifier, type: TypeSelector, modifiers: number) {
@@ -476,8 +482,7 @@ class IdentifierNameWalker extends Lint.AbstractWalker<NormalizedConfig[]> {
         return [new NameChecker(type, config), hasFilter];
     }
 
-    private _getModifiers(node: ts.Node, type: TypeSelector): number {
-        let modifiers = 0;
+    private _getModifiers(node: ts.Node, type: TypeSelector, modifiers: Modifiers = 0): number {
         if (node.modifiers !== undefined) {
             if (type | Types.member) { // property, method, parameter property
                 if (utils.hasModifier(node.modifiers, ts.SyntaxKind.PrivateKeyword)) {
@@ -525,9 +530,8 @@ class IdentifierNameWalker extends Lint.AbstractWalker<NormalizedConfig[]> {
             case ts.SyntaxKind.VariableStatement:
                 return this.visitVariableStatement(<ts.VariableStatement>node);
             case ts.SyntaxKind.FunctionDeclaration:
-                return this.visitFunctionDeclaration(<ts.FunctionDeclaration>node);
             case ts.SyntaxKind.FunctionExpression:
-                return this.visitFuncitonExpression(<ts.FunctionExpression>node);
+                return this.visitFunction(<ts.FunctionDeclaration | ts.FunctionExpression>node);
             case ts.SyntaxKind.ForStatement:
                 return this.visitForStatement(<ts.ForStatement>node);
             case ts.SyntaxKind.ForInStatement:
@@ -537,9 +541,8 @@ class IdentifierNameWalker extends Lint.AbstractWalker<NormalizedConfig[]> {
             case ts.SyntaxKind.Parameter:
                 return this.visitParameterDeclaration(<ts.ParameterDeclaration>node);
             case ts.SyntaxKind.ClassDeclaration:
-                return this.visitClassDeclaration(<ts.ClassDeclaration>node);
             case ts.SyntaxKind.ClassExpression:
-                return this.visitClassExpression(<ts.ClassExpression>node);
+                return this.visitClassLikeDeclaration(<ts.ClassLikeDeclaration>node);
             case ts.SyntaxKind.InterfaceDeclaration:
                 return this.visitInterfaceDeclaration(<ts.InterfaceDeclaration>node);
             case ts.SyntaxKind.EnumDeclaration:

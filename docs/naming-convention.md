@@ -53,6 +53,7 @@ Specifity:
 * `abstract` = 8,
 * `export` = 16,
 * `rename` = 64,
+* `unused` = 128
 
 ### Configuration composition
 
@@ -79,6 +80,7 @@ After filtering the formatting rules are reduced from the first to the last. Rem
   * `const`
   * `export`
   * `rename` // if you rename a property in a destructuring assignment, e.g. `let {foo: myFoo} = bar`
+  * `unused` // if the variable is never used
 
 #### function
 
@@ -94,6 +96,7 @@ After filtering the formatting rules are reduced from the first to the last. Rem
 * Extends: `variable`, always has `local` modifier
 * Valid modifiers:
   * `rename`
+  * `unused` // parameters in overload signatures and ambient signatures are never considered unused
 
 #### member
 
@@ -196,10 +199,10 @@ Here you see an example of how everything explained above works together. This i
   {"type": "variable", "modifiers": ["global", "const"], "format": ["camelCase","UPPER_CASE"]},
   // override the above format option for exported constants to allow only UPPER_CASE
   {"type": "variable", "modifiers": ["export", "const"], "format": "UPPER_CASE"},
-  // allow leading underscores for parameters, because `tsc --noUnusedParameters` will not flag underscore prefixed parameters
+  // allow leading underscores for unused parameters, because `tsc --noUnusedParameters` will not flag underscore prefixed parameters
   // all other rules (trailingUnderscore: forbid, format: camelCase) still apply
   // since we don't want to inherit this config to `parameterProperties`, we set `final = true`
-  {"type": "parameter", "leadingUnderscore": "allow", "final": true},
+  {"type": "parameter", "modifiers": "unused", "leadingUnderscore": "allow", "final": true},
   // require leading underscores for private properties and methods, all other rules still apply
   {"type": "member", "modifiers": "private", "leadingUnderscore": "require"},
   // same for protected

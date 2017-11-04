@@ -1,0 +1,24 @@
+export {};
+
+function _unused(_param): void;
+         ~~~~~~~ [err % ('function')]
+                 ~~~~~~ [err % ('parameter')]
+function _unused(): void;
+         ~~~~~~~ [err % ('function')]
+function _unused(_param) {}
+         ~~~~~~~ [err % ('function')]
+
+class _Foo<_T> {
+           ~~ [err % ('genericTypeParameter')]
+      ~~~~ [err % ('class')]
+    constructor(_foo, private _bar, public _bar, _bas) { _bas; }
+                              ~~~~ [err % ('parameterProperty')]
+                                           ~~~~ [err % ('parameterProperty')]
+                                                 ~~~~ [err % ('parameter')]
+}
+
+let _foo;
+    ~~~~ [err % ('variable')]
+_foo;
+
+[err]: %s name must not have leading underscore

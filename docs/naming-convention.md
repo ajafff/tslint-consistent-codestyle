@@ -201,8 +201,7 @@ Here you see an example of how everything explained above works together. This i
   {"type": "variable", "modifiers": ["export", "const"], "format": "UPPER_CASE"},
   // allow leading underscores for unused parameters, because `tsc --noUnusedParameters` will not flag underscore prefixed parameters
   // all other rules (trailingUnderscore: forbid, format: camelCase) still apply
-  // since we don't want to inherit this config to `parameterProperties`, we set `final = true`
-  {"type": "parameter", "modifiers": "unused", "leadingUnderscore": "allow", "final": true},
+  {"type": "parameter", "modifiers": "unused", "leadingUnderscore": "allow"},
   // require leading underscores for private properties and methods, all other rules still apply
   {"type": "member", "modifiers": "private", "leadingUnderscore": "require"},
   // same for protected

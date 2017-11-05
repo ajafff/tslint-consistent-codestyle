@@ -70,25 +70,17 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
             fail(node.type);
 
         let parameters: ReadonlyArray<ts.ParameterDeclaration> = node.parameters;
-        if (node.parameters.length !== 0 && isThisParameter(node.parameters[0]))
+        if (parameters.length !== 0 && isThisParameter(parameters[0]))
             parameters = parameters.slice(1);
 
         if (!parameters.some((p) => p.type !== undefined && p.dotDotDotToken === undefined))
             return;
 
-        let contextParameters = signature.parameters;
-        if (contextParameters.length !== 0) {
-            const firstParam = contextParameters[0];
-            if (firstParam.declarations !== undefined && isThisParameter(<ts.ParameterDeclaration>firstParam.declarations[0]))
-                contextParameters = contextParameters.slice(1);
-
-        }
-
         for (let i = 0; i < parameters.length; ++i) {
             const parameter = parameters[i];
             if (parameter.dotDotDotToken !== undefined || parameter.type === undefined)
                 continue;
-            const context = contextParameters[i];
+            const context = signature.parameters[i];
             if (context === undefined)
                 break;
             if (context.declarations !== undefined && isTypeParameter(checker.getTypeAtLocation(context.declarations[0])))
@@ -108,7 +100,10 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
             ))
             fail(func.type);
 
-        const {parameters} = func;
+        let parameters: ReadonlyArray<ts.ParameterDeclaration> = func.parameters;
+        if (parameters.length !== 0 && isThisParameter(parameters[0]))
+            parameters = parameters.slice(1);
+
         if (!parameters.some((p) => p.type !== undefined && p.dotDotDotToken === undefined))
             return;
 

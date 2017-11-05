@@ -25,6 +25,10 @@ const fn = function(a: string, b: number) {};
 
 declare function take<T>(cb: T): void;
 declare function generic<T>(cb: (param: T, i: number) => T);
+declare function genericReturn<T>(cb: () => T): T;
+function genericReturn2<T>(cb: () => T) {
+    return cb();
+}
 
 take<() => void>((a?: boolean) => a);
 take<(a: string, b: number) => void>((a: string, b: number) => a);
@@ -38,24 +42,90 @@ generic((a: string) => a);
 generic((a: string, i: number) => a);
                      ~~~~~~~~ [fail]
 take<((() => void) | ((a: string) => void))>((a: string) => a); // TODO find correct signature
-
+genericReturn((): number => {
+    return 1;
+});
+genericReturn2((): number => {
+    return 1;
+});
 
 (function(foo: "foo") {})("foo");
 (function(foo: string) {})("foo");
              ~~~~~~~~ [fail]
 (function(foo) {})("foo");
 (function(foo?) {})("foo");
-(function(param: string, ...foo: string[]))("foo", "bar", "baz");
+(function(param: string, ...foo: string[]) {})("foo", "bar", "baz");
                ~~~~~~~~ [fail]
 (function(foo?: string) {})();
 (<T>(param: T): T => {
+              ~~~ [fail]
     return param;
 })(1);
+(function(): string { return "foo"; })();
+           ~~~~~~~~ [fail]
+(function cb(): string {})();
+{
+    const result = (function(): string { return "foo"; })();
+    result = ((function(): string { return "foo"; }))();
+                         ~~~~~~~~ [fail]
+
+    const v: string | false = (function(): string | false {})
+}
+
 
 const myVerboseSignature: (a: number) => number = function(a: number): number {
                         ~~~~~~~~~~~~~~~~~~~~~~~ [fail]
                                                             ~~~~~~~~ [fail]
+                                                                     ~~~~~~~~ [fail]
     return a;
 }
+
+const myObj: {fn(a: string, b: number): void} = {
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [fail]
+    fn(a: string, b: number) {}
+        ~~~~~~~~ [fail]
+                   ~~~~~~~~ [fail]
+}
+
+const myOtherObj: {fn: (a: string, b: number) => void} = {
+    fn(a: string, b: number) {}
+        ~~~~~~~~ [fail]
+                   ~~~~~~~~ [fail]
+}
+
+const yetAnotherObject: {fn(a: string, b: number): void} = {
+    fn: function(a: string, b: number) {}
+                  ~~~~~~~~ [fail]
+                             ~~~~~~~~ [fail]
+}
+
+const andAnotherOne: {fn: (a: string, b: number) => void} = {
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [fail]
+    fn: function(a: string, b: number) {}
+                  ~~~~~~~~ [fail]
+                             ~~~~~~~~ [fail]
+}
+
+const evenWorkWithSignatures: {[key: string]: (a: string, b: number) => void} = {
+    fn(a: string, b: number): void {},
+        ~~~~~~~~ [fail]
+                   ~~~~~~~~ [fail]
+                            ~~~~~~ [fail]
+    foo(a: string, b: number) {},
+         ~~~~~~~~ [fail]
+                    ~~~~~~~~ [fail]
+    bar(a: string, b) {},
+         ~~~~~~~~ [fail]
+    baz(a): void {}
+          ~~~~~~ [fail]
+}
+
+const withLiteralType: {fn(): false} = {
+                     ~~~~~~~~~~~~~~~ [fail]
+    fn(): false {
+        ~~~~~~~ [fail]
+        return false;
+    },
+};
 
 [fail]: type annotation is redundant

@@ -52,5 +52,9 @@ take<((() => void) | ((a: string) => void))>((a: string) => a); // TODO find cor
     return param;
 })(1);
 
+const myVerboseSignature: (a: number) => number = function(a: number): number {
+                                                            ~~~~~~~~ [fail]
+    return a;
+}
 
 [fail]: type annotation is redundant

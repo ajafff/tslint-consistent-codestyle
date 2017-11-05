@@ -14,6 +14,10 @@ const foo: number = 1;
 let foo: number = 1;
 const arr: string[] = ["foo", "bar"];
 
+const myVerboseSignature: (a: number) => number = function(a: number): number { // currently shows an error at 'a: number'
+    return a;
+}
+
 declare function takeCallback(cb: (a: string) => void): void;
 takeCallback((a: string) => a);
 ```

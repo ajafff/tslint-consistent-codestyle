@@ -101,7 +101,7 @@ function initializerHasNoSideEffect(declaration: ts.VariableDeclaration, use: ts
         HasSideEffect = 1,
         NoSideEffect = 2,
     }
-    return (function cb(node: ts.Expression): Result | undefined {
+    return (function cb(node): Result | undefined {
         if (node.pos > use.pos)
             return Result.NoSideEffect;
         if (node.end <= use.pos)

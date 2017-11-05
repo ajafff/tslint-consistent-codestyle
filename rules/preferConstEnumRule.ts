@@ -123,7 +123,7 @@ function onlyConstUses(track: IEnum): boolean {
 type FindEnum = (name: ts.Identifier) => IEnum | undefined;
 
 function isConstInitializer(initializer: ts.Expression, members: Map<string, IEnumMember>, findEnum: FindEnum): boolean {
-    return (function isConst(node: ts.Expression, allowStrings: boolean): boolean {
+    return (function isConst(node, allowStrings): boolean {
         switch (node.kind) {
             case ts.SyntaxKind.Identifier:
                 const member = members.get((<ts.Identifier>node).text);
@@ -167,7 +167,7 @@ function isConstInitializer(initializer: ts.Expression, members: Map<string, IEn
 }
 
 function isStringValued(initializer: ts.Expression, members: Map<string, IEnumMember>, findEnum: FindEnum): boolean {
-    return (function stringValued(node: ts.Expression): boolean {
+    return (function stringValued(node): boolean {
         switch (node.kind) {
             case ts.SyntaxKind.ParenthesizedExpression:
                 return stringValued((<ts.ParenthesizedExpression>node).expression);

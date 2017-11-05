@@ -39,4 +39,9 @@ generic((a: string, i: number) => a);
                      ~~~~~~~~ [fail]
 take<((() => void) | ((a: string) => void))>((a: string) => a); // TODO find correct signature
 
+
+(function(foo: "foo") {})("foo");
+(function(foo: string) {})("foo");
+             ~~~~~~~~ [fail]
+
 [fail]: type annotation is redundant

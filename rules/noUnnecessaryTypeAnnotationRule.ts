@@ -32,6 +32,9 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
         // TODO use getContextuallyTypedParameterType
         if (!node.parameters.some((p) => p.type !== undefined && p.dotDotDotToken === undefined))
             return;
+        if (isIife(node))
+            return checkIife(node.parameters, node.parent.parent.arguments);
+
         const contextualType = checker.getContextualType(node);
         if (contextualType === undefined)
             return;
@@ -57,6 +60,17 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
         }
     }
 
+    function checkIife(parameters: ReadonlyArray<ts.ParameterDeclaration>, args: ReadonlyArray<ts.Expression>) {
+        const len = Math.min(parameters.length, args.length);
+        for (let i = 0; i < len; ++i) {
+            const {type, dotDotDotToken} = parameters[i];
+            if (type === undefined || dotDotDotToken !== undefined)
+                continue;
+            if (checker.getTypeFromTypeNode(type) === checker.getBaseTypeOfLiteralType(checker.getTypeAtLocation(args[i])))
+                fail(type);
+        }
+    }
+
     function checkVariables(list: ts.VariableDeclarationList) {
         const isConst = getVariableDeclarationKind(list) === VariableDeclarationKind.Const;
         for (const variable of list.declarations) {
@@ -74,4 +88,10 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
     function fail(type: ts.TypeNode) {
         ctx.addFailure(type.pos - 1, type.end, FAIL_MESSAGE, Lint.Replacement.deleteFromTo(type.pos - 1, type.end));
     }
+}
+
+function isIife<T extends FunctionExpressionLike>(node: T): node is T & {parent: ts.ParenthesizedExpression & {parent: ts.CallExpression}} {
+    return node.parent!.kind === ts.SyntaxKind.ParenthesizedExpression &&
+        node.parent!.parent!.kind === ts.SyntaxKind.CallExpression &&
+        (<ts.CallExpression>node.parent!.parent).expression === node.parent;
 }

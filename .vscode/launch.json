@@ -9,7 +9,6 @@
 			"stopOnEntry": false,
 			"args": ["--test", "test/rules/no-unnecessary-type-annotation/default"],
 			"cwd": "${workspaceRoot}",
-			"preLaunchTask": "build",
 			"runtimeExecutable": null,
 			"runtimeArgs": [
 				"--nolazy"

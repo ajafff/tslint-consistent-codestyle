@@ -9,12 +9,12 @@
   "main": "rules/index.js",
   "scripts": {
     "test": "tslint --test test/rules/*/*",
-    "prebuild": "rimraf '{src,rules}/*.js'",
-    "build": "tsc -p .",
+    "precompile": "rimraf '{src,rules}/*.js'",
+    "compile": "tsc -p .",
     "prepublishOnly": "npm run verify",
     "lint": "tslint -p .",
     "lint:fix": "tslint --fix -p .",
-    "verify": "run-s build lint coverage",
+    "verify": "run-s compile lint coverage",
     "precoverage": "rimraf coverage .nyc_output",
     "coverage": "nyc npm test",
     "report-coverage": "cat ./coverage/lcov.info | coveralls"

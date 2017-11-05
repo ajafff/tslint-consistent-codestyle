@@ -48,6 +48,12 @@ genericReturn((): number => {
 genericReturn2((): number => {
     return 1;
 });
+take<(this: any, a: string) => void>((a: string) => a);
+                                       ~~~~~~~~ [fail]
+take<(a: string) => void>(function(this: any, a: string) => a);
+                                               ~~~~~~~~ [fail]
+take<(this: any, a: string) => void>(function(this: any, a: string) => a);
+                                                          ~~~~~~~~ [fail]
 
 (function(foo: "foo") {})("foo");
 (function(foo: string) {})("foo");
@@ -70,6 +76,7 @@ genericReturn2((): number => {
                          ~~~~~~~~ [fail]
 
     const v: string | false = (function(): string | false {})
+    const v: true = (function(): true { return true; })
 }
 
 

@@ -53,6 +53,7 @@ take<((() => void) | ((a: string) => void))>((a: string) => a); // TODO find cor
 })(1);
 
 const myVerboseSignature: (a: number) => number = function(a: number): number {
+                        ~~~~~~~~~~~~~~~~~~~~~~~ [fail]
                                                             ~~~~~~~~ [fail]
     return a;
 }

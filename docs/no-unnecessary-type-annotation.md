@@ -14,7 +14,7 @@ const foo: number = 1;
 let foo: number = 1;
 const arr: string[] = ["foo", "bar"];
 
-const myVerboseSignature: (a: number) => number = function(a: number): number { // currently shows an error at 'a: number'
+const myVerboseSignature: (a: number) => number = function(a: number): number {
     return a;
 }
 

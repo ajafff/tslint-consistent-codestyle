@@ -55,7 +55,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
                 continue;
             const type = checker.getTypeFromTypeNode(parameter.type);
             const contextualParameterType = checker.getTypeOfSymbolAtLocation(context, node);
-            if (type === contextualParameterType)
+            if (typesAreEqual(type, contextualParameterType))
                 fail(parameter.type);
         }
     }
@@ -66,7 +66,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
             const {type, dotDotDotToken} = parameters[i];
             if (type === undefined || dotDotDotToken !== undefined)
                 continue;
-            if (checker.getTypeFromTypeNode(type) === checker.getBaseTypeOfLiteralType(checker.getTypeAtLocation(args[i])))
+            if (typesAreEqual(checker.getTypeFromTypeNode(type), checker.getBaseTypeOfLiteralType(checker.getTypeAtLocation(args[i]))))
                 fail(type);
         }
     }
@@ -80,13 +80,18 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
             if (!isConst)
                 inferred = checker.getBaseTypeOfLiteralType(inferred);
             const declared = checker.getTypeFromTypeNode(variable.type);
-            if (declared === inferred || isConst && declared === checker.getBaseTypeOfLiteralType(inferred))
+            if (typesAreEqual(declared, inferred) || isConst && typesAreEqual(declared, checker.getBaseTypeOfLiteralType(inferred)))
                 fail(variable.type);
         }
     }
 
     function fail(type: ts.TypeNode) {
         ctx.addFailure(type.pos - 1, type.end, FAIL_MESSAGE, Lint.Replacement.deleteFromTo(type.pos - 1, type.end));
+    }
+
+    // TODO this could use a little more effort
+    function typesAreEqual(a: ts.Type, b: ts.Type): boolean {
+        return a === b || checker.typeToString(a) === checker.typeToString(b);
     }
 }
 

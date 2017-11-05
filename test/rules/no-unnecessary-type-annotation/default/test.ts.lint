@@ -48,6 +48,9 @@ take<((() => void) | ((a: string) => void))>((a: string) => a); // TODO find cor
 (function(param: string, ...foo: string[]))("foo", "bar", "baz");
                ~~~~~~~~ [fail]
 (function(foo?: string) {})();
+(<T>(param: T): T => {
+    return param;
+})(1);
 
 
 [fail]: type annotation is redundant

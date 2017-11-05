@@ -118,6 +118,7 @@ const evenWorkWithSignatures: {[key: string]: (a: string, b: number) => void} = 
          ~~~~~~~~ [fail]
     baz(a): void {}
           ~~~~~~ [fail]
+    [foo](a: string): void {}
 }
 
 const withLiteralType: {fn(): false} = {
@@ -127,5 +128,17 @@ const withLiteralType: {fn(): false} = {
         return false;
     },
 };
+
+const noContext = {
+    foo(a: string): void {}
+}
+
+const anyContext: any = {
+    foo(a: string): void {}
+}
+
+class Clazz {
+    foo(a: string): void {}
+}
 
 [fail]: type annotation is redundant

@@ -142,14 +142,16 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
         const name = getPropertyName(method.name);
         if (name === undefined)
             return;
-        let type = checker.getTypeAtLocation(method.parent!);
+        let type = checker.getContextualType(<ts.ObjectLiteralExpression>method.parent);
         if (type === undefined)
             return;
         type = checker.getApparentType(type);
         if (!isTypeFlagSet(type, ts.TypeFlags.StructuredType))
             return;
         const symbol = type.getProperty(name);
-        return symbol && checker.getTypeOfSymbolAtLocation(symbol, method.name);
+        return symbol !== undefined
+            ? checker.getTypeOfSymbolAtLocation(symbol, method.name)
+            : String(+name) === name && type.getNumberIndexType() || type.getStringIndexType();
     }
 
     function signatureHasGenericReturn(signature: ts.Signature): boolean {

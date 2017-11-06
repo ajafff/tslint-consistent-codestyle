@@ -42,6 +42,9 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
 
     function checkFunction(node: FunctionExpressionLike) {
         // TODO use getContextuallyTypedParameterType
+        if (!functionHasTypeDeclarations(node))
+            return;
+
         const iife = getIife(node);
         if (iife !== undefined)
             return checkIife(node, iife);
@@ -53,6 +56,9 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
     }
 
     function checkObjectLiteralMethod(node: ts.MethodDeclaration) {
+        if (!functionHasTypeDeclarations(node))
+            return;
+
         const type = getContextualTypeOfObjectLiteralMethod(node);
         if (type === undefined)
             return;
@@ -69,25 +75,22 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
             typesAreEqual(checker.getTypeFromTypeNode(node.type), signature.getReturnType()))
             fail(node.type);
 
-        let parameters: ReadonlyArray<ts.ParameterDeclaration> = node.parameters;
-        if (parameters.length !== 0 && isThisParameter(parameters[0]))
-            parameters = parameters.slice(1);
-
-        if (!parameters.some((p) => p.type !== undefined && p.dotDotDotToken === undefined))
-            return;
-
+        const parameters = parametersExceptThis(node.parameters);
         for (let i = 0; i < parameters.length; ++i) {
+            // TODO rest parameters
             const parameter = parameters[i];
-            if (parameter.dotDotDotToken !== undefined || parameter.type === undefined)
+            if (parameter.type === undefined)
                 continue;
             const context = signature.parameters[i];
             if (context === undefined)
                 break;
             if (context.declarations !== undefined && isTypeParameter(checker.getTypeAtLocation(context.declarations[0])))
                 continue;
-            const type = checker.getTypeFromTypeNode(parameter.type);
-            const contextualParameterType = checker.getTypeOfSymbolAtLocation(context, node);
-            if (typesAreEqual(type, contextualParameterType))
+            if (compareParameterTypes(
+                checker.getTypeOfSymbolAtLocation(context, node),
+                checker.getTypeFromTypeNode(parameter.type),
+                parameter.questionToken !== undefined || parameter.initializer !== undefined,
+            ))
                 fail(parameter.type);
         }
     }
@@ -100,21 +103,20 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
             ))
             fail(func.type);
 
-        let parameters: ReadonlyArray<ts.ParameterDeclaration> = func.parameters;
-        if (parameters.length !== 0 && isThisParameter(parameters[0]))
-            parameters = parameters.slice(1);
-
-        if (!parameters.some((p) => p.type !== undefined && p.dotDotDotToken === undefined))
-            return;
+        const parameters = parametersExceptThis(func.parameters);
 
         const args = iife.arguments;
         const len = Math.min(parameters.length, args.length);
         for (let i = 0; i < len; ++i) {
-            const {type, dotDotDotToken} = parameters[i];
-            if (type === undefined || dotDotDotToken !== undefined)
+            const parameter = parameters[i];
+            if (parameter.type === undefined)
                 continue;
-            if (typesAreEqual(checker.getTypeFromTypeNode(type), checker.getBaseTypeOfLiteralType(checker.getTypeAtLocation(args[i]))))
-                fail(type);
+            if (compareParameterTypes(
+                checker.getBaseTypeOfLiteralType(checker.getTypeAtLocation(args[i])),
+                checker.getTypeFromTypeNode(parameter.type),
+                parameter.questionToken !== undefined || parameter.initializer !== undefined,
+            ))
+                fail(parameter.type);
         }
     }
 
@@ -166,6 +168,23 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
         const original = checker.getSignatureFromDeclaration(signature.declaration);
         return original !== undefined && isTypeParameter(original.getReturnType());
     }
+
+    function removeOptionalityFromType(type: ts.Type): ts.Type {
+        const allowsNull = !isUnionType(type)
+            ? isTypeFlagSet(type, ts.TypeFlags.Null)
+            : type.types.some((t) => isTypeFlagSet(t, ts.TypeFlags.Null));
+        type = checker.getNonNullableType(type);
+        if (allowsNull)
+            type = checker.getNullableType(type, ts.TypeFlags.Null);
+        return type;
+    }
+
+    function compareParameterTypes(context: ts.Type, declared: ts.Type, optional: boolean): boolean {
+        if (optional)
+            declared = removeOptionalityFromType(declared);
+        return typesAreEqual(declared, context) ||
+            optional && typesAreEqual(checker.getNullableType(declared, ts.TypeFlags.Undefined), context);
+    }
 }
 
 function getIife(node: FunctionExpressionLike): ts.CallExpression | undefined {
@@ -183,4 +202,12 @@ function getIife(node: FunctionExpressionLike): ts.CallExpression | undefined {
 
 function containsLiteralType(type: ts.Type): boolean {
     return isUnionType(type) ? type.types.some(containsLiteralType) : isTypeFlagSet(type, ts.TypeFlags.Literal);
+}
+
+function parametersExceptThis(parameters: ReadonlyArray<ts.ParameterDeclaration>) {
+    return parameters.length !== 0 && isThisParameter(parameters[0]) ? parameters.slice(1) : parameters;
+}
+
+function functionHasTypeDeclarations(func: ts.FunctionLikeDeclaration): boolean {
+    return func.type !== undefined || parametersExceptThis(func.parameters).some((p) => p.type !== undefined);
 }

@@ -27,7 +27,6 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
             case ts.SyntaxKind.ArrowFunction:
             case ts.SyntaxKind.FunctionExpression:
                 checkFunction(<FunctionExpressionLike>node);
-                // TODO check return type - add option
                 break;
             case ts.SyntaxKind.MethodDeclaration:
                 if (node.parent!.kind === ts.SyntaxKind.ObjectLiteralExpression)
@@ -76,19 +75,44 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
             fail(node.type);
 
         const parameters = parametersExceptThis(node.parameters);
+        let restParameterContext = false;
+        let contextualParameterType: ts.Type;
+
         for (let i = 0; i < parameters.length; ++i) {
-            // TODO rest parameters
+            if (!restParameterContext) {
+                const context = signature.parameters[i];
+                if (context === undefined || context.declarations === undefined)
+                    break;
+                const declaration = <ts.ParameterDeclaration>context.declarations[0];
+                if (isTypeParameter(checker.getTypeAtLocation(declaration)))
+                    continue;
+                contextualParameterType = checker.getTypeOfSymbolAtLocation(context, node);
+                if (declaration.dotDotDotToken !== undefined) {
+                    const indexType = contextualParameterType.getNumberIndexType();
+                    if (indexType === undefined)
+                        break;
+                    contextualParameterType = indexType;
+                    restParameterContext = true;
+                }
+            }
             const parameter = parameters[i];
             if (parameter.type === undefined)
                 continue;
-            const context = signature.parameters[i];
-            if (context === undefined)
-                break;
-            if (context.declarations !== undefined && isTypeParameter(checker.getTypeAtLocation(context.declarations[0])))
-                continue;
+            let declaredType: ts.Type;
+            if (parameter.dotDotDotToken !== undefined) {
+                if (!restParameterContext)
+                    break;
+                declaredType = checker.getTypeFromTypeNode(parameter.type);
+                const indexType = declaredType.getNumberIndexType();
+                if (indexType === undefined)
+                    break;
+                declaredType = indexType;
+            } else {
+                declaredType = checker.getTypeFromTypeNode(parameter.type);
+            }
             if (compareParameterTypes(
-                checker.getTypeOfSymbolAtLocation(context, node),
-                checker.getTypeFromTypeNode(parameter.type),
+                contextualParameterType!,
+                declaredType,
                 parameter.questionToken !== undefined || parameter.initializer !== undefined,
             ))
                 fail(parameter.type);

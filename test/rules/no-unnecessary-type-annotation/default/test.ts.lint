@@ -24,11 +24,8 @@ const foo10: Foo[] = [foo9, foo9];
 const fn = function(a: string, b: number) {};
 
 declare function take<T>(cb: T): void;
-declare function generic<T>(cb: (param: T, i: number) => T);
+declare function generic<T>(cb: (param: T, i: number) => T): void;
 declare function genericReturn<T>(cb: () => T): T;
-function genericReturn2<T>(cb: () => T) {
-    return cb();
-}
 
 take<() => void>((a?: boolean) => a);
 take<(a: string, b: number) => void>((a: string, b: number) => a);
@@ -45,14 +42,11 @@ take<((() => void) | ((a: string) => void))>((a: string) => a); // TODO find cor
 genericReturn((): number => {
     return 1;
 });
-genericReturn2((): number => {
-    return 1;
-});
 take<(this: any, a: string) => void>((a: string) => a);
                                        ~~~~~~~~ [fail]
-take<(a: string) => void>(function(this: any, a: string) => a);
+take<(a: string) => void>(function(this: any, a: string) {});
                                                ~~~~~~~~ [fail]
-take<(this: any, a: string) => void>(function(this: any, a: string) => a);
+take<(this: any, a: string) => void>(function(this: any, a: string) {});
                                                           ~~~~~~~~ [fail]
 take<(a: string) => void>((a?: string) => a);
                              ~~~~~~~~ [fail]
@@ -67,7 +61,23 @@ take<(a?: string) => void>((a?: string | undefined) => a);
 take<(a: string) => void>((a: string | undefined = "") => a);
                             ~~~~~~~~~~~~~~~~~~~~ [fail]
 take<(a: string) => void>((a?: string | null) => a);
-take<(a: string) => void>((a?: null) => a);
+take<(a: null) => void>((a?: null) => a);
+                           ~~~~~~ [fail]
+take<(a: string, b: string) => void>((...args: string[]) => args);
+take<(a: string, b: string, ...args: string[]) => void>((...args: string[]) => args);
+take<(...args: string[]) => void>((a: string, b: string, ...rest: string[]) => a);
+                                    ~~~~~~~~ [fail]
+                                               ~~~~~~~~ [fail]
+                                                                ~~~~~~~~~~ [fail]
+take<(...args: string[]) => void>((a: string, b, ...rest: string[]) => a);
+                                    ~~~~~~~~ [fail]
+                                                        ~~~~~~~~~~ [fail]
+take<(...args: string[]) => void>((a, b, ...rest: string[]) => a);
+                                                ~~~~~~~~~~ [fail]
+take<(a: number, ...args: string[]) => void>((a: number, b: string, ...rest: string[]) => a);
+                                               ~~~~~~~~ [fail]
+                                                          ~~~~~~~~ [fail]
+                                                                           ~~~~~~~~~~ [fail]
 
 (function(foo: "foo") {})("foo");
 (function(foo: string) {})("foo");
@@ -86,14 +96,16 @@ take<(a: string) => void>((a?: null) => a);
 })(1);
 (function(): string { return "foo"; })();
            ~~~~~~~~ [fail]
-(function cb(): string {})();
+(function cb(): string { return "foo"; })();
 {
-    const result = (function(): string { return "foo"; })();
+    let result = (function(): string { return "foo"; })();
     result = ((function(): string { return "foo"; }))();
                          ~~~~~~~~ [fail]
 
-    const v: string | false = (function(): string | false {})
-    const v: true = (function(): true { return true; })
+    const v: string | false = (function(): string | false { return false; })();
+           ~~~~~~~~~~~~~~~~ [fail]
+    const v2: true = (function(): true { return true; })();
+            ~~~~~~ [fail]
 }
 ((a: string, b: string, ...args: string[]) => {})("a", "b");
    ~~~~~~~~ [fail]
@@ -160,9 +172,9 @@ const evenWorkWithSignatures: {[key: string]: (a: string, b: number) => void} = 
                     ~~~~~~~~ [fail]
     bar(a: string, b) {},
          ~~~~~~~~ [fail]
-    baz(a): void {}
+    baz(a): void {},
           ~~~~~~ [fail]
-    [foo](a: string): void {}
+    [foo1](a: string): void {}
 }
 
 const withLiteralType: {fn(): false} = {

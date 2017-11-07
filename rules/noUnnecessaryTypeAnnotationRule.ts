@@ -108,16 +108,27 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
 
         const args = iife.arguments;
         const len = Math.min(parameters.length, args.length);
-        for (let i = 0; i < len; ++i) {
+        outer: for (let i = 0; i < len; ++i) {
             const parameter = parameters[i];
             if (parameter.type === undefined)
                 continue;
-            if (compareParameterTypes(
-                checker.getBaseTypeOfLiteralType(checker.getTypeAtLocation(args[i])),
-                checker.getTypeFromTypeNode(parameter.type),
-                parameter.questionToken !== undefined || parameter.initializer !== undefined,
-            ))
+            const declaredType = checker.getTypeFromTypeNode(parameter.type);
+            const contextualType = checker.getBaseTypeOfLiteralType(checker.getTypeAtLocation(args[i]));
+            if (parameter.dotDotDotToken !== undefined) {
+                const indexType = declaredType.getNumberIndexType();
+                if (indexType === undefined || !typesAreEqual(indexType, contextualType))
+                    break;
+                for (let j = i + 1; j < args.length; ++j)
+                    if (!typesAreEqual(contextualType, checker.getBaseTypeOfLiteralType(checker.getTypeAtLocation(args[j]))))
+                        break outer; // TODO build UnionType
                 fail(parameter.type);
+            } else if (compareParameterTypes(
+                contextualType,
+                declaredType,
+                parameter.questionToken !== undefined || parameter.initializer !== undefined,
+            )) {
+                fail(parameter.type);
+            }
         }
     }
 

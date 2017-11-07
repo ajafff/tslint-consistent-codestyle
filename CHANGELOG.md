@@ -1,5 +1,17 @@
 # Change Log
 
+## v1.9.1
+
+**Bugfixes:**
+
+* `no-unnecessary-type-annotation`
+  * check return types
+  * check types in IIFE (immediately invoked function expression)
+  * check object literal methods with contextual type
+  * exempt `this` parameters
+  * correctly handle optional parameters
+  * correctly handle rest parameters
+
 ## v1.9.0
 
 **Features:**

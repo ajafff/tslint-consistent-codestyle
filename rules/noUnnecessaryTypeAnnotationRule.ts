@@ -99,7 +99,8 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
         if (func.type !== undefined && func.name === undefined &&
             (
                 !isExpressionValueUsed(iife) ||
-                !containsLiteralType(checker.getTypeFromTypeNode(func.type)) && checker.getContextualType(iife) !== undefined
+                !containsTypeWithFlag(checker.getTypeFromTypeNode(func.type), ts.TypeFlags.Literal) &&
+                checker.getContextualType(iife) !== undefined
             ))
             fail(func.type);
 
@@ -170,13 +171,11 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
     }
 
     function removeOptionalityFromType(type: ts.Type): ts.Type {
-        const allowsNull = !isUnionType(type)
-            ? isTypeFlagSet(type, ts.TypeFlags.Null)
-            : type.types.some((t) => isTypeFlagSet(t, ts.TypeFlags.Null));
+        if (!containsTypeWithFlag(type, ts.TypeFlags.Undefined))
+            return type;
+        const allowsNull = containsTypeWithFlag(type, ts.TypeFlags.Null);
         type = checker.getNonNullableType(type);
-        if (allowsNull)
-            type = checker.getNullableType(type, ts.TypeFlags.Null);
-        return type;
+        return allowsNull ? checker.getNullableType(type, ts.TypeFlags.Null) : type;
     }
 
     function compareParameterTypes(context: ts.Type, declared: ts.Type, optional: boolean): boolean {
@@ -200,8 +199,8 @@ function getIife(node: FunctionExpressionLike): ts.CallExpression | undefined {
         return <ts.CallExpression>parent;
 }
 
-function containsLiteralType(type: ts.Type): boolean {
-    return isUnionType(type) ? type.types.some(containsLiteralType) : isTypeFlagSet(type, ts.TypeFlags.Literal);
+function containsTypeWithFlag(type: ts.Type, flag: ts.TypeFlags): boolean {
+    return isUnionType(type) ? type.types.some((t) => isTypeFlagSet(t, flag)) : isTypeFlagSet(type, flag);
 }
 
 function parametersExceptThis(parameters: ReadonlyArray<ts.ParameterDeclaration>) {

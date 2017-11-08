@@ -182,6 +182,8 @@ const evenWorkWithSignatures: {[key: string]: (a: string, b: number) => void} = 
     baz(a): void {},
           ~~~~~~ [fail]
     [foo1](a: string): void {},
+            ~~~~~~~~ [fail]
+                     ~~~~~~ [fail]
     noTypes(a, b) {},
     2(a: string, b: number) {}
        ~~~~~~~~ [fail]
@@ -191,7 +193,7 @@ const evenWorkWithSignatures: {[key: string]: (a: string, b: number) => void} = 
 const numericSignature: {[key: number]: (a: string) => void; [key: string]: (a: string, b: number) => void} = {
     foo(a: string, b?: number) {},
          ~~~~~~~~ [fail]
-                    ~~~~~~~~ [fail]
+                     ~~~~~~~~ [fail]
     3(a: string, b?: number) {},
        ~~~~~~~~ [fail]
     3e1(a: string, b?: number) {},
@@ -226,14 +228,16 @@ const anyContext: any = {
     foo(a: string): void {}
 }
 
-const obj: {[Symbol.hasInstance](instance: any): boolean} = {
-         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [fail]
+const objWithSymbolKey: {[Symbol.hasInstance](instance: any): boolean} = {
+                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [fail]
     [Symbol.hasInstance](instance: any): boolean {
                                  ~~~~~ [fail]
                                        ~~~~~~~~~ [fail]
         return true;
     },
 };
+
+// TODO computed properties
 
 class Clazz {
     foo(a: string): void {}

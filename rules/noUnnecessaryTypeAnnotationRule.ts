@@ -10,6 +10,7 @@ import {
     isUnionType,
     isThisParameter,
     isTypePredicateNode,
+    isValidNumericLiteral,
 } from 'tsutils';
 
 type FunctionExpressionLike = ts.ArrowFunction | ts.FunctionExpression;
@@ -223,7 +224,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
 
     function isNumericPropertyName(name: ts.PropertyName) {
         const str = getPropertyName(name);
-        return str !== undefined && String(+str) === str;
+        return str !== undefined && isValidNumericLiteral(str) && String(+str) === str;
     }
 }
 

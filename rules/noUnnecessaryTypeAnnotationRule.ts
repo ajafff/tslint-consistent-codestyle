@@ -10,6 +10,7 @@ import {
     isUnionType,
     isThisParameter,
     isTypePredicateNode,
+    isValidNumericLiteral,
 } from 'tsutils';
 
 type FunctionExpressionLike = ts.ArrowFunction | ts.FunctionExpression;
@@ -198,7 +199,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
         const symbol = type.getProperty(name);
         return symbol !== undefined
             ? checker.getTypeOfSymbolAtLocation(symbol, method.name)
-            : String(parseInt(name, 10)) === name && type.getNumberIndexType() || type.getStringIndexType();
+            : isValidNumericLiteral(name) && type.getNumberIndexType() || type.getStringIndexType();
     }
 
     function signatureHasGenericOrTypePredicateReturn(signature: ts.Signature): boolean {

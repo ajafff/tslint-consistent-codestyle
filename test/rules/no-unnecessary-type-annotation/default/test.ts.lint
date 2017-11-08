@@ -63,6 +63,8 @@ take<(a: string) => void>((a: string | undefined = "") => a);
 take<(a: string) => void>((a?: string | null) => a);
 take<(a: null) => void>((a?: null) => a);
                            ~~~~~~ [fail]
+take<(a: null) => void>((a?: null | undefined) => a);
+                           ~~~~~~~~~~~~~~~~~~ [fail]
 take<(a: string, b: string) => void>((...args: string[]) => args);
 take<(a: string, b: string, ...args: string[]) => void>((...args: string[]) => args);
 take<(...args: string[]) => void>((a: string, b: string, ...rest: string[]) => a);
@@ -78,6 +80,11 @@ take<(a: number, ...args: string[]) => void>((a: number, b: string, ...rest: str
                                                ~~~~~~~~ [fail]
                                                           ~~~~~~~~ [fail]
                                                                            ~~~~~~~~~~ [fail]
+take<(...args: any[]) => void>((a: any, b: any) => a);
+                                 ~~~~~ [fail]
+                                         ~~~~~ [fail]
+take<(...args: any) => void>((a: any, b: any) => a);
+take<(...args: any[]) => void>((...args: any) => args);
 
 (function(foo: "foo") {})("foo");
 (function(foo: string) {})("foo");
@@ -174,7 +181,19 @@ const evenWorkWithSignatures: {[key: string]: (a: string, b: number) => void} = 
          ~~~~~~~~ [fail]
     baz(a): void {},
           ~~~~~~ [fail]
-    [foo1](a: string): void {}
+    [foo1](a: string): void {},
+    noTypes(a, b) {},
+    2(a: string, b: number) {}
+       ~~~~~~~~ [fail]
+                  ~~~~~~~~ [fail]
+}
+
+const numericSignature: {[key: number]: (a: string) => void; [key: string]: (a: string, b: number) => void} = {
+    foo(a: string, b: number) {},
+         ~~~~~~~~ [fail]
+                    ~~~~~~~~ [fail]
+    3(a: string, b: number) {},
+       ~~~~~~~~ [fail]
 }
 
 const withLiteralType: {fn(): false} = {
@@ -196,5 +215,11 @@ const anyContext: any = {
 class Clazz {
     foo(a: string): void {}
 }
+
+[1, "2", true].filter((e): e is string => typeof e === 'string');
+take<(foo: any) => foo is string>((foo: any): foo is string => typeof foo === "string");
+                                      ~~~~~ [fail]
+take<((foo: any) => foo is string)|(foo: any) => boolean)>((foo: any): foo is string => typeof foo === "string");
+take<((foo: any) => foo is string)|(foo: any) => boolean)>((foo: any): boolean => typeof foo === "string");
 
 [fail]: type annotation is redundant

@@ -9,6 +9,7 @@ import {
     isExpressionValueUsed,
     isUnionType,
     isThisParameter,
+    isTypePredicateNode,
 } from 'tsutils';
 
 type FunctionExpressionLike = ts.ArrowFunction | ts.FunctionExpression;
@@ -71,7 +72,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
             return;
         const signature = callSignatures[0];
         // TODO handle type predicate
-        if (node.type !== undefined && !signatureHasGenericReturn(signature) &&
+        if (node.type !== undefined && !signatureHasGenericOrTypePredicateReturn(signature) &&
             typesAreEqual(checker.getTypeFromTypeNode(node.type), signature.getReturnType()))
             fail(node.type);
 
@@ -198,10 +199,12 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
         const symbol = type.getProperty(name);
         return symbol !== undefined
             ? checker.getTypeOfSymbolAtLocation(symbol, method.name)
-            : String(+name) === name && type.getNumberIndexType() || type.getStringIndexType();
+            : String(parseInt(name, 10)) === name && type.getNumberIndexType() || type.getStringIndexType();
     }
 
-    function signatureHasGenericReturn(signature: ts.Signature): boolean {
+    function signatureHasGenericOrTypePredicateReturn(signature: ts.Signature): boolean {
+        if (signature.declaration.type !== undefined && isTypePredicateNode(signature.declaration.type))
+            return true;
         const original = checker.getSignatureFromDeclaration(signature.declaration);
         return original !== undefined && isTypeParameter(original.getReturnType());
     }

@@ -1,5 +1,13 @@
 # Change Log
 
+## v1.9.2
+
+**Bugfixes:**
+
+* `no-unnecessary-type-annotation`
+  * fixed a false positive with typeguard functions
+  * this rule is no longer considered experimental
+
 ## v1.9.1
 
 **Bugfixes:**

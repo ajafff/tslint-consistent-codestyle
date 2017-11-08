@@ -71,7 +71,6 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
         if (callSignatures.length !== 1)
             return;
         const signature = callSignatures[0];
-        // TODO handle type predicate
         if (node.type !== undefined && !signatureHasGenericOrTypePredicateReturn(signature) &&
             typesAreEqual(checker.getTypeFromTypeNode(node.type), signature.getReturnType()))
             fail(node.type);

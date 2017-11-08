@@ -189,22 +189,25 @@ const evenWorkWithSignatures: {[key: string]: (a: string, b: number) => void} = 
 }
 
 const numericSignature: {[key: number]: (a: string) => void; [key: string]: (a: string, b: number) => void} = {
-    foo(a: string, b: number) {},
+    foo(a: string, b?: number) {},
          ~~~~~~~~ [fail]
                     ~~~~~~~~ [fail]
-    3(a: string, b: number) {},
+    3(a: string, b?: number) {},
        ~~~~~~~~ [fail]
-    3e1(a: string, b: number) {},
+    3e1(a: string, b?: number) {},
          ~~~~~~~~ [fail]
-    2.5(a: string, b: number) {},
+    2.5(a: string, b?: number) {},
          ~~~~~~~~ [fail]
-    4.0(a: string, b: number) {},
+    4.0(a: string, b?: number) {},
          ~~~~~~~~ [fail]
-    "2"(a: string, b: number) {},
+    "2"(a: string, b?: number) {},
          ~~~~~~~~ [fail]
-    "-2"(a: string, b: number) {},
+    "-2"(a: string, b?: number) {},
           ~~~~~~~~ [fail]
-                     ~~~~~~~~ [fail]
+                      ~~~~~~~~ [fail]
+    "2e1"(a: string, b?: number) {},
+           ~~~~~~~~ [fail]
+                       ~~~~~~~~ [fail]
 }
 
 const withLiteralType: {fn(): false} = {
@@ -222,6 +225,15 @@ const noContext = {
 const anyContext: any = {
     foo(a: string): void {}
 }
+
+const obj: {[Symbol.hasInstance](instance: any): boolean} = {
+         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [fail]
+    [Symbol.hasInstance](instance: any): boolean {
+                                 ~~~~~ [fail]
+                                       ~~~~~~~~~ [fail]
+        return true;
+    },
+};
 
 class Clazz {
     foo(a: string): void {}

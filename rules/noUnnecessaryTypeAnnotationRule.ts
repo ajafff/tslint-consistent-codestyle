@@ -10,7 +10,6 @@ import {
     isUnionType,
     isThisParameter,
     isTypePredicateNode,
-    isValidNumericLiteral,
 } from 'tsutils';
 
 type FunctionExpressionLike = ts.ArrowFunction | ts.FunctionExpression;
@@ -68,7 +67,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
 
     function checkContextSensitiveFunctionOrMethod(node: ts.FunctionLikeDeclaration, contextualType: ts.Type) {
         const callSignatures = contextualType.getCallSignatures();
-        // TODO choose the correct signature?
+        // TODO choose the correct signature! filter by arity
         if (callSignatures.length !== 1)
             return;
         const signature = callSignatures[0];
@@ -187,19 +186,17 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
     }
 
     function getContextualTypeOfObjectLiteralMethod(method: ts.MethodDeclaration): ts.Type | undefined {
-        const name = getPropertyName(method.name);
-        if (name === undefined)
-            return;
         let type = checker.getContextualType(<ts.ObjectLiteralExpression>method.parent);
         if (type === undefined)
             return;
         type = checker.getApparentType(type);
         if (!isTypeFlagSet(type, ts.TypeFlags.StructuredType))
             return;
-        const symbol = type.getProperty(name);
+        const t = checker.getTypeAtLocation(method);
+        const symbol = t.symbol && type.getProperties().find((s) => s.escapedName === t.symbol!.escapedName);
         return symbol !== undefined
             ? checker.getTypeOfSymbolAtLocation(symbol, method.name)
-            : isValidNumericLiteral(name) && type.getNumberIndexType() || type.getStringIndexType();
+            : isNumericPropertyName(method.name) && type.getNumberIndexType() || type.getStringIndexType();
     }
 
     function signatureHasGenericOrTypePredicateReturn(signature: ts.Signature): boolean {
@@ -222,6 +219,11 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
             declared = removeOptionalityFromType(declared);
         return typesAreEqual(declared, context) ||
             optional && typesAreEqual(checker.getNullableType(declared, ts.TypeFlags.Undefined), context);
+    }
+
+    function isNumericPropertyName(name: ts.PropertyName) {
+        const str = getPropertyName(name);
+        return str !== undefined && String(+str) === str;
     }
 }
 

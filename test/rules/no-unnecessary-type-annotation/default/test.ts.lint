@@ -198,8 +198,13 @@ const numericSignature: {[key: number]: (a: string) => void; [key: string]: (a: 
          ~~~~~~~~ [fail]
     2.5(a: string, b: number) {},
          ~~~~~~~~ [fail]
-    3.0(a: string, b: number) {},
+    4.0(a: string, b: number) {},
          ~~~~~~~~ [fail]
+    "2"(a: string, b: number) {},
+         ~~~~~~~~ [fail]
+    "-2"(a: string, b: number) {},
+          ~~~~~~~~ [fail]
+                     ~~~~~~~~ [fail]
 }
 
 const withLiteralType: {fn(): false} = {

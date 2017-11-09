@@ -100,11 +100,14 @@ take<((a: string) => void) & {name?: string}>((a: string) => a);
                                                 ~~~~~~~~ [fail]
 take<((a: string) => void) & ((a: string) => void)>((a: string) => a);
 take<((a: string) => void) & (() => void)>((a: string) => a);
+take<((a: {fn(): void}) => void) | ((a: {fn(): void}, b: number) => void)>((a: {fn(): void}) => a);
 take<((a: string) => void) | ((a: string) => void)>((a: string): void => a);
                                                       ~~~~~~~~ [fail]
                                                                ~~~~~~ [fail]
 take<((a: string) => void) | ((a: string) => void) & {name?: string}>((a: string) => a);
                                                                         ~~~~~~~~ [fail]
+take<((a: string) => void) | object & {name?: string}>((a: string) => a);
+                                                         ~~~~~~~~ [fail]
 take<(((a: string) => void) | ((a: string) => void)) & {name?: string}>((a: string) => a);
                                                                           ~~~~~~~~ [fail]
 // only return type differs - don't complain about the return annotation

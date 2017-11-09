@@ -11,6 +11,7 @@ import {
     isThisParameter,
     isTypePredicateNode,
     isValidNumericLiteral,
+    isIntersectionType,
 } from 'tsutils';
 
 type FunctionExpressionLike = ts.ArrowFunction | ts.FunctionExpression;
@@ -67,29 +68,28 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
     }
 
     function checkContextSensitiveFunctionOrMethod(node: ts.FunctionLikeDeclaration, contextualType: ts.Type) {
-        const callSignatures = contextualType.getCallSignatures();
-        // TODO choose the correct signature! filter by arity
-        if (callSignatures.length !== 1)
+        const parameters = parametersExceptThis(node.parameters);
+        const sig = getMatchingSignature(contextualType, parameters);
+        if (sig === undefined)
             return;
-        const signature = callSignatures[0];
-        if (node.type !== undefined && !signatureHasGenericOrTypePredicateReturn(signature) &&
+        const [signature, checkReturn] = sig;
+
+        if (checkReturn && node.type !== undefined && !signatureHasGenericOrTypePredicateReturn(signature) &&
             typesAreEqual(checker.getTypeFromTypeNode(node.type), signature.getReturnType()))
             fail(node.type);
 
-        const parameters = parametersExceptThis(node.parameters);
         let restParameterContext = false;
         let contextualParameterType: ts.Type;
 
         for (let i = 0; i < parameters.length; ++i) {
             if (!restParameterContext) {
                 const context = signature.parameters[i];
-                if (context === undefined || context.declarations === undefined)
+                if (context === undefined || context.valueDeclaration === undefined)
                     break;
-                const declaration = <ts.ParameterDeclaration>context.declarations[0];
-                if (isTypeParameter(checker.getTypeAtLocation(declaration)))
+                if (isTypeParameter(checker.getTypeAtLocation(context.valueDeclaration)))
                     continue;
                 contextualParameterType = checker.getTypeOfSymbolAtLocation(context, node);
-                if (declaration.dotDotDotToken !== undefined) {
+                if ((<ts.ParameterDeclaration>context.valueDeclaration).dotDotDotToken !== undefined) {
                     const indexType = contextualParameterType.getNumberIndexType();
                     if (indexType === undefined)
                         break;
@@ -226,6 +226,79 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
         const str = getPropertyName(name);
         return str !== undefined && isValidNumericLiteral(str) && String(+str) === str;
     }
+
+    function getMatchingSignature(type: ts.Type, parameters: ReadonlyArray<ts.ParameterDeclaration>): [ts.Signature, boolean] | undefined {
+        const minArguments = getMinArguments(parameters);
+
+        const signatures = getSignaturesOfType(type).filter((s) => getMinArguments(s.declaration.parameters, true) >= minArguments);
+
+        switch (signatures.length) {
+            case 0:
+                return;
+            case 1:
+                return [signatures[0], true];
+            default:
+                const str = checker.signatureToString(signatures[0]);
+                const withoutReturn = removeSignatureReturn(str);
+                let returnUsable = true;
+                for (let i = 1; i < signatures.length; ++i) { // check if all signatures are the same
+                    const sig = checker.signatureToString(signatures[i]);
+                    if (str !== sig) {
+                        if (withoutReturn !== removeSignatureReturn(sig))
+                            return;
+                        returnUsable = false;
+                    }
+                }
+                return [signatures[0], returnUsable];
+        }
+    }
+}
+
+function removeSignatureReturn(str: string) {
+    let open = 1;
+    let i = 1;
+    for (; open !== 0; ++i) {
+        if (str[i] === '(') {
+            ++open;
+        } else if (str[i] === ')') {
+            --open;
+        }
+    }
+    return str.substr(0, i + 1);
+}
+
+function getSignaturesOfType(type: ts.Type): ts.Signature[] {
+    if (isUnionType(type)) {
+        const signatures = [];
+        for (const t of type.types)
+            signatures.push(...getSignaturesOfType(t));
+        return signatures;
+    }
+    if (isIntersectionType(type)) {
+        let signatures: ts.Signature[] | undefined;
+        for (const t of type.types) {
+            const sig = getSignaturesOfType(t);
+            if (sig.length !== 0) {
+                if (signatures !== undefined)
+                    return []; // if more than one type of the intersection has call signatures, none of them is useful for inference
+                signatures = sig;
+            }
+        }
+        return signatures === undefined ? [] : signatures;
+    }
+    return type.getCallSignatures();
+}
+
+function getMinArguments(parameters: ReadonlyArray<ts.ParameterDeclaration>, lhs?: boolean): number {
+    let minArguments = parameters.length;
+    if (lhs && minArguments !== 0 && parameters[minArguments - 1].dotDotDotToken !== undefined)
+        return Infinity;
+    for (; minArguments > 0; --minArguments) {
+        const parameter = parameters[minArguments - 1];
+        if (parameter.questionToken === undefined && parameter.initializer === undefined && parameter.dotDotDotToken === undefined)
+            break;
+    }
+    return minArguments;
 }
 
 function getIife(node: FunctionExpressionLike): ts.CallExpression | undefined {

@@ -1,5 +1,14 @@
 # Change Log
 
+## v1.9.3
+
+**Bugfixes:**
+
+* `no-unnecessary-type-annotation`
+  * choose correct signature by arity
+  * correctly handle methods with numeric name
+  * correctly handle methods with computed names
+
 ## v1.9.2
 
 **Bugfixes:**

@@ -224,7 +224,24 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
 
     function isNumericPropertyName(name: ts.PropertyName) {
         const str = getPropertyName(name);
-        return str !== undefined && isValidNumericLiteral(str) && String(+str) === str;
+        if (str !== undefined)
+            return isValidNumericLiteral(str) && String(+str) === str;
+        return isAssignableToNumber(checker.getTypeAtLocation((<ts.ComputedPropertyName>name).expression)); // TODO use isTypeAssignableTo
+    }
+
+    function isAssignableToNumber(type: ts.Type): boolean {
+        if (isTypeParameter(type) && type.symbol !== undefined && type.symbol.declarations !== undefined) {
+            const declaration = <ts.TypeParameterDeclaration>type.symbol.declarations[0];
+            if (declaration.constraint === undefined)
+                return true;
+            return isAssignableToNumber(checker.getTypeFromTypeNode(declaration.constraint));
+        }
+        if (isUnionType(type))
+            return type.types.every(isAssignableToNumber);
+        if (isIntersectionType(type))
+            return type.types.some(isAssignableToNumber);
+
+        return isTypeFlagSet(type, ts.TypeFlags.NumberLike | ts.TypeFlags.Any);
     }
 
     function getMatchingSignature(type: ts.Type, parameters: ReadonlyArray<ts.ParameterDeclaration>): [ts.Signature, boolean] | undefined {

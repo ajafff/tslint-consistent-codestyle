@@ -265,7 +265,63 @@ const objWithSymbolKey: {[Symbol.hasInstance](instance: any): boolean} = {
     },
 };
 
-// TODO computed properties
+declare let stringKey: string;
+declare let numberKey: number;
+declare let stringOrNumber: string | number;
+declare let stringAndNumber: string & number;
+declare let anyKey: any;
+
+const bothSignatures: {[key: number]: (a: string) => void; [key: string]: (a: string, b: number) => void} = {
+    [stringKey](a: string, b?: number) {},
+                 ~~~~~~~~ [fail]
+                             ~~~~~~~~ [fail]
+    [numberKey](a: string, b?: number) {},
+                 ~~~~~~~~ [fail]
+    [stringOrNumber](a: string, b?: number) {},
+                      ~~~~~~~~ [fail]
+                                  ~~~~~~~~ [fail]
+    [stringAndNumber](a: string, b?: number) {},
+                       ~~~~~~~~ [fail]
+    [anyKey](a: string, b?: number) {},
+              ~~~~~~~~ [fail]
+}
+
+function anyTypeParameter<T>(param: T) {
+    const obj: {[key: number]: (a: string) => void; [key: string]: (a: string, b: number) => void} = {
+        [param](a: string, b?: number) {},
+                 ~~~~~~~~ [fail]
+    }
+}
+
+function numericTypeParameter<T extends number, U extends 1 | 2, V extends T, W extends U>(a: T, b: U, c: V, d: W) {
+    const obj: {[key: number]: (a: string) => void; [key: string]: (a: string, b: number) => void} = {
+        [a](a: string, b?: number) {},
+             ~~~~~~~~ [fail]
+        [b](a: string, b?: number) {},
+             ~~~~~~~~ [fail]
+        [c](a: string, b?: number) {},
+             ~~~~~~~~ [fail]
+        [d](a: string, b?: number) {},
+             ~~~~~~~~ [fail]
+    }
+}
+
+function stringTypeParameter<T extends string, U extends "1" | "2", V extends T, W extends U>(a: T, b: U, c: V, d: W) {
+    const obj: {[key: number]: (a: string) => void; [key: string]: (a: string, b: number) => void} = {
+        [a](a: string, b?: number) {},
+             ~~~~~~~~ [fail]
+                         ~~~~~~~~ [fail]
+        [b](a: string, b?: number) {},
+             ~~~~~~~~ [fail]
+                         ~~~~~~~~ [fail]
+        [c](a: string, b?: number) {},
+             ~~~~~~~~ [fail]
+                         ~~~~~~~~ [fail]
+        [d](a: string, b?: number) {},
+             ~~~~~~~~ [fail]
+                         ~~~~~~~~ [fail]
+    }
+}
 
 class Clazz {
     foo(a: string): void {}

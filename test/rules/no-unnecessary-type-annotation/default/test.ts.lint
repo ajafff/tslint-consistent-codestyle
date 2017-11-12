@@ -45,6 +45,9 @@ genericReturn((): number => {
 });
 take<(this: any, a: string) => void>((a: string) => a);
                                        ~~~~~~~~ [fail]
+take<(this: any, a: string) => void>((a: string, b: number) => a);
+take<(this: any, a: string) => void>((a: string, b?: number) => a);
+                                       ~~~~~~~~ [fail]
 take<(a: string) => void>(function(this: any, a: string) {});
                                                ~~~~~~~~ [fail]
 take<(this: any, a: string) => void>(function(this: any, a: string) {});
@@ -52,6 +55,8 @@ take<(this: any, a: string) => void>(function(this: any, a: string) {});
 take<(a: string) => void>((a?: string) => a);
                              ~~~~~~~~ [fail]
 take<(a: string) => void>((a?: string | undefined) => a);
+                             ~~~~~~~~~~~~~~~~~~~~ [fail]
+take<(a?: string) => void>((a: string | undefined) => a);
                              ~~~~~~~~~~~~~~~~~~~~ [fail]
 take<(a: string | undefined) => void>((a?: string) => a);
                                          ~~~~~~~~ [fail]

@@ -257,7 +257,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
     function getMatchingSignature(type: ts.Type, parameters: ReadonlyArray<ts.ParameterDeclaration>): [ts.Signature, boolean] | undefined {
         const minArguments = getMinArguments(parameters);
 
-        const signatures = getSignaturesOfType(type).filter((s) => getMinArguments(s.declaration.parameters, true) >= minArguments);
+        const signatures = getSignaturesOfType(type).filter((s) => getNumParameters(s.declaration.parameters) >= minArguments);
 
         switch (signatures.length) {
             case 0:
@@ -316,10 +316,16 @@ function getSignaturesOfType(type: ts.Type): ts.Signature[] {
     return type.getCallSignatures();
 }
 
-function getMinArguments(parameters: ReadonlyArray<ts.ParameterDeclaration>, lhs?: boolean): number {
-    let minArguments = parameters.length;
-    if (lhs && minArguments !== 0 && parameters[minArguments - 1].dotDotDotToken !== undefined)
+function getNumParameters(parameters: ReadonlyArray<ts.ParameterDeclaration>): number {
+    if (parameters.length === 0)
+        return 0;
+    if (parameters[parameters.length - 1].dotDotDotToken !== undefined)
         return Infinity;
+    return parametersExceptThis(parameters).length;
+}
+
+function getMinArguments(parameters: ReadonlyArray<ts.ParameterDeclaration>): number {
+    let minArguments = parameters.length;
     for (; minArguments > 0; --minArguments) {
         const parameter = parameters[minArguments - 1];
         if (parameter.questionToken === undefined && parameter.initializer === undefined && parameter.dotDotDotToken === undefined)

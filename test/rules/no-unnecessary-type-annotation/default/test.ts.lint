@@ -101,6 +101,8 @@ take<((a: string, b: number) => void) | ((a: boolean, b: number, c: object) => v
 take<((a: string, b: number) => void) | ((a: boolean, b: number, c: object) => void)>((a: boolean, b: number, c?: object): void => a);
 take<((a: string, b: number) => void) | ((a: boolean, b: number, c: object) => void)>((a: boolean, b: number): void => a);
 take<((a: string, b: number) => void) | ((a: boolean, b: number, c: object) => void)>((a: string, b: number): void => a);
+take<((a: string, b: number) => void) | ((a: boolean, b: number, c?: object) => void)>((a: string, b: number): void => a);
+take<((a: string, b: number) => void) | ((a: boolean, b: number, c: object) => void)>((): void => null);
 take<((a: string) => void) & {name?: string}>((a: string) => a);
                                                 ~~~~~~~~ [fail]
 take<((a: string) => void) & ((a: string) => void)>((a: string) => a);

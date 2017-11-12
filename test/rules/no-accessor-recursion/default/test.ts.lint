@@ -1,0 +1,78 @@
+let obj = {
+    get foo() {
+        return this._foo;
+    },
+
+    set foo(v: string) {
+        this._foo = v;
+    },
+
+    get bar() {
+        return this.bar;
+               ~~~~~~~~ [fail]
+    },
+
+    set bar(v: string) {
+        this.bar = v;
+        ~~~~~~~~ [fail]
+    },
+
+    get baz() {
+        return that.baz;
+    },
+
+    set baz(v: string) {
+        that.baz = v;
+    },
+
+    get bas() {
+        return (() => this.bas)();
+                      ~~~~~~~~ [fail]
+    },
+
+    set bas(v: string) {
+        (() => this.bas = v)();
+               ~~~~~~~~ [fail]
+    },
+    fn() {
+        this.foo = this.foo;
+        this.bar = this.bar;
+        this.baz = this.baz;
+        this.bas = this.bas;
+    }
+}
+
+obj = {
+    get foo() {
+        return {
+            get bar() {
+                class Foo {
+                    get foo() {
+                        return this.foo;
+                               ~~~~~~~~ [fail]
+                    }
+                    get bar() {
+                        return this.bar;
+                               ~~~~~~~~ [fail]
+                    }
+                    getBaz() {
+                        return this.foo + this.bar;
+                    }
+                }
+                return this.foo;
+            }
+        }
+    },
+    get bar() {
+        this.bar++;
+        ~~~~~~~~ [fail]
+        return 1;
+    },
+    set bar(v: number) {
+        const tmp = this.bar;
+                    ~~~~~~~~ [fail]
+        doStuff(v + tmp);
+    }
+}
+
+[fail]: accessor recursion is not allowed

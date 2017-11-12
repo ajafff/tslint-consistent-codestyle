@@ -72,6 +72,13 @@ obj = {
         const tmp = this.bar;
                     ~~~~~~~~ [fail]
         doStuff(v + tmp);
+    },
+    get baz() {
+        if (condition) {
+            return this.baz;
+                   ~~~~~~~~ [fail]
+        }
+        return this.bar;
     }
 }
 

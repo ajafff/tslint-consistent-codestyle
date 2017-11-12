@@ -51,6 +51,7 @@ Rule | Description
 [ext-curly](https://github.com/ajafff/tslint-consistent-codestyle/blob/master/docs/ext-curly.md) |Enforces where to consistently use curly braces where not strictly necessary.
 [naming-convention](https://github.com/ajafff/tslint-consistent-codestyle/blob/master/docs/naming-convention.md) | Fine grained configuration to enfoce consistent naming for almost everything. E.g. variables, functions, classes, methods, parameters, enums, etc.
 [no-as-type-assertion](https://github.com/ajafff/tslint-consistent-codestyle/blob/master/docs/no-as-type-assertion.md) | Prefer `<Type>foo` over `foo as Type`.
+[no-accessor-recursion](https://github.com/ajafff/tslint-consistent-codestyle/blob/master/docs/no-accessor-recursion.md) | Don't use `get foo() { return this.foo; }`. This is most likely a typo.
 [no-collapsible-if](https://github.com/ajafff/tslint-consistent-codestyle/blob/master/docs/no-collapsible-if.md) | Identifies nested if statements that can be combined into one.
 [no-else-after-return](https://github.com/ajafff/tslint-consistent-codestyle/blob/master/docs/no-else-after-return.md) | Like [no-else-return from eslint](http://eslint.org/docs/rules/no-else-return).
 [no-return-undefined](https://github.com/ajafff/tslint-consistent-codestyle/blob/master/docs/no-return-undefined.md) | Just `return;` instead of `return undefined;`.

@@ -1,5 +1,17 @@
 # Change Log
 
+## v1.10.0
+
+**Bugfixes:**
+
+* `no-unnecessary-type-annotation`
+  * avoid infinite recursion for circular type parameters
+  * fix signature arity calculation
+
+**Features:**
+
+* new rule [`no-accessor-recursion`](https://github.com/ajafff/tslint-consistent-codestyle/blob/master/docs/no-accessor-recursion.md)
+
 ## v1.9.3
 
 **Bugfixes:**

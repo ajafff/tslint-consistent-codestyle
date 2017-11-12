@@ -229,19 +229,29 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
         return isAssignableToNumber(checker.getTypeAtLocation((<ts.ComputedPropertyName>name).expression)); // TODO use isTypeAssignableTo
     }
 
-    function isAssignableToNumber(type: ts.Type): boolean {
-        if (isTypeParameter(type) && type.symbol !== undefined && type.symbol.declarations !== undefined) {
-            const declaration = <ts.TypeParameterDeclaration>type.symbol.declarations[0];
-            if (declaration.constraint === undefined)
-                return true;
-            return isAssignableToNumber(checker.getTypeFromTypeNode(declaration.constraint));
-        }
-        if (isUnionType(type))
-            return type.types.every(isAssignableToNumber);
-        if (isIntersectionType(type))
-            return type.types.some(isAssignableToNumber);
+    function isAssignableToNumber(type: ts.Type) {
+        let typeParametersSeen: Set<ts.Type> | undefined;
+        return (function check(t): boolean {
+            if (isTypeParameter(t) && t.symbol !== undefined && t.symbol.declarations !== undefined) {
+                if (typeParametersSeen === undefined) {
+                    typeParametersSeen = new Set([t]);
+                } else if (!typeParametersSeen.has(t)) {
+                    typeParametersSeen.add(t);
+                } else {
+                    return false;
+                }
+                const declaration = <ts.TypeParameterDeclaration>t.symbol.declarations[0];
+                if (declaration.constraint === undefined)
+                    return true;
+                return check(checker.getTypeFromTypeNode(declaration.constraint));
+            }
+            if (isUnionType(t))
+                return t.types.every(check);
+            if (isIntersectionType(t))
+                return t.types.some(check);
 
-        return isTypeFlagSet(type, ts.TypeFlags.NumberLike | ts.TypeFlags.Any);
+            return isTypeFlagSet(t, ts.TypeFlags.NumberLike | ts.TypeFlags.Any);
+        })(type);
     }
 
     function getMatchingSignature(type: ts.Type, parameters: ReadonlyArray<ts.ParameterDeclaration>): [ts.Signature, boolean] | undefined {

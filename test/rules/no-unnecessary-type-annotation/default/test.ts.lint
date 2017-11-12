@@ -323,6 +323,23 @@ function stringTypeParameter<T extends string, U extends "1" | "2", V extends T,
     }
 }
 
+function recursiveTypeParameter<T extends V | U, U extends V & T, V extends T | U | W, W extends V>(a: T, b: U, c: V, d: W) {
+    const obj: {[key: number]: (a: string) => void; [key: string]: (a: string, b: number) => void} = {
+        [a](a: string, b?: number) {},
+             ~~~~~~~~ [fail]
+                         ~~~~~~~~ [fail]
+        [b](a: string, b?: number) {},
+             ~~~~~~~~ [fail]
+                         ~~~~~~~~ [fail]
+        [c](a: string, b?: number) {},
+             ~~~~~~~~ [fail]
+                         ~~~~~~~~ [fail]
+        [d](a: string, b?: number) {},
+             ~~~~~~~~ [fail]
+                         ~~~~~~~~ [fail]
+    }
+}
+
 class Clazz {
     foo(a: string): void {}
 }

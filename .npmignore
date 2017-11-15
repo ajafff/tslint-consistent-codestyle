@@ -8,3 +8,4 @@ tslint.json
 /coverage/
 /.nyc_output
 /docs
+/.circleci/

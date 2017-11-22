@@ -1,0 +1,17 @@
+import React from 'react';
+import * as React from 'react';
+import React = require('react');
+
+import react from 'react';
+       ~~~~~ [Import 'react' is unused.]
+import * as react from 'react';
+            ~~~~~ [Import 'react' is unused.]
+import react = require('react');
+       ~~~~~ [Import 'react' is unused.]
+
+let React, react;
+    ~~~~~ [Variable 'React' is unused.]
+           ~~~~~ [Variable 'react' is unused.]
+
+let foo = <img />;
+    ~~~ [Variable 'foo' is unused.]

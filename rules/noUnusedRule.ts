@@ -52,21 +52,28 @@ class UnusedWalker extends Lint.AbstractWalker<IOptions> {
                         this._failNamedExpression(identifier, ExpressionKind.Class);
                     return;
             }
-            if (variable.uses.length === 0)
-                return this.addFailureAtNode(identifier, `${showKind(identifier)} '${identifier.text}' is unused.`);
+            if (variable.uses.length === 0) {
+                if (identifier.text === 'React' && this.sourceFile.languageVariant === ts.LanguageVariant.JSX &&
+                    isImportFromExternal(identifier) && containsJsx(this.sourceFile))
+                    return; // special case for 'React' import implicitly used by JSX
+                return this._fail(identifier, 'unused');
+            }
             let uses = filterWriteOnly(variable.uses, identifier);
             if (uses.length === 0)
-                return this.addFailureAtNode(identifier, `${showKind(identifier)} '${identifier.text}' is only written and never read.`);
+                return this._fail(identifier, 'only written and never read');
             const filtered = uses.length !== variable.uses.length;
             uses = filterUsesInDeclaration(uses, variable.declarations);
             if (uses.length === 0)
-                return this.addFailureAtNode(
-                    identifier,
-                    `${showKind(identifier)} '${identifier.text}' is only ${filtered ? 'written or ' : ''}used inside of its declaration.`,
-                );
+                return this._fail(identifier, `only ${filtered ? 'written or ' : ''}used inside of its declaration`);
             // TODO error for classes / functions only used mutually recursive
-            // TODO handle JSDoc references in JS files
         });
+    }
+
+    private _fail(identifier: ts.Identifier, error: string) {
+        return this.addFailureAtNode(
+            identifier,
+            `${showKind(identifier)} '${identifier.text}' is ${error}.`,
+        );
     }
 
     private _failNamedExpression(identifier: ts.Identifier, kind: ExpressionKind) {
@@ -75,6 +82,17 @@ class UnusedWalker extends Lint.AbstractWalker<IOptions> {
             `${kind} '${identifier.text}' is never used by its name. Convert it to an anonymous ${kind.toLocaleLowerCase()} expression.`,
             Lint.Replacement.deleteFromTo(identifier.pos, identifier.end),
         );
+    }
+}
+
+function containsJsx(node: ts.Node): boolean | undefined {
+    switch (node.kind) {
+        case ts.SyntaxKind.JsxElement:
+        case ts.SyntaxKind.JsxSelfClosingElement:
+        // TODO add JsxFragment
+            return true;
+        default:
+            return ts.forEachChild(node, containsJsx);
     }
 }
 
@@ -196,20 +214,25 @@ function isExcluded(variable: VariableInfo, sourceFile: ts.SourceFile, usage: Ma
             parent.kind === ts.SyntaxKind.TypeParameter && typeParameterMayBeRequired(<ts.TypeParameterDeclaration>parent, usage))
             return true;
         // exclude imports in TypeScript files, because is may be used implicitly by the declaration emitter
-        if (/\.tsx?$/.test(sourceFile.fileName) && !sourceFile.isDeclarationFile && opts.ignoreImports) {
-            switch (parent.kind) {
-                case ts.SyntaxKind.ImportEqualsDeclaration:
-                    if ((<ts.ImportEqualsDeclaration>parent).moduleReference.kind === ts.SyntaxKind.ExternalModuleReference)
-                        return true;
-                    break;
-                case ts.SyntaxKind.NamespaceImport:
-                case ts.SyntaxKind.ImportSpecifier:
-                case ts.SyntaxKind.ImportClause:
-                    return true;
-            }
-        }
+        if (/\.tsx?$/.test(sourceFile.fileName) && !sourceFile.isDeclarationFile && opts.ignoreImports && isImportFromExternal(declaration))
+            return true;
     }
     return false;
+}
+
+function isImportFromExternal(node: ts.Identifier) {
+    switch (node.parent!.kind) {
+        case ts.SyntaxKind.ImportEqualsDeclaration:
+            if ((<ts.ImportEqualsDeclaration>node.parent).moduleReference.kind === ts.SyntaxKind.ExternalModuleReference)
+                return true;
+            break;
+        case ts.SyntaxKind.NamespaceImport:
+        case ts.SyntaxKind.ImportSpecifier:
+        case ts.SyntaxKind.ImportClause:
+            return true;
+        default:
+            return false;
+    }
 }
 
 function typeParameterMayBeRequired(parameter: ts.TypeParameterDeclaration, usage: Map<ts.Identifier, VariableInfo>): boolean {

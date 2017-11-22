@@ -1,0 +1,20 @@
+import React from 'react';
+       ~~~~~ [Import 'React' is unused.]
+import * as React from 'react';
+            ~~~~~ [Import 'React' is unused.]
+import React = require('react');
+       ~~~~~ [Import 'React' is unused.]
+
+import react from 'react';
+       ~~~~~ [Import 'react' is unused.]
+import * as react from 'react';
+            ~~~~~ [Import 'react' is unused.]
+import react = require('react');
+       ~~~~~ [Import 'react' is unused.]
+
+let React, react;
+    ~~~~~ [Variable 'React' is unused.]
+           ~~~~~ [Variable 'react' is unused.]
+
+let foo = null;
+    ~~~ [Variable 'foo' is unused.]

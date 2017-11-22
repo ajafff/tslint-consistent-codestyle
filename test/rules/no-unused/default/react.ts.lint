@@ -1,0 +1,2 @@
+import * as React from 'react';
+            ~~~~~ [Import 'React' is unused.]

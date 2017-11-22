@@ -1,6 +1,10 @@
-# Change Log
+# 1.10.1
 
-## v1.10.0
+**Bugfixes:**
+
+* `no-unused` added special handling for `React` implicitly used by JSX
+
+# 1.10.0
 
 **Bugfixes:**
 
@@ -12,7 +16,7 @@
 
 * new rule [`no-accessor-recursion`](https://github.com/ajafff/tslint-consistent-codestyle/blob/master/docs/no-accessor-recursion.md)
 
-## v1.9.3
+# 1.9.3
 
 **Bugfixes:**
 
@@ -21,7 +25,7 @@
   * correctly handle methods with numeric name
   * correctly handle methods with computed names
 
-## v1.9.2
+# 1.9.2
 
 **Bugfixes:**
 
@@ -29,7 +33,7 @@
   * fixed a false positive with typeguard functions
   * this rule is no longer considered experimental
 
-## v1.9.1
+# 1.9.1
 
 **Bugfixes:**
 
@@ -41,7 +45,7 @@
   * correctly handle optional parameters
   * correctly handle rest parameters
 
-## v1.9.0
+# 1.9.0
 
 **Features:**
 
@@ -50,7 +54,7 @@
 * `no-var-before-return` adds option `"allow-destructuring"`
 * `early-exit` adds special handling for `{"max-length": 0}`
 
-## v1.8.0
+# 1.8.0
 
 **Bugfixes:**
 
@@ -63,13 +67,13 @@
 
 * `no-unused` adds option `"unused-catch-binding"` to disallow unused catch bindings. Only use this rule if you use TypeScript@2.5.1 or newer
 
-## v1.7.0
+# 1.7.0
 
 **Features:**
 
 * new rule [`const-parameters`](https://github.com/ajafff/tslint-consistent-codestyle/blob/master/docs/const-parameters.md)
 
-## v1.6.0
+# 1.6.0
 
 **Bugfixes:**
 
@@ -80,7 +84,7 @@
 
 * `parameter-properties` adds `"trailing"` option
 
-## v1.5.1
+# 1.5.1
 
 **Bugfixes:**
 
@@ -93,14 +97,14 @@
   * Bugfix for enum used as type
   * Stricter checks for initializer
 
-## v1.5.0
+# 1.5.0
 
 **Features:**
 
 * :sparkles: New rule [`no-unused`](https://github.com/ajafff/tslint-consistent-codestyle/blob/master/docs/no-unused.md) to find dead code and unused declarations.
 * New rule [`early-exit`](https://github.com/ajafff/tslint-consistent-codestyle/blob/master/docs/early-exit.md) recommends to use an early exit instead of a long `if` block. Big thanks to @andy-hanson for this great contribution.
 
-## v1.4.0
+# 1.4.0
 
 **Features:**
 
@@ -110,7 +114,7 @@
 
 * `no-var-before-return` now has an exception array destructuring because there could be an iterator being destructured.
 
-## v1.3.0
+# 1.3.0
 
 **Features:**
 
@@ -121,7 +125,7 @@
 
 * Remove `no-curly` rule from package, which is still under development
 
-## v1.2.0
+# 1.2.0
 
 **Features:**
 
@@ -134,13 +138,13 @@
   * type `function` now correctly inherits from type `variable` instead of getting overridden depending on their ordering
   * Adding a `filter` to a configuration no longer overrides every other config in the inheritance chain
 
-## v1.1.0
+# 1.1.0
 
 **Features:**
 
 * `naming-convention`: Add `filter` option to config
 
-## v1.0.0
+# 1.0.0
 
 **Breaking Changes:**
 

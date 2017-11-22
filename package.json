@@ -1,6 +1,6 @@
 {
   "name": "tslint-consistent-codestyle",
-  "version": "1.10.0",
+  "version": "1.10.1",
   "description": "Additional rules to enforce constistent code style with tslint",
   "repository": {
     "type": "git",
@@ -17,7 +17,8 @@
     "verify": "run-s compile lint coverage",
     "precoverage": "rimraf coverage .nyc_output",
     "coverage": "nyc npm test",
-    "report-coverage": "cat ./coverage/lcov.info | coveralls"
+    "report-coverage": "cat ./coverage/lcov.info | coveralls",
+    "github-release": "GITHUB_TOKEN=$(cat ~/.github_token.txt) github-release-from-changelog"
   },
   "keywords": [
     "eslint",
@@ -37,6 +38,7 @@
   },
   "devDependencies": {
     "coveralls": "^2.13.0",
+    "github-release-from-changelog": "^1.2.1",
     "npm-run-all": "^4.1.1",
     "nyc": "^11.0.3",
     "rimraf": "^2.6.2",

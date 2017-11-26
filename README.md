@@ -8,15 +8,11 @@
 
 The rules in this package can be used to enforce consistent code style.
 
-<a target='_blank' rel='nofollow' href='https://app.codesponsor.io/link/8AqcXz6t6a33WM1qgByFkXNV/ajafff/tslint-consistent-codestyle'>
-  <img alt='Sponsor' width='888' height='68' src='https://app.codesponsor.io/embed/8AqcXz6t6a33WM1qgByFkXNV/ajafff/tslint-consistent-codestyle.svg' />
-</a>
-
 # Usage
 
 Install from npm to your devDependencies  (https://www.npmjs.com/package/tslint-consistent-codestyle)
 
-```
+```sh
 npm install --save-dev tslint-consistent-codestyle
 ```
 

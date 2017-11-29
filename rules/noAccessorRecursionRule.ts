@@ -14,7 +14,7 @@ function walk(ctx: Lint.WalkContext<void>) {
     let name: string | undefined;
 
     return ctx.sourceFile.statements.forEach(function cb(node: ts.Node): any {
-        if (isAccessorDeclaration(node)) {
+        if (isAccessorDeclaration(node) && node.body !== undefined) {
             const before = name;
             name = getPropertyName(node.name);
             node.body.statements.forEach(cb);

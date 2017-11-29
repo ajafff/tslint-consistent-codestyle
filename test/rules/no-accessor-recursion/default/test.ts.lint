@@ -82,4 +82,13 @@ obj = {
     }
 }
 
+abstract class MyClass {
+    abstract get prop(): string;
+
+    set prop(v: string) {
+        this.prop = v;
+        ~~~~~~~~~ [fail]
+    }
+}
+
 [fail]: accessor recursion is not allowed

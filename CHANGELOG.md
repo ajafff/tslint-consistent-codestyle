@@ -1,3 +1,9 @@
+# 1.10.2
+
+**Bugfixes:**
+
+* `no-accessor-recursion` fixed crash on abstract accessor
+
 # 1.10.1
 
 **Bugfixes:**

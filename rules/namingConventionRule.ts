@@ -7,10 +7,14 @@ import { AbstractConfigDependentRule } from '../src/rules';
 // TODO don't flag inherited members
 // TODO skip all ambient declarations
 
-const PASCAL_OPTION = 'PascalCase';
-const CAMEL_OPTION  = 'camelCase';
-const SNAKE_OPTION  = 'snake_case';
-const UPPER_OPTION  = 'UPPER_CASE';
+const enum Format {
+    Pascal = 'PascalCase',
+    StrictPascal = 'StrictPascalCase',
+    Camel = 'camelCase',
+    StrictCamel = 'strictCamelCase',
+    Upper = 'UPPER_CASE',
+    Snake = 'snake_case',
+}
 
 const FORMAT_FAIL   = ' name must be in ';
 const LEADING_FAIL  = ' name must not have leading underscore';
@@ -112,7 +116,6 @@ enum Specifity {
     // tslint:enable:naming-convention
 }
 
-type Format = 'camelCase' | 'PascalCase' | 'snake_case' | 'UPPER_CASE';
 type IdentifierType = keyof typeof Types;
 type Modifier = keyof typeof Modifiers | 'unused';
 
@@ -571,13 +574,17 @@ function parseOptionArray<T>(option?: T | T[]): T | T[] | undefined {
 
 function matchesFormat(identifier: string, format: Format): boolean {
     switch (format) {
-        case PASCAL_OPTION:
+        case Format.Pascal:
             return isPascalCase(identifier);
-        case CAMEL_OPTION:
+        case Format.StrictPascal:
+            return isStrictPascalCase(identifier);
+        case Format.Camel:
             return isCamelCase(identifier);
-        case SNAKE_OPTION:
+        case Format.StrictCamel:
+            return isStrictCamelCase(identifier);
+        case Format.Snake:
             return isSnakeCase(identifier);
-        case UPPER_OPTION:
+        case Format.Upper:
             return isUpperCase(identifier);
     }
 }
@@ -590,7 +597,7 @@ function matchesAnyFormat(identifier: string, formats: Format[]): boolean {
 }
 
 function formatFormatList(formats: Format[]): string {
-    let result = formats[0];
+    let result: string = formats[0];
     const lastIndex = formats.length - 1;
     for (let i = 1; i < lastIndex; ++i)
         result += ', ' + formats[i];
@@ -598,10 +605,18 @@ function formatFormatList(formats: Format[]): string {
 }
 
 function isPascalCase(name: string) {
-    return name.length === 0 || name[0] === name[0].toUpperCase() && hasStrictCamelHumps(name, true);
+    return name.length === 0 || name[0] === name[0].toUpperCase() && !name.includes('_');
 }
 
 function isCamelCase(name: string) {
+    return name.length === 0 || name[0] === name[0].toLowerCase() && !name.includes('_');
+}
+
+function isStrictPascalCase(name: string) {
+    return name.length === 0 || name[0] === name[0].toUpperCase() && hasStrictCamelHumps(name, true);
+}
+
+function isStrictCamelCase(name: string) {
     return name.length === 0 || name[0] === name[0].toLowerCase() && hasStrictCamelHumps(name, false);
 }
 

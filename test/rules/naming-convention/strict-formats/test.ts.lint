@@ -1,0 +1,80 @@
+function foo() {}
+function innerHTML() {}
+         ~~~~~~~~~ [function name must be in strictCamelCase]
+function innerHtml() {}
+function Foo() {}
+         ~~~ [function name must be in strictCamelCase]
+function InnerHtml() {}
+         ~~~~~~~~~ [function name must be in strictCamelCase]
+function MOAR() {}
+         ~~~~ [function name must be in strictCamelCase]
+function a_() {}
+         ~~ [function name must be in strictCamelCase]
+function a() {}
+function B() {}
+         ~ [function name must be in strictCamelCase]
+
+let foo,
+    ~~~ [variable name must be in StrictPascalCase]
+    innerHTML,
+    ~~~~~~~~~ [variable name must be in StrictPascalCase]
+    innerHtml,
+    ~~~~~~~~~ [variable name must be in StrictPascalCase]
+    Foo,
+    InnerHtml,
+    InnerHTML,
+    ~~~~~~~~~ [variable name must be in StrictPascalCase]
+    MOAR,
+    ~~~~ [variable name must be in StrictPascalCase]
+    a_,
+    ~~ [variable name must be in StrictPascalCase]
+    _a,
+    ~~ [variable name must be in StrictPascalCase]
+    A_,
+    ~~ [variable name must be in StrictPascalCase]
+    _A,
+    ~~ [variable name must be in StrictPascalCase]
+    a,
+    ~ [variable name must be in StrictPascalCase]
+    B;
+
+namespace ns {
+    function foo() {}
+    function innerHTML() {}
+    function innerHtml() {}
+    function Foo() {}
+             ~~~ [function name must be in camelCase]
+    function InnerHtml() {}
+             ~~~~~~~~~ [function name must be in camelCase]
+    function MOAR() {}
+             ~~~~ [function name must be in camelCase]
+    function a_() {}
+             ~~ [function name must be in camelCase]
+    function _a() {}
+             ~~ [function name must be in camelCase]
+    function a() {}
+    function B() {}
+             ~ [function name must be in camelCase]
+
+    let foo,
+        ~~~ [variable name must be in PascalCase]
+        innerHTML,
+        ~~~~~~~~~ [variable name must be in PascalCase]
+        innerHtml,
+        ~~~~~~~~~ [variable name must be in PascalCase]
+        Foo,
+        InnerHtml,
+        InnerHTML,
+        MOAR,
+        a_,
+        ~~ [variable name must be in PascalCase]
+        _a,
+        ~~ [variable name must be in PascalCase]
+        A_,
+        ~~ [variable name must be in PascalCase]
+        _A,
+        ~~ [variable name must be in PascalCase]
+        a,
+        ~ [variable name must be in PascalCase]
+        B;
+}

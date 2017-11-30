@@ -41,9 +41,11 @@ function Foo([Foo, , Bar) {}
          ~~~ [function name must be in strictCamelCase]
               ~~~        [parameter name must be in strictCamelCase]
                      ~~~ [parameter name must be in strictCamelCase]
-function foo({bar: _bar, baz: ajaffBaz, foo: foo}) {}
+function foo({bar: _bar, baz: ajaffBaz, foo: foo, bas: ajaffFoo}) {}
                    ~~~~ [parameter name must start with ajaff]
+                   ~~~~ [parameter name must end with one of Renamed,Foo]
                               ~~~~~~~~ [parameter name must be in strictCamelCase]
+                              ~~~~~~~~ [parameter name must end with one of Renamed,Foo]
 
 class TestClass {
       ~~~~~~~~~ [class name must start with one of Foo,Bar]
@@ -89,13 +91,13 @@ class TestClass {
 }
 
 class FooBar<t> {}
-             ~ [genericTypeParameter name must be in StrictPascalCase]
-             ~ [genericTypeParameter name must start with T]
+             ~ [genericTypeParameter name did not match required regex]
 
 class Foo<Test> {}
-          ~~~~ [genericTypeParameter name must be in StrictPascalCase]
+          ~~~~ [genericTypeParameter name did not match required regex]
 
 class Foo<TFoo> {}
+          ~~~~ [genericTypeParameter name did not match required regex]
 
 class BarFoo<T> {}
 
@@ -109,8 +111,21 @@ const enum foo {
            ~~~ [enum name must be in UPPER_CASE]
 }
 
+export enum FOO_BAR {
+            ~~~~~~~ [enum name must be in snake_case]
+}
+
+export enum foo_bar {
+}
+
 type foo = "bar";
      ~~~ [typeAlias name must be in StrictPascalCase]
+
+type T = {
+    // ignore parameters in index signatures
+    [_KEY_: string]: string,
+    [key_name: number]: string,
+}
 
 for (let {Foo} of []);
           ~~~ [variable name must be in strictCamelCase]
@@ -142,3 +157,11 @@ abstract class Foo {
     abstract private _barAjaff();
 }
 abstract class AbstractFoo() {}
+
+let {foo: bar, baz: bazRenamed} = {};
+          ~~~ [variable name must end with Renamed]
+
+declare let _foo_: any;
+
+export default class {}
+export default function {}

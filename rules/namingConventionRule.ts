@@ -289,7 +289,7 @@ class NameChecker {
     private _checkSuffixes(identifier: string, name: ts.Identifier, suffixes: string[], walker: Lint.AbstractWalker<any>): string {
         for (const suffix of suffixes)
             if (identifier.endsWith(suffix))
-                return identifier.slice(-suffix.length);
+                return identifier.slice(0, -suffix.length);
         walker.addFailureAtNode(name, this._failMessage(SUFFIX_FAIL_ARR + suffixes.toString()));
         return identifier;
     }
@@ -487,7 +487,7 @@ class IdentifierNameWalker extends Lint.AbstractWalker<NormalizedConfig[]> {
 
     private _getModifiers(node: ts.Node, type: TypeSelector, modifiers: Modifiers = 0): number {
         if (node.modifiers !== undefined) {
-            if (type | Types.member) { // property, method, parameter property
+            if (type & Types.member) { // property, method, parameter property
                 if (utils.hasModifier(node.modifiers, ts.SyntaxKind.PrivateKeyword)) {
                     modifiers |= Modifiers.private;
                 } else if (utils.hasModifier(node.modifiers, ts.SyntaxKind.ProtectedKeyword)) {

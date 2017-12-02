@@ -13,7 +13,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 function walk(ctx: Lint.WalkContext<void>) {
     let name: string | undefined;
 
-    return ctx.sourceFile.statements.forEach(function cb(node: ts.Node): any {
+    return ctx.sourceFile.statements.forEach(function cb(node: ts.Node): void {
         if (isAccessorDeclaration(node) && node.body !== undefined) {
             const before = name;
             name = getPropertyName(node.name);

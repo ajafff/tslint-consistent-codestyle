@@ -90,6 +90,16 @@ After filtering the formatting rules are reduced from the first to the last. Rem
   * `global` or `local`
   * `export`
 
+#### functionVariable
+
+* Scope: every variable that is initialized with an arrow function or function expression
+* Extends: `variable`
+* Valid modifiers:
+  * `global` or `local`
+  * `const`
+  * `export`
+  * `unused` // if the variable is never used
+
 #### parameter
 
 * Scope: parameters
@@ -199,6 +209,8 @@ Here you see an example of how everything explained above works together. This i
   {"type": "variable", "modifiers": ["global", "const"], "format": ["camelCase","UPPER_CASE"]},
   // override the above format option for exported constants to allow only UPPER_CASE
   {"type": "variable", "modifiers": ["export", "const"], "format": "UPPER_CASE"},
+  // require exported constant variables that are initialized with functions to be camelCase
+  {"type": "functionVariable", "modifiers": ["export", "const"], "format": "camelCase"},
   // allow leading underscores for unused parameters, because `tsc --noUnusedParameters` will not flag underscore prefixed parameters
   // all other rules (trailingUnderscore: forbid, format: camelCase) still apply
   {"type": "parameter", "modifiers": "unused", "leadingUnderscore": "allow"},

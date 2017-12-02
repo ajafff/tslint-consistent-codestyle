@@ -41,6 +41,7 @@ enum Types {
     genericTypeParameter = 1 << 10,
     enum = 1 << 11,
     enumMember = 1 << 12,
+    functionVariable = 1 << 13,
     // tslint:enable:naming-convention
 }
 
@@ -48,6 +49,7 @@ enum TypeSelector {
     // tslint:disable:naming-convention
     variable = Types.variable,
     function = variable | Types.function,
+    functionVariable = variable | Types.functionVariable,
     parameter = variable | Types.parameter,
     property = Types.member | Types.property,
     parameterProperty = parameter | property,
@@ -98,6 +100,7 @@ enum Specifity {
     default = 1 << 9,
     variable = 2 << 9,
     function = 3 << 9,
+    functionVariable = Specifity.function,
     parameter = 4 << 9,
     member = 5 << 9,
     property = 6 << 9,
@@ -390,11 +393,14 @@ class IdentifierNameWalker extends Lint.AbstractWalker<NormalizedConfig[]> {
             modifiers |= Modifiers.const;
         utils.forEachDeclaredVariable(list, (declaration) => {
             let currentModifiers = modifiers;
+            let selector = TypeSelector.variable;
             if (!isEqualName(declaration.name, declaration.propertyName))
                 currentModifiers |= Modifiers.rename;
             if (this._isUnused(declaration.name))
                 currentModifiers |= Modifiers.unused;
-            this._checkName(declaration.name, TypeSelector.variable, currentModifiers);
+            if (isFunctionVariable(declaration))
+                selector = TypeSelector.functionVariable;
+            this._checkName(declaration.name, selector, currentModifiers);
         });
     }
 
@@ -657,4 +663,15 @@ function isNameIdentifier(node: ts.Declaration & {name: ts.DeclarationName}): no
 function isEqualName(name: ts.Identifier, propertyName?: ts.PropertyName) {
     return propertyName === undefined ||
         (propertyName.kind === ts.SyntaxKind.Identifier && propertyName.text === name.text);
+}
+
+function isFunctionVariable(declaration: ts.VariableLikeDeclaration) {
+    if (declaration.initializer) {
+        switch (declaration.initializer.kind) {
+            case ts.SyntaxKind.ArrowFunction:
+            case ts.SyntaxKind.FunctionExpression:
+                return true;
+        }
+    }
+    return false;
 }

@@ -354,7 +354,9 @@ class Clazz {
 [1, "2", true].filter((e): e is string => typeof e === 'string');
 take<(foo: any) => foo is string>((foo: any): foo is string => typeof foo === "string");
                                       ~~~~~ [fail]
-take<((foo: any) => foo is string)|(foo: any) => boolean)>((foo: any): foo is string => typeof foo === "string");
-take<((foo: any) => foo is string)|(foo: any) => boolean)>((foo: any): boolean => typeof foo === "string");
+take<((foo: any) => foo is string)|((foo: any) => boolean)>((foo: any): foo is string => typeof foo === "string");
+                                                                ~~~~~ [fail]
+take<((foo: any) => foo is string)|((foo: any) => boolean)>((foo: any): boolean => typeof foo === "string");
+                                                                ~~~~~ [fail]
 
 [fail]: type annotation is redundant

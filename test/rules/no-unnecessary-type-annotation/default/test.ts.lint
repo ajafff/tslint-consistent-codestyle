@@ -1,0 +1,115 @@
+export {};
+
+let foo1: number = 1;
+        ~~~~~~~~ [fail]
+let foo2: 1 = 1;
+const foo3: number = 1;
+          ~~~~~~~~ [fail]
+const foo4: 1 = 1;
+          ~~~ [fail]
+const foo5: string[] = [];
+const foo6: string[] = ["foo", "bar"];
+          ~~~~~~~~~~ [fail]
+const foo7 = "foo";
+let foo8 = "foo";
+
+interface Foo {
+    foo: number;
+}
+
+const foo9: Foo = {foo: 1};
+const foo10: Foo[] = [foo9, foo9];
+           ~~~~~~~ [fail]
+
+const fn = function(a: string, b: number) {};
+
+declare function take<T>(cb: T): void;
+declare function generic<T>(cb: (param: T, i: number) => T): void;
+declare function genericReturn<T>(cb: () => T): T;
+
+take<() => void>((a?: boolean) => a);
+take<(a: string, b: number) => void>((a: string, b: number) => a);
+                                       ~~~~~~~~ [fail]
+                                                  ~~~~~~~~ [fail]
+generic((a: string) => a);
+generic((a: string, i: number) => a);
+                     ~~~~~~~~ [fail]
+take<((() => void) | ((a: string) => void))>((a: string) => a);
+                                               ~~~~~~~~ [fail]
+genericReturn((): number => {
+    return 1;
+});
+take<(...args: any[]) => void>(((a: any, b: any): void => {}));
+                                  ~~~~~ [fail]
+                                          ~~~~~ [fail]
+take<((a: string) => void) | ((a: string) => void)>((a: string): void => a);
+                                                      ~~~~~~~~ [fail]
+take<((a: string) => void) | ((a: string) => void) & {name?: string}>((a: string) => a);
+                                                                        ~~~~~~~~ [fail]
+take<((a: string) => void) | object & {name?: string}>((a: string) => a);
+                                                         ~~~~~~~~ [fail]
+take<(((a: string) => void) | ((a: string) => void)) & {name?: string}>((a: string) => a);
+                                                                          ~~~~~~~~ [fail]
+// only return type differs - don't complain about the return annotation
+take<((a: string) => string) | ((a: string) => number)>((a: string): string => a);
+                                                          ~~~~~~~~ [fail]
+
+(function(foo: "foo") {})("foo");
+(function(foo: string) {})("foo");
+             ~~~~~~~~ [fail]
+(function(foo): void {})("foo");
+(function(foo?): void {})("foo");
+(function(param: string, ...foo: string[]) {})("foo", "bar", "baz");
+               ~~~~~~~~ [fail]
+                               ~~~~~~~~~~ [fail]
+(function(foo?: string) {})();
+(function(this: any, a: string) {})("foo");
+                      ~~~~~~~~ [fail]
+(<T>(param: T): T => {
+    return param;
+})(1);
+(function(): string { return "foo"; })();
+(function cb(): string { return "foo"; })();
+{
+    let result = (function(): string { return "foo"; })();
+    result = ((function(): string { return "foo"; }))();
+
+    const v: string | false = (function(): string | false { return false; })();
+           ~~~~~~~~~~~~~~~~ [fail]
+    const v2: true = (function(): true { return true; })();
+            ~~~~~~ [fail]
+}
+
+const myVerboseSignature: (a: number) => number = function(a: number): number {
+                        ~~~~~~~~~~~~~~~~~~~~~~~ [fail]
+                                                            ~~~~~~~~ [fail]
+    return a;
+};
+
+const evenWorkWithSignatures: {[key: string]: (a: string, b: number) => void} = {
+    fn(a: string, b: number): void {},
+        ~~~~~~~~ [fail]
+                   ~~~~~~~~ [fail]
+    foo(a: string, b: number) {},
+         ~~~~~~~~ [fail]
+                    ~~~~~~~~ [fail]
+    bar(a: string, b) {},
+         ~~~~~~~~ [fail]
+    baz(a): void {},
+    [foo1](a: string): void {},
+            ~~~~~~~~ [fail]
+    noTypes(a, b) {},
+    2(a: string, b: number) {}
+       ~~~~~~~~ [fail]
+                  ~~~~~~~~ [fail]
+};
+
+[1, "2", true].filter((e): e is string => typeof e === 'string');
+take<(foo: any) => foo is string>((foo: any): foo is string => typeof foo === "string");
+                                      ~~~~~ [fail]
+take<((foo: any) => foo is string)|((foo: any) => boolean)>((foo: any): foo is string => typeof foo === "string");
+                                                                ~~~~~ [fail]
+take<((foo: any) => foo is string)|((foo: any) => boolean)>((foo: any): boolean => typeof foo === "string");
+                                                                ~~~~~ [fail]
+
+[fail]: type annotation is redundant

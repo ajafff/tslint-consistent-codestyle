@@ -19,3 +19,9 @@ const myVerboseSignature: (a: number) => number = function(a: number): number {
 declare function takeCallback(cb: (a: string) => void): void;
 takeCallback((a: string) => a);
 ```
+
+### Options
+
+#### `"check-return-type"`
+
+Enables checking function return types. This option can cause false positives for (mutually) recursive functions.

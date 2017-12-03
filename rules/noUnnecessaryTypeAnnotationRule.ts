@@ -16,15 +16,26 @@ import {
 
 type FunctionExpressionLike = ts.ArrowFunction | ts.FunctionExpression;
 
+const CHECK_RETURN_TYPE_OPTION = 'check-return-type';
 const FAIL_MESSAGE = `type annotation is redundant`;
+
+interface IOptions {
+    checkReturnType: boolean;
+}
 
 export class Rule extends Lint.Rules.TypedRule {
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk, undefined, program.getTypeChecker());
+        return this.applyWithFunction(
+            sourceFile,
+            walk, {
+                checkReturnType: this.ruleArguments.indexOf(CHECK_RETURN_TYPE_OPTION) !== -1,
+            },
+            program.getTypeChecker(),
+        );
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
+function walk(ctx: Lint.WalkContext<IOptions>, checker: ts.TypeChecker) {
     return ts.forEachChild(ctx.sourceFile, function cb(node): void {
         switch (node.kind) {
             case ts.SyntaxKind.ArrowFunction:
@@ -74,7 +85,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
             return;
         const [signature, checkReturn] = sig;
 
-        if (checkReturn && node.type !== undefined && !signatureHasGenericOrTypePredicateReturn(signature) &&
+        if (ctx.options.checkReturnType && checkReturn && node.type !== undefined && !signatureHasGenericOrTypePredicateReturn(signature) &&
             typesAreEqual(checker.getTypeFromTypeNode(node.type), signature.getReturnType()))
             fail(node.type);
 
@@ -122,7 +133,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
     }
 
     function checkIife(func: FunctionExpressionLike, iife: ts.CallExpression) {
-        if (func.type !== undefined && func.name === undefined &&
+        if (ctx.options.checkReturnType && func.type !== undefined && func.name === undefined &&
             (
                 !isExpressionValueUsed(iife) ||
                 !containsTypeWithFlag(checker.getTypeFromTypeNode(func.type), ts.TypeFlags.Literal) &&

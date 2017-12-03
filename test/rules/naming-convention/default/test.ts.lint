@@ -1,6 +1,6 @@
 var moduleCamel  = "camel";
 var ModulePascal = "pascal";
-    ~~~~~~~~~~~~    [variable name must be in camelCase]
+    ~~~~~~~~~~~~    [variable name must be in strictCamelCase]
 const MODULE_CONST  = "const"
 const another_const = "const"
       ~~~~~~~~~~~~~ [variable name must be in UPPER_CASE]
@@ -24,26 +24,28 @@ var trailing_ = "";
 var number = 42;
 
 let goodCamel, goodCameL, good123Camel, goodCamel123, baDCamel;
-                                                      ~~~~~~~~ [variable name must be in camelCase]
+                                                      ~~~~~~~~ [variable name must be in strictCamelCase]
 interface GoodPascal{}
 interface GoodPascaL{}
 interface GoodPascal123{}
 interface Good123Pascal{}
 interface BADPASCAL{}
-          ~~~~~~~~~ [interface name must be in PascalCase]
+          ~~~~~~~~~ [interface name must be in StrictPascalCase]
 interface BadPAscal{}
-          ~~~~~~~~~ [interface name must be in PascalCase]
+          ~~~~~~~~~ [interface name must be in StrictPascalCase]
 
 function foo({_Bar, Baz, _bas}) {}
-              ~~~~      [parameter name must be in camelCase]
-                    ~~~ [parameter name must be in camelCase]
+              ~~~~      [parameter name must be in strictCamelCase]
+                    ~~~ [parameter name must be in strictCamelCase]
 function Foo([Foo, , Bar) {}
-         ~~~ [function name must be in camelCase]
-              ~~~        [parameter name must be in camelCase]
-                     ~~~ [parameter name must be in camelCase]
-function foo({bar: _bar, baz: ajaffBaz, foo: foo}) {}
+         ~~~ [function name must be in strictCamelCase]
+              ~~~        [parameter name must be in strictCamelCase]
+                     ~~~ [parameter name must be in strictCamelCase]
+function foo({bar: _bar, baz: ajaffBaz, foo: foo, bas: ajaffFoo}) {}
                    ~~~~ [parameter name must start with ajaff]
-                              ~~~~~~~~ [parameter name must be in camelCase]
+                   ~~~~ [parameter name must end with one of Renamed,Foo]
+                              ~~~~~~~~ [parameter name must be in strictCamelCase]
+                              ~~~~~~~~ [parameter name must end with one of Renamed,Foo]
 
 class TestClass {
       ~~~~~~~~~ [class name must start with one of Foo,Bar]
@@ -54,18 +56,18 @@ class TestClass {
             ~~~~~~~~~~  [property name must not have trailing underscore]
             ~~~~~~~~~~  [property name must have leading underscore]
     private _snake_priv = 10;
-            ~~~~~~~~~~~  [property name must be in camelCase]
+            ~~~~~~~~~~~  [property name must be in strictCamelCase]
 
     public snake_pub = 10;
-           ~~~~~~~~~  [property name must be in camelCase]
+           ~~~~~~~~~  [property name must be in strictCamelCase]
     public _camelPub = 10;
            ~~~~~~~~~  [property name must not have leading underscore]
 
     public get camelPubAcc() {}
     public set camelPubAcc(Var) {}
-                           ~~~ [parameter name must be in camelCase]
+                           ~~~ [parameter name must be in strictCamelCase]
     private get snake_priv_acc() {}
-                ~~~~~~~~~~~~~~  [property name must be in camelCase]
+                ~~~~~~~~~~~~~~  [property name must be in strictCamelCase]
                 ~~~~~~~~~~~~~~  [property name must have leading underscore]
 
     readonly public static FOO = "foo";
@@ -73,7 +75,7 @@ class TestClass {
                            ~~~ [property name must be in UPPER_CASE]
     public static Bar() {};
     public static bar() {};
-                  ~~~ [method name must be in PascalCase]
+                  ~~~ [method name must be in StrictPascalCase]
     constructor(public readonly _foo, protected bar) {}
                                 ~~~~ [parameterProperty name must not have leading underscore]
                                 ~~~~ [parameterProperty name must be in UPPER_CASE]
@@ -81,45 +83,58 @@ class TestClass {
     constructor(private readonly _FOO_Bar) {}
     toJSON() {}
     testtoJSON() {}
-    ~~~~~~~~~~ [method name must be in camelCase]
+    ~~~~~~~~~~ [method name must be in strictCamelCase]
     toJSONtest() {}
-    ~~~~~~~~~~ [method name must be in camelCase]
+    ~~~~~~~~~~ [method name must be in strictCamelCase]
     toJSON = "foo";
-    ~~~~~~ [property name must be in camelCase]
+    ~~~~~~ [property name must be in strictCamelCase]
 }
 
 class FooBar<t> {}
-             ~ [genericTypeParameter name must be in PascalCase]
-             ~ [genericTypeParameter name must start with T]
+             ~ [genericTypeParameter name did not match required regex]
 
 class Foo<Test> {}
-          ~~~~ [genericTypeParameter name must be in PascalCase]
+          ~~~~ [genericTypeParameter name did not match required regex]
 
 class Foo<TFoo> {}
+          ~~~~ [genericTypeParameter name did not match required regex]
 
 class BarFoo<T> {}
 
 enum foo {
-     ~~~ [enum name must be in PascalCase]
+     ~~~ [enum name must be in StrictPascalCase]
     bar,
-    ~~~ [enumMember name must be in PascalCase]
+    ~~~ [enumMember name must be in StrictPascalCase]
     Baz,
 }
 const enum foo {
            ~~~ [enum name must be in UPPER_CASE]
 }
 
+export enum FOO_BAR {
+            ~~~~~~~ [enum name must be in snake_case]
+}
+
+export enum foo_bar {
+}
+
 type foo = "bar";
-     ~~~ [typeAlias name must be in PascalCase]
+     ~~~ [typeAlias name must be in StrictPascalCase]
+
+type T = {
+    // ignore parameters in index signatures
+    [_KEY_: string]: string,
+    [key_name: number]: string,
+}
 
 for (let {Foo} of []);
-          ~~~ [variable name must be in camelCase]
+          ~~~ [variable name must be in strictCamelCase]
 
 for (let Foo in []);
-         ~~~ [variable name must be in camelCase]
+         ~~~ [variable name must be in strictCamelCase]
 
 for (let I = 0;;);
-         ~ [variable name must be in camelCase]
+         ~ [variable name must be in strictCamelCase]
 
 for (Foo of []);
 
@@ -146,4 +161,11 @@ abstract class AbstractFoo() {}
 // `functionVariable` is not defined in the config, so this should use the `variable` options.
 let fooFunc = () => undefined;
 let foo_func = () => undefined;
-    ~~~~~~~~ [functionVariable name must be in camelCase]
+    ~~~~~~~~ [functionVariable name must be in strictCamelCase]
+let {foo: bar, baz: bazRenamed} = {};
+          ~~~ [variable name must end with Renamed]
+
+declare let _foo_: any;
+
+export default class {}
+export default function {}

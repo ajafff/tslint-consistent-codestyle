@@ -3,10 +3,20 @@ export {};
 function _unused(_param): void;
          ~~~~~~~ [err % ('function')]
                  ~~~~~~ [err % ('parameter')]
+function _unused({_foo}): void;
+         ~~~~~~~ [err % ('function')]
+                  ~~~~ [err % ('parameter')]
 function _unused(): void;
          ~~~~~~~ [err % ('function')]
 function _unused(_param) {}
          ~~~~~~~ [err % ('function')]
+
+function foo(_param, {_p1, _p2}) {
+             ~~~~~~ [err % ('parameter')]
+                      ~~~ [err % ('parameter')]
+    _param = _param;
+    _p1;
+}
 
 class _Foo<_T> {
            ~~ [err % ('genericTypeParameter')]

@@ -4,27 +4,29 @@
     "naming-convention": [
        true,
        {"type": "default", "leadingUnderscore": "forbid", "trailingUnderscore": "forbid"},
-       {"type": "variable", "format": "camelCase"},
+       {"type": "variable", "format": "strictCamelCase"},
        {"type": "variable", "modifiers": ["global","const"], "format": "UPPER_CASE", "leadingUnderscore": null, "trailingUnderscore": null},
        {"type": "variable", "modifiers": "export", "format": "UPPER_CASE", "final": true},
-       {"type": "parameter", "modifiers": "rename", "prefix": "ajaff"},
+       {"type": "variable", "modifiers": "rename", "suffix": "Renamed"},
+       {"type": "parameter", "modifiers": "rename", "prefix": "ajaff", "suffix": ["Renamed", "Foo"]},
        {"type": "parameter", "leadingUnderscore": "allow", "final": true},
-       {"type": "member", "format": "camelCase"},
+       {"type": "member", "format": "strictCamelCase"},
        {"type": "member", "modifiers": "abstract", "suffix": "Ajaff"},
        {"type": "member", "modifiers": "private", "leadingUnderscore": "require"},
        {"type": "member", "modifiers": "protected", "leadingUnderscore": "require"},
-       {"type": "member", "modifiers": "static", "format": "PascalCase"},
-       {"type": "method", "format": "camelCase"},
-       {"type": "method", "modifiers": "static", "format": "PascalCase"},
+       {"type": "member", "modifiers": "static", "format": "StrictPascalCase"},
+       {"type": "method", "format": "strictCamelCase"},
+       {"type": "method", "modifiers": "static", "format": "StrictPascalCase"},
        {"type": "method", "filter": "^toJSON$", "format": null},
        {"type": "property", "modifiers": "const", "format": "UPPER_CASE", "final": true},
        {"type": "property", "modifiers": ["static", "const"], "format": "UPPER_CASE", "final": true},
        {"type": "property", "modifiers": ["private", "readonly"], "format": null, "prefix": "FOO_", "suffix": "Bar"},
-       {"type": "type", "format": "PascalCase"},
+       {"type": "type", "format": "StrictPascalCase"},
        {"type": "class", "prefix": ["Foo", "Bar"]},
        {"type": "class", "modifiers": "abstract", "prefix": "Abstract"},
-       {"type": "genericTypeParameter", "prefix": "T"},
-       {"type": "enum", "modifiers": "const", "format": "UPPER_CASE"}
+       {"type": "genericTypeParameter", "format": null, "regex": "^[TUV]$"},
+       {"type": "enum", "modifiers": "const", "format": "UPPER_CASE"},
+       {"type": "enum", "modifiers": "export", "format": "snake_case"}
     ]
   }
 }

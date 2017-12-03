@@ -1,0 +1,362 @@
+export {};
+
+let foo1: number = 1;
+        ~~~~~~~~ [fail]
+let foo2: 1 = 1;
+const foo3: number = 1;
+          ~~~~~~~~ [fail]
+const foo4: 1 = 1;
+          ~~~ [fail]
+const foo5: string[] = [];
+const foo6: string[] = ["foo", "bar"];
+          ~~~~~~~~~~ [fail]
+const foo7 = "foo";
+let foo8 = "foo";
+
+interface Foo {
+    foo: number;
+}
+
+const foo9: Foo = {foo: 1};
+const foo10: Foo[] = [foo9, foo9];
+           ~~~~~~~ [fail]
+
+const fn = function(a: string, b: number) {};
+
+declare function take<T>(cb: T): void;
+declare function generic<T>(cb: (param: T, i: number) => T): void;
+declare function genericReturn<T>(cb: () => T): T;
+
+take<() => void>((a?: boolean) => a);
+take<(a: string, b: number) => void>((a: string, b: number) => a);
+                                       ~~~~~~~~ [fail]
+                                                  ~~~~~~~~ [fail]
+take<(a: string, b: number) => void>((a: string, b) => a);
+                                       ~~~~~~~~ [fail]
+take<(a: string, b: number) => void>((a, b) => a);
+take<(a: "a", b: number) => void>((a: string, b: {}) => a);
+generic((a: string) => a);
+generic((a: string, i: number) => a);
+                     ~~~~~~~~ [fail]
+take<((() => void) | ((a: string) => void))>((a: string) => a);
+                                               ~~~~~~~~ [fail]
+genericReturn((): number => {
+    return 1;
+});
+take<(this: any, a: string) => void>((a: string) => a);
+                                       ~~~~~~~~ [fail]
+take<(this: any, a: string) => void>((a: string, b: number) => a);
+take<(this: any, a: string) => void>((a: string, b?: number) => a);
+                                       ~~~~~~~~ [fail]
+take<(a: string) => void>(function(this: any, a: string) {});
+                                               ~~~~~~~~ [fail]
+take<(this: any, a: string) => void>(function(this: any, a: string) {});
+                                                          ~~~~~~~~ [fail]
+take<(a: string) => void>((a?: string) => a);
+                             ~~~~~~~~ [fail]
+take<(a: string) => void>((a?: string | undefined) => a);
+                             ~~~~~~~~~~~~~~~~~~~~ [fail]
+take<(a?: string) => void>((a: string | undefined) => a);
+                             ~~~~~~~~~~~~~~~~~~~~ [fail]
+take<(a: string | undefined) => void>((a?: string) => a);
+                                         ~~~~~~~~ [fail]
+take<(a?: string) => void>((a?: string) => a);
+                              ~~~~~~~~ [fail]
+take<(a?: string) => void>((a?: string | undefined) => a);
+                              ~~~~~~~~~~~~~~~~~~~~ [fail]
+take<(a: string) => void>((a: string | undefined = "") => a);
+                            ~~~~~~~~~~~~~~~~~~~~ [fail]
+take<(a: string) => void>((a?: string | null) => a);
+take<(a: null) => void>((a?: null) => a);
+                           ~~~~~~ [fail]
+take<(a: null) => void>((a?: null | undefined) => a);
+                           ~~~~~~~~~~~~~~~~~~ [fail]
+take<(a: string, b: string) => void>((...args: string[]) => args);
+take<(a: string, b: string, ...args: string[]) => void>((...args: string[]) => args);
+take<(...args: string[]) => void>((a: string, b: string, ...rest: string[]) => a);
+                                    ~~~~~~~~ [fail]
+                                               ~~~~~~~~ [fail]
+                                                                ~~~~~~~~~~ [fail]
+take<(...args: string[]) => void>((a: string, b, ...rest: string[]) => a);
+                                    ~~~~~~~~ [fail]
+                                                        ~~~~~~~~~~ [fail]
+take<(...args: string[]) => void>((a, b, ...rest: string[]) => a);
+                                                ~~~~~~~~~~ [fail]
+take<(a: number, ...args: string[]) => void>((a: number, b: string, ...rest: string[]) => a);
+                                               ~~~~~~~~ [fail]
+                                                          ~~~~~~~~ [fail]
+                                                                           ~~~~~~~~~~ [fail]
+take<(...args: any[]) => void>((a: any, b: any) => a);
+                                 ~~~~~ [fail]
+                                         ~~~~~ [fail]
+take<(...args: any) => void>((a: any, b: any) => a);
+take<(...args: any[]) => void>((...args: any) => args);
+
+take<(() => () => void) | ((a: string) => void)>((): void => null);
+take<((a: string, b: number) => void) | ((a: boolean, b: number, c: object) => void)>((a: boolean, b: number, c: object): void => a);
+                                                                                        ~~~~~~~~~ [fail]
+                                                                                                    ~~~~~~~~ [fail]
+                                                                                                               ~~~~~~~~ [fail]
+                                                                                                                        ~~~~~~ [fail]
+take<((a: string, b: number) => void) | ((a: boolean, b: number, c: object) => void)>((a: boolean, b: number, c?: object): void => a);
+take<((a: string, b: number) => void) | ((a: boolean, b: number, c: object) => void)>((a: boolean, b: number): void => a);
+take<((a: string, b: number) => void) | ((a: boolean, b: number, c: object) => void)>((a: string, b: number): void => a);
+take<((a: string, b: number) => void) | ((a: boolean, b: number, c?: object) => void)>((a: string, b: number): void => a);
+take<((a: string, b: number) => void) | ((a: boolean, b: number, c: object) => void)>((): void => null);
+take<((a: string) => void) & {name?: string}>((a: string) => a);
+                                                ~~~~~~~~ [fail]
+take<((a: string) => void) & ((a: string) => void)>((a: string) => a);
+take<((a: string) => void) & (() => void)>((a: string) => a);
+take<((a: {fn(): void}) => void) | ((a: {fn(): void}, b: number) => void)>((a: {fn(): void}) => a);
+take<((a: string) => void) | ((a: string) => void)>((a: string): void => a);
+                                                      ~~~~~~~~ [fail]
+                                                               ~~~~~~ [fail]
+take<((a: string) => void) | ((a: string) => void) & {name?: string}>((a: string) => a);
+                                                                        ~~~~~~~~ [fail]
+take<((a: string) => void) | object & {name?: string}>((a: string) => a);
+                                                         ~~~~~~~~ [fail]
+take<(((a: string) => void) | ((a: string) => void)) & {name?: string}>((a: string) => a);
+                                                                          ~~~~~~~~ [fail]
+// only return type differs - don't complain about the return annotation
+take<((a: string) => string) | ((a: string) => number)>((a: string): string => a);
+                                                          ~~~~~~~~ [fail]
+
+(function(foo: "foo") {})("foo");
+(function(foo: string) {})("foo");
+             ~~~~~~~~ [fail]
+(function(foo) {})("foo");
+(function(foo?) {})("foo");
+(function(param: string, ...foo: string[]) {})("foo", "bar", "baz");
+               ~~~~~~~~ [fail]
+                               ~~~~~~~~~~ [fail]
+(function(foo?: string) {})();
+(function(this: any, a: string) {})("foo");
+                      ~~~~~~~~ [fail]
+(<T>(param: T): T => {
+              ~~~ [fail]
+    return param;
+})(1);
+(function(): string { return "foo"; })();
+           ~~~~~~~~ [fail]
+(function cb(): string { return "foo"; })();
+{
+    let result = (function(): string { return "foo"; })();
+    result = ((function(): string { return "foo"; }))();
+                         ~~~~~~~~ [fail]
+
+    const v: string | false = (function(): string | false { return false; })();
+           ~~~~~~~~~~~~~~~~ [fail]
+    const v2: true = (function(): true { return true; })();
+            ~~~~~~ [fail]
+}
+((a: string, b: string, ...args: string[]) => {})("a", "b");
+   ~~~~~~~~ [fail]
+              ~~~~~~~~ [fail]
+((a: string, b: string, ...args: string[]) => {})("a", "b", "c");
+   ~~~~~~~~ [fail]
+              ~~~~~~~~ [fail]
+                               ~~~~~~~~~~ [fail]
+((a, b, ...rest: number[]) => {})("a", "b", 1, 2, 3);
+               ~~~~~~~~~~ [fail]
+((...args: (string | number)[]) => {})("foo", 1); // TODO would be nice
+((...args: string[]) => {})("foo", 1);
+((...args: (string | number)[]) => {})(foo1 ? "foo" : 1);
+         ~~~~~~~~~~~~~~~~~~~~~ [fail]
+((...args: Array<string | number>) => {})(foo1 ? "foo" : 1);
+         ~~~~~~~~~~~~~~~~~~~~~~~~ [fail]
+((...args: string[]) => {})(...["foo", "bar"]);
+         ~~~~~~~~~~ [fail]
+((...args: (string | number)[]) => {})(...["foo", "bar", 1, 2, 3]);
+         ~~~~~~~~~~~~~~~~~~~~~ [fail]
+((...args: string[]) => {})(...["foo", "bar"], "baz");
+         ~~~~~~~~~~ [fail]
+
+const myVerboseSignature: (a: number) => number = function(a: number): number {
+                        ~~~~~~~~~~~~~~~~~~~~~~~ [fail]
+                                                            ~~~~~~~~ [fail]
+                                                                     ~~~~~~~~ [fail]
+    return a;
+}
+
+const myObj: {fn(a: string, b: number): void} = {
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [fail]
+    fn(a: string, b: number) {}
+        ~~~~~~~~ [fail]
+                   ~~~~~~~~ [fail]
+}
+
+const myOtherObj: {fn: (a: string, b: number) => void} = {
+    fn(a: string, b: number) {}
+        ~~~~~~~~ [fail]
+                   ~~~~~~~~ [fail]
+}
+
+const yetAnotherObject: {fn(a: string, b: number): void} = {
+    fn: function(a: string, b: number) {}
+                  ~~~~~~~~ [fail]
+                             ~~~~~~~~ [fail]
+}
+
+const andAnotherOne: {fn: (a: string, b: number) => void} = {
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [fail]
+    fn: function(a: string, b: number) {}
+                  ~~~~~~~~ [fail]
+                             ~~~~~~~~ [fail]
+}
+
+const evenWorkWithSignatures: {[key: string]: (a: string, b: number) => void} = {
+    fn(a: string, b: number): void {},
+        ~~~~~~~~ [fail]
+                   ~~~~~~~~ [fail]
+                            ~~~~~~ [fail]
+    foo(a: string, b: number) {},
+         ~~~~~~~~ [fail]
+                    ~~~~~~~~ [fail]
+    bar(a: string, b) {},
+         ~~~~~~~~ [fail]
+    baz(a): void {},
+          ~~~~~~ [fail]
+    [foo1](a: string): void {},
+            ~~~~~~~~ [fail]
+                     ~~~~~~ [fail]
+    noTypes(a, b) {},
+    2(a: string, b: number) {}
+       ~~~~~~~~ [fail]
+                  ~~~~~~~~ [fail]
+}
+
+const numericSignature: {[key: number]: (a: string) => void; [key: string]: (a: string, b: number) => void} = {
+    foo(a: string, b?: number) {},
+         ~~~~~~~~ [fail]
+                     ~~~~~~~~ [fail]
+    3(a: string, b?: number) {},
+       ~~~~~~~~ [fail]
+    3e1(a: string, b?: number) {},
+         ~~~~~~~~ [fail]
+    2.5(a: string, b?: number) {},
+         ~~~~~~~~ [fail]
+    4.0(a: string, b?: number) {},
+         ~~~~~~~~ [fail]
+    "2"(a: string, b?: number) {},
+         ~~~~~~~~ [fail]
+    "-2"(a: string, b?: number) {},
+          ~~~~~~~~ [fail]
+                      ~~~~~~~~ [fail]
+    "2e1"(a: string, b?: number) {},
+           ~~~~~~~~ [fail]
+                       ~~~~~~~~ [fail]
+}
+
+const withLiteralType: {fn(): false} = {
+                     ~~~~~~~~~~~~~~~ [fail]
+    fn(): false {
+        ~~~~~~~ [fail]
+        return false;
+    },
+};
+
+const noContext = {
+    foo(a: string): void {}
+}
+
+const anyContext: any = {
+    foo(a: string): void {}
+}
+
+const objWithSymbolKey: {[Symbol.hasInstance](instance: any): boolean} = {
+                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [fail]
+    [Symbol.hasInstance](instance: any): boolean {
+                                 ~~~~~ [fail]
+                                       ~~~~~~~~~ [fail]
+        return true;
+    },
+};
+
+declare let stringKey: string;
+declare let numberKey: number;
+declare let stringOrNumber: string | number;
+declare let stringAndNumber: string & number;
+declare let anyKey: any;
+
+const bothSignatures: {[key: number]: (a: string) => void; [key: string]: (a: string, b: number) => void} = {
+    [stringKey](a: string, b?: number) {},
+                 ~~~~~~~~ [fail]
+                             ~~~~~~~~ [fail]
+    [numberKey](a: string, b?: number) {},
+                 ~~~~~~~~ [fail]
+    [stringOrNumber](a: string, b?: number) {},
+                      ~~~~~~~~ [fail]
+                                  ~~~~~~~~ [fail]
+    [stringAndNumber](a: string, b?: number) {},
+                       ~~~~~~~~ [fail]
+    [anyKey](a: string, b?: number) {},
+              ~~~~~~~~ [fail]
+}
+
+function anyTypeParameter<T>(param: T) {
+    const obj: {[key: number]: (a: string) => void; [key: string]: (a: string, b: number) => void} = {
+        [param](a: string, b?: number) {},
+                 ~~~~~~~~ [fail]
+    }
+}
+
+function numericTypeParameter<T extends number, U extends 1 | 2, V extends T, W extends U>(a: T, b: U, c: V, d: W) {
+    const obj: {[key: number]: (a: string) => void; [key: string]: (a: string, b: number) => void} = {
+        [a](a: string, b?: number) {},
+             ~~~~~~~~ [fail]
+        [b](a: string, b?: number) {},
+             ~~~~~~~~ [fail]
+        [c](a: string, b?: number) {},
+             ~~~~~~~~ [fail]
+        [d](a: string, b?: number) {},
+             ~~~~~~~~ [fail]
+    }
+}
+
+function stringTypeParameter<T extends string, U extends "1" | "2", V extends T, W extends U>(a: T, b: U, c: V, d: W) {
+    const obj: {[key: number]: (a: string) => void; [key: string]: (a: string, b: number) => void} = {
+        [a](a: string, b?: number) {},
+             ~~~~~~~~ [fail]
+                         ~~~~~~~~ [fail]
+        [b](a: string, b?: number) {},
+             ~~~~~~~~ [fail]
+                         ~~~~~~~~ [fail]
+        [c](a: string, b?: number) {},
+             ~~~~~~~~ [fail]
+                         ~~~~~~~~ [fail]
+        [d](a: string, b?: number) {},
+             ~~~~~~~~ [fail]
+                         ~~~~~~~~ [fail]
+    }
+}
+
+function recursiveTypeParameter<T extends V | U, U extends V & T, V extends T | U | W, W extends V>(a: T, b: U, c: V, d: W) {
+    const obj: {[key: number]: (a: string) => void; [key: string]: (a: string, b: number) => void} = {
+        [a](a: string, b?: number) {},
+             ~~~~~~~~ [fail]
+                         ~~~~~~~~ [fail]
+        [b](a: string, b?: number) {},
+             ~~~~~~~~ [fail]
+                         ~~~~~~~~ [fail]
+        [c](a: string, b?: number) {},
+             ~~~~~~~~ [fail]
+                         ~~~~~~~~ [fail]
+        [d](a: string, b?: number) {},
+             ~~~~~~~~ [fail]
+                         ~~~~~~~~ [fail]
+    }
+}
+
+class Clazz {
+    foo(a: string): void {}
+}
+
+[1, "2", true].filter((e): e is string => typeof e === 'string');
+take<(foo: any) => foo is string>((foo: any): foo is string => typeof foo === "string");
+                                      ~~~~~ [fail]
+take<((foo: any) => foo is string)|((foo: any) => boolean)>((foo: any): foo is string => typeof foo === "string");
+                                                                ~~~~~ [fail]
+take<((foo: any) => foo is string)|((foo: any) => boolean)>((foo: any): boolean => typeof foo === "string");
+                                                                ~~~~~ [fail]
+
+[fail]: type annotation is redundant

@@ -1,0 +1,49 @@
+// Default - should be snake_case.
+let default_snake  = "";
+let DefaultPascal = "";
+    ~~~~~~~~~~~~~    [variable name must be in snake_case]
+
+
+// Exported variables - should be UPPER_CASE.
+export let EXPORTED_VAR = "";
+export let exportedVar = "";
+           ~~~~~~~~~~~ [variable name must be in UPPER_CASE]
+
+
+// Exported functions - should be camelCase.
+export function funcCamel() {}
+export function FUNC_CAMEL() {}
+                ~~~~~~~~~~ [function name must be in camelCase]
+
+
+// Exported function variables - should be in PascalCase.
+export let FuncArrowVar = () => undefined;
+export let FUNC_ARROW_VAR = () => undefined;
+           ~~~~~~~~~~~~~~ [functionVariable name must be in PascalCase]
+export let FuncExpressionVar = function() {};
+export let FUNC_EXPRESSION_VAR = function() {};
+           ~~~~~~~~~~~~~~~~~~~ [functionVariable name must be in PascalCase]
+
+
+// Const function variables - should be in camelCase.
+const funcArrowVar = () => undefined;
+const FUNC_ARROW_VAR = () => undefined;
+      ~~~~~~~~~~~~~~ [functionVariable name must be in camelCase]
+const funcExpressionVar = function() {};
+const FUNC_EXPRESSION_VAR = function() {};
+      ~~~~~~~~~~~~~~~~~~~ [functionVariable name must be in camelCase]
+
+
+// Named functions - should be in snake_case (the default).
+export let NamedFuncExpressionVar = function named_foo() {};
+export let NAMED_FUNC_EXPRESSION_VAR = function NAMED_FOO() {};
+           ~~~~~~~~~~~~~~~~~~~~~~~~~ [functionVariable name must be in PascalCase]
+                                                ~~~~~~~~~ [function name must be in snake_case]
+
+
+// Local function variables - should be UPPER_CASE.
+function local_test() {
+    let LOCAL_FUNC = () => undefined;
+    let localFunc = () => undefined;
+        ~~~~~~~~~ [functionVariable name must be in UPPER_CASE]
+}

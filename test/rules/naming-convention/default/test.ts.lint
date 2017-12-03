@@ -142,3 +142,8 @@ abstract class Foo {
     abstract private _barAjaff();
 }
 abstract class AbstractFoo() {}
+
+// `functionVariable` is not defined in the config, so this should use the `variable` options.
+let fooFunc = () => undefined;
+let foo_func = () => undefined;
+    ~~~~~~~~ [functionVariable name must be in camelCase]

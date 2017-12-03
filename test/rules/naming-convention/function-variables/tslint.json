@@ -1,0 +1,14 @@
+{
+  "rulesDirectory": ["../../../../rules"],
+  "rules": {
+    "naming-convention": [
+      true,
+      { "type": "default", "format": "snake_case" },
+      { "type": "variable", "modifiers": "export", "format": "UPPER_CASE" },
+      { "type": "function", "modifiers": "export", "format": "camelCase" },
+      { "type": "functionVariable", "modifiers": "export", "format": "PascalCase" },
+      { "type": "functionVariable", "modifiers": "local", "format": "UPPER_CASE" },
+      { "type": "functionVariable", "modifiers": "const", "format": "camelCase" }
+    ]
+  }
+}

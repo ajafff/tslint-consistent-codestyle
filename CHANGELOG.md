@@ -1,3 +1,20 @@
+# 1.11.0
+
+**Non-breaking rule changes:** (you might want to amend your configuration to make the rules stricter again)
+
+* `naming-convention`: Format options `"camelCase"` and `"PascalCase"` now allow adjacent uppercase characters to make it usable for real-world code. Use the new options `"strictCamelCase"` and `"StrictPascalCase"` to restore the old strict behavior.
+* `no-unnecessary-type-annotation`: disabled checking return type annotations by default as these cause the most false positves. You can enable the check with the new option `"check-return-type"`.
+
+**Bugfixes:**
+
+* `naming-convention`: fixed a bug where the suffix was not correctly removed from the name when using an array of suffixes.
+
+**Features:**
+
+* `naming-convention`: added new type `"functionVariable"`.
+  * It matches all variables initialized with an arrow function or function expression.
+  * It inherits configuration from `"variable"`
+
 # 1.10.2
 
 **Bugfixes:**

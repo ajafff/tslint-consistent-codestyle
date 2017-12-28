@@ -37,7 +37,7 @@
     "tsutils": "^2.12.2"
   },
   "devDependencies": {
-    "coveralls": "^2.13.0",
+    "coveralls": "^3.0.0",
     "github-release-from-changelog": "^1.2.1",
     "npm-run-all": "^4.1.1",
     "nyc": "^11.0.3",

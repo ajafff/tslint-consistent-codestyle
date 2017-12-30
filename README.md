@@ -3,8 +3,10 @@
 [![CircleCI](https://circleci.com/gh/ajafff/tslint-consistent-codestyle.svg?style=shield)](https://circleci.com/gh/ajafff/tslint-consistent-codestyle)
 [![Coverage Status](https://coveralls.io/repos/github/ajafff/tslint-consistent-codestyle/badge.svg)](https://coveralls.io/github/ajafff/tslint-consistent-codestyle)
 [![Join the chat at https://gitter.im/ajafff/tslint-consistent-codestyle](https://badges.gitter.im/ajafff/tslint-consistent-codestyle.svg)](https://gitter.im/ajafff/tslint-consistent-codestyle?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Greenkeeper badge](https://badges.greenkeeper.io/ajafff/tslint-consistent-codestyle.svg)](https://greenkeeper.io/)
 
 # Purpose
+
 
 The rules in this package can be used to enforce consistent code style.
 

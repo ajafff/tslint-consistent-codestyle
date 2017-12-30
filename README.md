@@ -6,6 +6,8 @@
 
 # Purpose
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/ajafff/tslint-consistent-codestyle.svg)](https://greenkeeper.io/)
+
 The rules in this package can be used to enforce consistent code style.
 
 # Usage

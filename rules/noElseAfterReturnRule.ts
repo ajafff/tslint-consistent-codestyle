@@ -43,7 +43,7 @@ function endsControlFlow(statement: ts.Statement | ts.BlockLike | ts.DefaultClau
         statement = statement.statements[statement.statements.length - 1];
     }
 
-    return isDefinitelyReturned(<ts.Statement>statement);
+    return isDefinitelyReturned(statement);
 }
 
 function isDefinitelyReturned(statement: ts.Statement): StatementType {

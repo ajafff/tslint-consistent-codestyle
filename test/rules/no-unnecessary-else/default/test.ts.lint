@@ -287,7 +287,7 @@ if (true) {
         if (true)
             while (true) {
                 if (true)
-                    continue; // TODO
+                    continue;
                 if (true) {
                     continue foo;
                 } else {
@@ -363,5 +363,29 @@ if (true) {
     }
 } else {}
   ~~~~ [fail]
+
+foo: bar: for (;;) {
+    if (true)
+        for (;;)
+            continue foo;
+    else {}
+    ~~~~ [fail]
+
+    if (true)
+        for (;;)
+            break bar;
+    else {}
+    ~~~~ [fail]
+
+    if (true)
+        baz: bas: for (;;)
+            break bas;
+    else {}
+
+    if (true)
+        baz: bas: for (;;)
+            break baz;
+    else {}
+}
 
 [fail]: unnecessary else

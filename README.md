@@ -7,7 +7,6 @@
 
 # Purpose
 
-
 The rules in this package can be used to enforce consistent code style.
 
 # Usage

@@ -171,7 +171,6 @@ if (true) {
         return;
     }
 } else {}
-  ~~~~ [fail]
 
 if (true) {
     try {
@@ -325,5 +324,44 @@ foo: for (;;)
                 break;
             }
     else {}
+
+if (true) {
+    try {
+        throw 'foo';
+    } catch {}
+} else {}
+
+if (true) {
+    try {
+        'statement';
+    } catch {
+        throw 'foo';
+    }
+} else {}
+
+if (true) {
+    try {
+        return foo();
+    } catch {
+        throw 'foo';
+    }
+} else {}
+  ~~~~ [fail]
+
+if (true) {
+    try {
+        return foo();
+    } finally {
+    }
+} else {}
+  ~~~~ [fail]
+
+if (true) {
+    try {
+    } finally {
+        return;
+    }
+} else {}
+  ~~~~ [fail]
 
 [fail]: unnecessary else

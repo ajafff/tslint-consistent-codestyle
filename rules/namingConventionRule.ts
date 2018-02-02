@@ -397,7 +397,7 @@ class IdentifierNameWalker extends Lint.AbstractWalker<NormalizedConfig[]> {
         utils.forEachDeclaredVariable(list, (declaration) => {
             let currentModifiers = modifiers;
             let selector = TypeSelector.variable;
-            if (!isEqualName(declaration.name, declaration.propertyName))
+            if (declaration.kind === ts.SyntaxKind.BindingElement && !isEqualName(declaration.name, declaration.propertyName))
                 currentModifiers |= Modifiers.rename;
             if (this._isUnused(declaration.name))
                 currentModifiers |= Modifiers.unused;
@@ -680,7 +680,7 @@ function isEqualName(name: ts.Identifier, propertyName?: ts.PropertyName) {
         (propertyName.kind === ts.SyntaxKind.Identifier && propertyName.text === name.text);
 }
 
-function isFunctionVariable(declaration: ts.VariableLikeDeclaration) {
+function isFunctionVariable(declaration: ts.VariableDeclaration | ts.BindingElement) {
     if (declaration.initializer) {
         switch (declaration.initializer.kind) {
             case ts.SyntaxKind.ArrowFunction:

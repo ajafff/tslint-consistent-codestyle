@@ -38,4 +38,17 @@ if (foo)
     if (bar) foo(bar); else if (baz) foo(baz); else {foo();bas();}
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [1]
 
+if (foo) {
+    label: while (true) {}
+}
+
+if (foo)
+    label: while (true) {}
+    ~~~~~~~~~~~~~~~~~~~~~~ [1]
+
+
+if (foo)
+    label: foo: bar: while (true) {}
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [1]
+
 [1]: statement must be braced

@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
 import * as Lint from 'tslint';
-import { isBlock, isIterationStatement, isIfStatement, getNextToken, isSameLine } from 'tsutils';
+import { isBlock, isIterationStatement, isIfStatement, getNextToken, isSameLine, isLabeledStatement } from 'tsutils';
 import { isElseIf } from '../src/utils';
 
 const FAIL_MESSAGE_MISSING = `statement must be braced`;
@@ -79,7 +79,7 @@ class ExtCurlyWalker extends Lint.AbstractWalker<IOptions> {
             const result = this._ifStatementNeedsBraces(node);
             return result[0] || result[1];
         }
-        if (isIterationStatement(node))
+        if (isIterationStatement(node) || isLabeledStatement(node))
             return this._needsBraces(node.statement);
         return node.kind === ts.SyntaxKind.SwitchStatement || node.kind === ts.SyntaxKind.TryStatement;
     }

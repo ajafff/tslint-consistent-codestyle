@@ -1,3 +1,9 @@
+# 1.11.1
+
+**Bugfixes:**
+
+* `ext-curly`: handle LabeledStatement as if it was not present
+
 # 1.11.0
 
 **Non-breaking rule changes:** (you might want to amend your configuration to make the rules stricter again)

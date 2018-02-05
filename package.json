@@ -1,6 +1,6 @@
 {
   "name": "tslint-consistent-codestyle",
-  "version": "1.11.0",
+  "version": "1.11.1",
   "description": "Additional rules to enforce constistent code style with tslint",
   "repository": {
     "type": "git",
@@ -21,7 +21,6 @@
     "github-release": "GITHUB_TOKEN=$(cat ~/github_token.txt) github-release-from-changelog"
   },
   "keywords": [
-    "eslint",
     "tslint",
     "custom-rules",
     "rules",

@@ -33,7 +33,7 @@
   "license": "MIT",
   "dependencies": {
     "tslib": "^1.7.1",
-    "tsutils": "^2.21.0"
+    "tsutils": "^2.22.2"
   },
   "devDependencies": {
     "coveralls": "^3.0.0",

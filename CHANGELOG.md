@@ -1,3 +1,19 @@
+# 1.12.0
+
+**Features:**
+
+This package now provides all rules for the [Wotan linter runtime](https://github.com/fimbullinter/wotan/blob/master/packages/wotan/README.md) as well.
+Example `.wotanrc.yaml`:
+
+```yaml
+extends:
+  - tslint-consistent-codestyle # makes rules from the package available with the 'tcc/' prefix
+rules: # now configure the rules you want to use, remember to use the 'tcc/' prefix
+  tcc/no-collapsible-if: error
+  tcc/no-unused:
+    options: 'ignore-parameters'
+```
+
 # 1.11.1
 
 **Bugfixes:**

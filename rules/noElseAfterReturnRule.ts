@@ -26,7 +26,7 @@ class IfWalker extends AbstractIfStatementWalker<void> {
         if (node.elseStatement !== undefined &&
             !isElseIf(node) &&
             isLastStatementReturn(node.thenStatement))
-            this.addFailureAtNode(node.getChildAt(5 /*else*/, this.sourceFile)!, FAIL_MESSAGE);
+            this.addFailureAtNode(node.getChildAt(5 /*else*/, this.sourceFile), FAIL_MESSAGE);
     }
 }
 

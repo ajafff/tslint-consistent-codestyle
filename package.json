@@ -19,6 +19,7 @@
     "precoverage": "rimraf coverage .nyc_output",
     "coverage": "nyc npm test",
     "report-coverage": "cat ./coverage/lcov.info | coveralls",
+    "postpublish": "git push origin master --tags && npm run github-release",
     "github-release": "GITHUB_TOKEN=$(cat ~/github_token.txt) github-release-from-changelog"
   },
   "keywords": [

@@ -17,6 +17,8 @@ Install from npm to your devDependencies  (https://www.npmjs.com/package/tslint-
 npm install --save-dev tslint-consistent-codestyle
 ```
 
+## With TSLint
+
 Configure tslint to use `tslint-consistent-codestyle`:
 
 This package provides an empty configuration preset that just contains the `rulesDirectory`. That means you can easily use the rules in this package, but don't get any predefined configuration. To use it, just add it to the `extends` array in your `tslint.json`:
@@ -42,6 +44,21 @@ As of `tslint@5.2.0` you can also use `tslint-consistent-codestyle` as `rulesDir
 ```
 
 Now configure some of the new rules.
+
+## With Wotan
+
+This package provides all rules for both TSLint and [Wotan](https://github.com/fimbullinter/wotan/blob/master/packages/wotan/README.md).
+
+To use rules from this package, add the following to your `.wotanrc.yaml` file:
+
+```yaml
+extends:
+  - tslint-consistent-codestyle # makes rules from the package available with the 'tcc/' prefix
+rules: # now configure the rules you want to use, remember to use the 'tcc/' prefix
+  tcc/no-collapsible-if: error
+  tcc/no-unused:
+    options: 'ignore-parameters'
+```
 
 # Rules
 

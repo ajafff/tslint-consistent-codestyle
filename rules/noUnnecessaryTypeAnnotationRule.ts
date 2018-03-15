@@ -95,6 +95,7 @@ function walk(ctx: Lint.WalkContext<IOptions>, checker: ts.TypeChecker) {
         for (let i = 0; i < parameters.length; ++i) {
             if (!restParameterContext) {
                 const context = signature.parameters[i];
+                // wotan-disable-next-line no-useless-predicate
                 if (context === undefined || context.valueDeclaration === undefined)
                     break;
                 if (isTypeParameter(checker.getTypeAtLocation(context.valueDeclaration)))

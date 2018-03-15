@@ -39,7 +39,7 @@
     "tsutils": "^2.22.2"
   },
   "devDependencies": {
-    "@fimbul/wotan": "^0.4.0",
+    "@fimbul/wotan": "^0.5.0",
     "coveralls": "^3.0.0",
     "github-release-from-changelog": "^1.2.1",
     "npm-run-all": "^4.1.1",

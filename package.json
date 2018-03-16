@@ -13,7 +13,7 @@
     "compile": "tsc -p .",
     "prepublishOnly": "npm run verify",
     "lint:wotan": "wotan",
-    "lint:tslint": "tslint -p .",
+    "lint:tslint": "wotan -m @fimbul/valtyr",
     "lint": "run-p lint:*",
     "verify": "run-s compile lint coverage",
     "precoverage": "rimraf coverage .nyc_output",
@@ -39,6 +39,7 @@
     "tsutils": "^2.22.2"
   },
   "devDependencies": {
+    "@fimbul/valtyr": "^0.4.0",
     "@fimbul/wotan": "^0.5.0",
     "coveralls": "^3.0.0",
     "github-release-from-changelog": "^1.2.1",

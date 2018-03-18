@@ -59,6 +59,8 @@ take<((a: string) => string) | ((a: string) => number)>((a: string): string => a
              ~~~~~~~~ [fail]
 (function(foo: string) {}("foo"));
              ~~~~~~~~ [fail]
+foo8 = function(foo: string)(foo8);
+                   ~~~~~~~~ [fail]
 (function(foo): void {})("foo");
 (function(foo?): void {})("foo");
 (function(param: string, ...foo: string[]) {})("foo", "bar", "baz");

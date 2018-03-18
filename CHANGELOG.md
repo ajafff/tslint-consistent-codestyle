@@ -1,3 +1,9 @@
+# 1.12.1
+
+**Bugfixes:**
+
+* `no-unnecessary-type-annotations` now recognizes IIFEs that look like `(function(param: string) {}('parameter'));`
+
 # 1.12.0
 
 **Features:**

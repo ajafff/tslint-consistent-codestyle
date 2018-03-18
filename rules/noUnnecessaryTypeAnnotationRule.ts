@@ -347,13 +347,11 @@ function getMinArguments(parameters: ReadonlyArray<ts.ParameterDeclaration>): nu
 }
 
 function getIife(node: FunctionExpressionLike): ts.CallExpression | undefined {
-    if (node.parent!.kind !== ts.SyntaxKind.ParenthesizedExpression)
-        return;
-    let prev = node.parent!;
+    let prev: ts.Node = node;
     let parent = prev.parent!;
     while (parent.kind === ts.SyntaxKind.ParenthesizedExpression) {
         prev = parent;
-        parent = parent.parent!;
+        parent = prev.parent!;
     }
     if (parent.kind === ts.SyntaxKind.CallExpression && (<ts.CallExpression>parent).expression === prev)
         return <ts.CallExpression>parent;

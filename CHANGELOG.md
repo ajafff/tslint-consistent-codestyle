@@ -1,3 +1,7 @@
+# 1.12.2
+
+* `no-unnecessary-type-annotation`: fix infinite loop on union with generic signature (#57)
+
 # 1.12.1
 
 **Bugfixes:**

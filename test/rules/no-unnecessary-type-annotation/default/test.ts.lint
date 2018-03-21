@@ -53,6 +53,10 @@ take<(((a: string) => void) | ((a: string) => void)) & {name?: string}>((a: stri
 // only return type differs - don't complain about the return annotation
 take<((a: string) => string) | ((a: string) => number)>((a: string): string => a);
                                                           ~~~~~~~~ [fail]
+take<(<T>(a: string) => string) | (<T>(a: string) => number)>((a: string): string => a);
+                                                                ~~~~~~~~ [fail]
+take<(<T extends () => void>(a: string) => string) | (<T extends () => void>(a: string) => number)>((a: string): string => a);
+                                                                                                      ~~~~~~~~ [fail]
 
 (function(foo: "foo") {})("foo");
 (function(foo: string) {})("foo");

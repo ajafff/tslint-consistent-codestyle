@@ -35,6 +35,13 @@ export class Rule extends Lint.Rules.TypedRule {
     }
 }
 
+const formatFlags = ts.TypeFormatFlags.UseStructuralFallback
+    | ts.TypeFormatFlags.UseFullyQualifiedType
+    | ts.TypeFormatFlags.UseAliasDefinedOutsideCurrentScope
+    | ts.TypeFormatFlags.NoTruncation
+    | ts.TypeFormatFlags.WriteClassExpressionAsTypeLiteral
+    | ts.TypeFormatFlags.WriteArrowStyleSignature;
+
 function walk(ctx: Lint.WalkContext<IOptions>, checker: ts.TypeChecker) {
     return ts.forEachChild(ctx.sourceFile, function cb(node): void {
         switch (node.kind) {
@@ -190,7 +197,7 @@ function walk(ctx: Lint.WalkContext<IOptions>, checker: ts.TypeChecker) {
 
     // TODO this could use a little more effort
     function typesAreEqual(a: ts.Type, b: ts.Type): boolean {
-        return a === b || checker.typeToString(a) === checker.typeToString(b);
+        return a === b || checker.typeToString(a, undefined, formatFlags) === checker.typeToString(b, undefined, formatFlags);
     }
 
     function getContextualTypeOfFunction(func: FunctionExpressionLike): ts.Type | undefined {
@@ -277,11 +284,11 @@ function walk(ctx: Lint.WalkContext<IOptions>, checker: ts.TypeChecker) {
             case 1:
                 return [signatures[0], true];
             default:
-                const str = checker.signatureToString(signatures[0]);
+                const str = checker.signatureToString(signatures[0], undefined, formatFlags);
                 const withoutReturn = removeSignatureReturn(str);
                 let returnUsable = true;
                 for (let i = 1; i < signatures.length; ++i) { // check if all signatures are the same
-                    const sig = checker.signatureToString(signatures[i]);
+                    const sig = checker.signatureToString(signatures[i], undefined, formatFlags);
                     if (str !== sig) {
                         if (withoutReturn !== removeSignatureReturn(sig))
                             return;
@@ -293,17 +300,11 @@ function walk(ctx: Lint.WalkContext<IOptions>, checker: ts.TypeChecker) {
     }
 }
 
-function removeSignatureReturn(str: string) {
-    let open = 1;
-    let i = 1;
-    for (; open !== 0; ++i) {
-        if (str[i] === '(') {
-            ++open;
-        } else if (str[i] === ')') {
-            --open;
-        }
-    }
-    return str.substr(0, i + 1);
+function removeSignatureReturn(str: string): string {
+    const sourceFile = ts.createSourceFile('tmp.ts', `var a:${str}`, ts.ScriptTarget.ESNext);
+    const signature = <ts.FunctionOrConstructorTypeNode>(<ts.VariableStatement>sourceFile.statements[0])
+        .declarationList.declarations[0].type!;
+    return sourceFile.text.substring(6, signature.parameters.end + 1);
 }
 
 function getSignaturesOfType(type: ts.Type): ts.Signature[] {

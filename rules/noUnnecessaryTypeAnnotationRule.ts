@@ -283,7 +283,7 @@ function walk(ctx: Lint.WalkContext<IOptions>, checker: ts.TypeChecker) {
                 return;
             case 1:
                 return [signatures[0], true];
-            default:
+            default: {
                 const str = checker.signatureToString(signatures[0], undefined, formatFlags);
                 const withoutReturn = removeSignatureReturn(str);
                 let returnUsable = true;
@@ -296,6 +296,7 @@ function walk(ctx: Lint.WalkContext<IOptions>, checker: ts.TypeChecker) {
                     }
                 }
                 return [signatures[0], returnUsable];
+            }
         }
     }
 }

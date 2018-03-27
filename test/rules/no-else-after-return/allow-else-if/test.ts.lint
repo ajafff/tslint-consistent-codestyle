@@ -1,0 +1,72 @@
+if (condition) {
+    return;
+} else {
+  ~~~~ [fail]
+    return;
+}
+
+if (condition) {
+    return;
+} else if (someOtherCondition) {
+    return;
+}
+
+if (condition) {
+    return;
+} else if (someOtherCondition) {
+    return;
+} else {
+  ~~~~ [fail]
+    return;
+}
+
+if (condition) {
+    return;
+} else if (someOtherCondition) {
+    return;
+} else if (yetAnotherCondition) {
+    return;
+} else {
+  ~~~~ [fail]
+    return;
+}
+
+if (condition) {
+    // nothing
+} else if (someOtherCondition) {
+    return;
+} else {
+    return;
+}
+
+if (condition) {
+    // nothing
+} else if (someOtherCondition) {
+    return;
+} else if (yetAnotherCondition) {
+    return;
+} else {
+    return;
+}
+
+if (condition) {
+    return;
+} else if (someOtherCondition) {
+    // nothing
+} else if (yetAnotherCondition) {
+    return;
+} else {
+    return;
+}
+
+if (condition) {
+    return;
+} else if (someOtherCondition) {
+    return;
+} else if (yetAnotherCondition) {
+    // nothing
+} else {
+    return;
+}
+
+[fail]: unnecessary else after return

@@ -1,3 +1,7 @@
+# 1.12.3
+
+* `no-else-after-return`: use correct control flow analysis
+
 # 1.12.2
 
 * `no-unnecessary-type-annotation`: fix infinite loop on union with generic signature (#57)

@@ -1,21 +1,37 @@
-if (true) {
+if (condition) {
     return;
 } else {}
   ~~~~ [fail]
 
-if (true) return;
+if (condition) {
+    while (true)
+        return;
+} else {}
+  ~~~~ [fail]
+
+if (condition) {
+    while (false)
+        return;
+} else {}
+
+if (condition) {
+    while (condition)
+        return;
+} else {}
+
+if (condition) return;
 else ;
 ~~~~ [fail]
 
-if (true) {
+if (condition) {
     {
         return;
     }
 } else {}
   ~~~~ [fail]
 
-if (true) {
-    if (true) {
+if (condition) {
+    if (confition) {
         return;
     } else {
       ~~~~ [fail]
@@ -24,46 +40,46 @@ if (true) {
 } else {}
   ~~~~ [fail]
 
-if (true) {
-    if (true) {
+if (condition) {
+    if (condition) {
         return;
     }
 } else {}
 
-if (true) return;
+if (condition) return;
 
-if (true) foo();
+if (condition) foo();
 else bar();
 
-if (true) {
+if (condition) {
     return;
 }
 
-if (true) {
+if (condition) {
     foo();
 } else {
     bar();
 }
 
-if (true) {
+if (condition) {
     {
     }
 } else {}
 
-if (true) {
-    if (true) {
+if (condition) {
+    if (condition) {
         return;
     } else {
       ~~~~ [fail]
     }
 } else {}
 
-if (true) {
-    if (true) {
+if (condition) {
+    if (condition) {
     }
 } else {}
 
-if (true) {
+if (condition) {
     switch (foo) {
         case 'a':
             return;
@@ -75,7 +91,7 @@ if (true) {
 } else {}
   ~~~~ [fail]
 
-if (true) {
+if (condition) {
     switch (foo) {
         default:
             return;
@@ -85,7 +101,7 @@ if (true) {
 } else {}
   ~~~~ [fail]
 
-if (true) {
+if (condition) {
     switch (foo) {
         case 'a':
             return;
@@ -94,7 +110,7 @@ if (true) {
     }
 } else {}
 
-if (true) {
+if (condition) {
     switch (foo) {
         case 'a':
             return;
@@ -105,7 +121,7 @@ if (true) {
 } else {}
   ~~~~ [fail]
 
-if (true) {
+if (condition) {
     switch (foo) {
         case 'a':
             return;
@@ -118,7 +134,7 @@ if (true) {
 } else {}
   ~~~~ [fail]
 
-if (true) {
+if (condition) {
     switch (foo) {
         case 'a':
             return;
@@ -128,17 +144,66 @@ if (true) {
     }
 } else {}
 
-if (true) {
-}else if (true) {
+if (condition) {
+}else if (condition) {
     return;
 } else {}
 
-if (true) {
+if (condition) {
 }else{
-    if (true) {
+    if (condition) {
         return;
     } else {}
       ~~~~ [fail]
+}
+
+if (condition) {
+    throw null;
+} else {}
+
+if (condition) {
+    if (condition)
+        return;
+    else
+    ~~~~ [fail]
+        return;
+} else {}
+  ~~~~ [fail]
+
+switch (Boolean()) {
+    case true:
+        if (condition) {
+            if (condition)
+                break;
+            return;
+        } else {}
+        break;
+    case false:
+        if (condition) {
+            if (condition)
+                return;
+            return;
+        } else {}
+          ~~~~ [fail]
+}
+
+outer: for (;;) {
+    if (condition) {
+        switch (Boolean()) {
+            case true:
+                break;
+        }
+        return;
+    } else {}
+      ~~~~ [fail]
+
+    if (condition) {
+        switch (Boolean()) {
+            case true:
+                break outer;
+        }
+        return;
+    } else {}
 }
 
 

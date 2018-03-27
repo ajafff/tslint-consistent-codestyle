@@ -36,7 +36,7 @@
   "dependencies": {
     "@fimbul/bifrost": "^0.6.0",
     "tslib": "^1.7.1",
-    "tsutils": "^2.22.2"
+    "tsutils": "^2.24.0"
   },
   "devDependencies": {
     "@fimbul/valtyr": "^0.6.0",
@@ -47,7 +47,7 @@
     "nyc": "^11.0.3",
     "rimraf": "^2.6.2",
     "tslint": "^5.8.0",
-    "typescript": "~2.7.1"
+    "typescript": "~2.8.1"
   },
   "peerDependencies": {
     "tslint": "^5.0.0",

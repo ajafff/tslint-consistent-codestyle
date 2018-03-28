@@ -1,3 +1,9 @@
+# 1.13.0
+
+**Features:**
+
+* `no-else-after-return`: added option `"allow-else-if"`
+
 # 1.12.3
 
 * `no-else-after-return`: use correct control flow analysis

@@ -302,10 +302,9 @@ function walk(ctx: Lint.WalkContext<IOptions>, checker: ts.TypeChecker) {
 }
 
 function removeSignatureReturn(str: string): string {
-    const sourceFile = ts.createSourceFile('tmp.ts', `var a:${str}`, ts.ScriptTarget.ESNext);
-    const signature = <ts.FunctionOrConstructorTypeNode>(<ts.VariableStatement>sourceFile.statements[0])
-        .declarationList.declarations[0].type!;
-    return sourceFile.text.substring(6, signature.parameters.end + 1);
+    const sourceFile = ts.createSourceFile('tmp.ts', `type T=${str}`, ts.ScriptTarget.ESNext);
+    const signature = <ts.FunctionOrConstructorTypeNode>(<ts.TypeAliasDeclaration>sourceFile.statements[0]).type;
+    return sourceFile.text.substring(7, signature.parameters.end + 1);
 }
 
 function getSignaturesOfType(type: ts.Type): ts.Signature[] {

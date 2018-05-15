@@ -12,6 +12,7 @@ import {
     isTypePredicateNode,
     isValidNumericLiteral,
     isIntersectionType,
+    getIIFE,
 } from 'tsutils';
 
 type FunctionExpressionLike = ts.ArrowFunction | ts.FunctionExpression;
@@ -65,7 +66,7 @@ function walk(ctx: Lint.WalkContext<IOptions>, checker: ts.TypeChecker) {
         if (!functionHasTypeDeclarations(node))
             return;
 
-        const iife = getIife(node);
+        const iife = getIIFE(node);
         if (iife !== undefined)
             return checkIife(node, iife);
 
@@ -345,17 +346,6 @@ function getMinArguments(parameters: ReadonlyArray<ts.ParameterDeclaration>): nu
             break;
     }
     return minArguments;
-}
-
-function getIife(node: FunctionExpressionLike): ts.CallExpression | undefined {
-    let prev: ts.Node = node;
-    let parent = prev.parent!;
-    while (parent.kind === ts.SyntaxKind.ParenthesizedExpression) {
-        prev = parent;
-        parent = prev.parent!;
-    }
-    if (parent.kind === ts.SyntaxKind.CallExpression && (<ts.CallExpression>parent).expression === prev)
-        return <ts.CallExpression>parent;
 }
 
 function containsTypeWithFlag(type: ts.Type, flag: ts.TypeFlags): boolean {

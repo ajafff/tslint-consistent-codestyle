@@ -16,4 +16,4 @@ for (i = 1; --i;);
 
 for (i = 1; i, --i);
 
-[fail]: use while loop instead
+[fail]: Prefer `while` loops instead of `for` loops without an initializer and incrementor.

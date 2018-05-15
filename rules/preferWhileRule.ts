@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 import * as Lint from 'tslint';
 
-const FAIL_MESSAGE = `use while loop instead`;
+const FAIL_MESSAGE = 'Prefer `while` loops instead of `for` loops without an initializer and incrementor.';
 
 export class Rule extends Lint.Rules.AbstractRule {
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {

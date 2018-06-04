@@ -1,3 +1,9 @@
+# 1.13.1
+
+**Bugfixes:**
+
+* `naming-convention`: added missing configuration handling for `"type": "parameterProperty"`
+
 # 1.13.0
 
 **Features:**

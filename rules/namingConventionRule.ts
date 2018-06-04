@@ -312,7 +312,10 @@ class IdentifierNameWalker extends Lint.AbstractWalker<NormalizedConfig[]> {
         return this._usage.get(name)!.uses.length === 0;
     }
 
-    private _checkTypeParameters(node: ts.DeclarationWithTypeParameters, modifiers: Modifiers) {
+    private _checkTypeParameters(
+        node: ts.SignatureDeclaration | ts.ClassLikeDeclaration | ts.InterfaceDeclaration | ts.TypeAliasDeclaration,
+        modifiers: Modifiers,
+    ) {
         if (node.typeParameters !== undefined)
             for (const {name} of node.typeParameters)
                 this._checkName(name, TypeSelector.genericTypeParameter, modifiers);

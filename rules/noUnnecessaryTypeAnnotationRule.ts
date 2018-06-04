@@ -221,9 +221,11 @@ function walk(ctx: Lint.WalkContext<IOptions>, checker: ts.TypeChecker) {
     }
 
     function signatureHasGenericOrTypePredicateReturn(signature: ts.Signature): boolean {
+        if (signature.declaration === undefined)
+            return false;
         if (signature.declaration.type !== undefined && isTypePredicateNode(signature.declaration.type))
             return true;
-        const original = checker.getSignatureFromDeclaration(signature.declaration);
+        const original = checker.getSignatureFromDeclaration(<ts.SignatureDeclaration>signature.declaration);
         return original !== undefined && isTypeParameter(original.getReturnType());
     }
 
@@ -277,7 +279,10 @@ function walk(ctx: Lint.WalkContext<IOptions>, checker: ts.TypeChecker) {
     function getMatchingSignature(type: ts.Type, parameters: ReadonlyArray<ts.ParameterDeclaration>): [ts.Signature, boolean] | undefined {
         const minArguments = getMinArguments(parameters);
 
-        const signatures = getSignaturesOfType(type).filter((s) => getNumParameters(s.declaration.parameters) >= minArguments);
+        const signatures = getSignaturesOfType(type).filter(
+            (s) => s.declaration !== undefined &&
+                getNumParameters(<ReadonlyArray<ts.ParameterDeclaration>>s.declaration.parameters) >= minArguments,
+        );
 
         switch (signatures.length) {
             case 0:

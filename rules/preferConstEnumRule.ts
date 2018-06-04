@@ -110,8 +110,9 @@ function onlyConstUses(track: IEnum): boolean {
             default:
                 return false;
             case ts.SyntaxKind.ElementAccessExpression:
-                if ((<ts.ElementAccessExpression>parent).argumentExpression === undefined ||
-                    (<ts.ElementAccessExpression>parent).argumentExpression!.kind !== ts.SyntaxKind.StringLiteral)
+                // wotan-disable-next-line no-useless-predicate
+                if ((<ts.ElementAccessExpression>parent).argumentExpression === undefined || // compatibilty with typescript@<2.9.0
+                    (<ts.ElementAccessExpression>parent).argumentExpression.kind !== ts.SyntaxKind.StringLiteral)
                     return false;
                 break;
             case ts.SyntaxKind.PropertyAccessExpression:
@@ -147,7 +148,12 @@ function isConstInitializer(initializer: ts.Expression, members: Map<string, IEn
             return member !== undefined && member.isConst && (allowStrings || !member.stringValued);
         }
         if (isElementAccessExpression(node)) {
-            if (!isIdentifier(node.expression) || node.argumentExpression === undefined || !isStringLiteral(node.argumentExpression))
+            if (
+                !isIdentifier(node.expression) ||
+                // wotan-disable-next-line no-useless-predicate
+                node.argumentExpression === undefined || // compatibility with typescript@<2.9.0
+                !isStringLiteral(node.argumentExpression)
+            )
                 return false;
             const track = findEnum(node.expression);
             if (track === undefined)

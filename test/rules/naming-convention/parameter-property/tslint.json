@@ -1,0 +1,17 @@
+{
+  "rulesDirectory": [
+    "../../../../rules"
+  ],
+  "rules": {
+    "naming-convention": [
+      true,
+      {"type": "default", "format": "PascalCase", "leadingUnderscore": "forbid", "trailingUnderscore": "forbid"},
+      {"type": "parameter", "format": "camelCase"},
+      {"type": "variable", "format": "camelCase"},
+      {"type": "property", "format": "camelCase"},
+      {"type": "property", "modifiers": ["public"], "format": "PascalCase"},
+      {"type": "parameterProperty", "modifiers": "protected", "format": "UPPER_CASE"},
+      {"type": "parameterProperty", "filter": "x", "format": "camelCase"}
+    ]
+  }
+}

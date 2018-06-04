@@ -78,7 +78,6 @@ class TestClass {
                   ~~~ [method name must be in StrictPascalCase]
     constructor(public readonly _foo, protected bar) {}
                                 ~~~~ [parameterProperty name must not have leading underscore]
-                                ~~~~ [parameterProperty name must be in UPPER_CASE]
                                                 ~~~ [parameterProperty name must have leading underscore]
     constructor(private readonly _FOO_Bar) {}
     toJSON() {}

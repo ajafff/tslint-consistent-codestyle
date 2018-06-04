@@ -1,0 +1,6 @@
+export class Point {
+    constructor(protected x: number, protected y: number, Z: number, public selected: boolean) {}
+                                               ~ [parameterProperty name must be in UPPER_CASE]
+                                                          ~ [parameter name must be in camelCase]
+                                                                            ~~~~~~~~ [parameterProperty name must be in PascalCase]
+}

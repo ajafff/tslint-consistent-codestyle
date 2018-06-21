@@ -34,12 +34,12 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@fimbul/bifrost": "^0.10.0",
+    "@fimbul/bifrost": "^0.11.0",
     "tslib": "^1.7.1",
     "tsutils": "^2.27.0"
   },
   "devDependencies": {
-    "@fimbul/valtyr": "^0.10.0",
+    "@fimbul/valtyr": "^0.11.0",
     "@fimbul/wotan": "^0.11.0",
     "coveralls": "^3.0.0",
     "github-release-from-changelog": "^1.2.1",

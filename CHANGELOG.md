@@ -1,3 +1,9 @@
+# 1.13.2
+
+**Bugfixes:**
+
+* `no-unused`: fixed crash on type parameter of declaration inside global augmentation
+
 # 1.13.1
 
 **Bugfixes:**

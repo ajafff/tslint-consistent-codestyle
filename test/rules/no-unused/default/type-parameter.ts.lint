@@ -6,3 +6,11 @@ declare module "foo" {
 
 export default class <T> {}
                       ~ [TypeParameter 'T' is unused.]
+
+declare global {
+  namespace jest {
+    interface Matchers<R> {
+      toEqualSomething(argument: string): object;
+    }
+  }
+}

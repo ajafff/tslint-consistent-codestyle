@@ -259,6 +259,8 @@ function typeParameterMayBeRequired(parameter: ts.TypeParameterDeclaration, usag
             case ts.SyntaxKind.ModuleDeclaration:
                 if ((<ts.ModuleDeclaration>parent).name.kind !== ts.SyntaxKind.Identifier)
                     return ts.isExternalModule(parent.getSourceFile());
+                if (parent.flags & ts.NodeFlags.GlobalAugmentation)
+                    return true;
                 const variable = usage.get(<ts.Identifier>(<ts.ModuleDeclaration>parent).name)!;
                 if (!variable.exported)
                     return variable.inGlobalScope;

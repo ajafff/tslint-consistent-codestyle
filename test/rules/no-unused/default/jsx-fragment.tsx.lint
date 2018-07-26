@@ -1,0 +1,4 @@
+import * as React from 'react';
+
+let foo = <></>;
+    ~~~ [Variable 'foo' is unused.]

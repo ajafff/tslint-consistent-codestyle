@@ -89,7 +89,7 @@ function containsJsx(node: ts.Node): boolean | undefined {
     switch (node.kind) {
         case ts.SyntaxKind.JsxElement:
         case ts.SyntaxKind.JsxSelfClosingElement:
-        // TODO add JsxFragment
+        case ts.SyntaxKind.JsxFragment:
             return true;
         default:
             return ts.forEachChild(node, containsJsx);

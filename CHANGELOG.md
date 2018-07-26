@@ -1,3 +1,9 @@
+# 2.13.3
+
+**Bugfixes:**
+
+* `no-unused`: don't mark import of `React` as unused if required by JsxFragment
+
 # 1.13.2
 
 **Bugfixes:**

@@ -313,7 +313,7 @@ function removeSignatureReturn(str: string): string {
     return sourceFile.text.substring(7, signature.parameters.end + 1);
 }
 
-function getSignaturesOfType(type: ts.Type): ts.Signature[] {
+function getSignaturesOfType(type: ts.Type): ReadonlyArray<ts.Signature> {
     if (isUnionType(type)) {
         const signatures = [];
         for (const t of type.types)
@@ -321,7 +321,7 @@ function getSignaturesOfType(type: ts.Type): ts.Signature[] {
         return signatures;
     }
     if (isIntersectionType(type)) {
-        let signatures: ts.Signature[] | undefined;
+        let signatures;
         for (const t of type.types) {
             const sig = getSignaturesOfType(t);
             if (sig.length !== 0) {

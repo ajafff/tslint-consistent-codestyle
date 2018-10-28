@@ -4,7 +4,11 @@ import * as ts from 'typescript';
 
 export class Rule extends Lint.Rules.AbstractRule {
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const options = { 'max-length': 2, ...this.ruleArguments[0] };
+        const options = {
+            'max-length': 2,
+            'ignore-constructor': false,
+            ...this.ruleArguments[0],
+        };
         return this.applyWithFunction(sourceFile, walk, options);
     }
 }
@@ -23,12 +27,19 @@ function failureStringAlways(exit: string): string {
 
 interface IOptions {
     'max-length': number;
+    'ignore-constructor': boolean;
 }
 
 function walk(ctx: Lint.WalkContext<IOptions>) {
-    const { sourceFile, options: { 'max-length': maxLineLength } } = ctx;
+    const {
+        sourceFile,
+        options: { 'max-length': maxLineLength, 'ignore-constructor': ignoreConstructor },
+    } = ctx;
 
     return ts.forEachChild(sourceFile, function cb(node): void {
+        if (ignoreConstructor && node.kind === ts.SyntaxKind.Constructor)
+            return;
+
         if (isIfStatement(node))
             check(node);
         return ts.forEachChild(node, cb);

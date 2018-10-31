@@ -56,7 +56,9 @@ for (const x of xs) {
 }
 ```
 
-An options object as in `"early-exit": [true, { "max-length": 4 }]` may be provided to configure what makes a block count as "large". The default is 2 lines.
+An options object as in `"early-exit": [true, { "max-length": 4, "ignore-constructor": true }]` may be provided.
+
+`"max-length"` configures what makes a block count as "large". The default is 2 lines.
 
 If you set `"max-length"` to `0`, the rule will always suggest an early return, regardless of the line count. For example:
 
@@ -90,3 +92,6 @@ for (const x of xs) {
   bar();
 }
 ```
+
+In addition you can choose to ignore `if` statements within class constructors with `"ignore-constructor": true` which defaults to `false`.
+Enabling this option prevents potential mistakes by overriding the constructed object with a non-primitive return value.

@@ -24,3 +24,34 @@ class Foo {
         }
     }
 }
+
+class Foo {
+    constructor() {
+        function f() {
+            if (so) {
+            ~~ [0]
+                some(
+                    long,
+                    thing);
+            }
+
+            function f() {
+                if (so) {
+                ~~ [0]
+                    some(
+                        long,
+                        thing);
+                }
+            }
+        }
+    }
+}
+
+// Making sure that if statement outside function scope doesn't cause error
+if (so) {
+    some(
+        long,
+        thing);
+}
+
+[0]: Remainder of block is inside 'if' statement. Prefer to invert the condition and 'return' early.

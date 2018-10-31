@@ -1,4 +1,4 @@
-import { isBlock, isCaseOrDefaultClause, isIfStatement } from 'tsutils';
+import { isBlock, isCaseOrDefaultClause, isIfStatement, isFunctionScopeBoundary } from 'tsutils';
 import * as Lint from 'tslint';
 import * as ts from 'typescript';
 
@@ -37,11 +37,9 @@ function walk(ctx: Lint.WalkContext<IOptions>) {
     } = ctx;
 
     return ts.forEachChild(sourceFile, function cb(node): void {
-        if (ignoreConstructor && node.kind === ts.SyntaxKind.Constructor)
-            return;
-
-        if (isIfStatement(node))
+        if (isIfStatement(node) && (!ignoreConstructor || !isConstructorClosestFunctionScopeBoundary(node)))
             check(node);
+
         return ts.forEachChild(node, cb);
     });
 
@@ -164,4 +162,14 @@ function isLastStatement(ifStatement: ts.IfStatement, statements: ReadonlyArray<
             throw new Error();
         i--;
     }
+}
+
+function isConstructorClosestFunctionScopeBoundary(node: ts.Node): boolean {
+    let currentParent = node.parent;
+    while (currentParent) {
+        if (isFunctionScopeBoundary(currentParent))
+            return currentParent.kind === ts.SyntaxKind.Constructor;
+        currentParent = currentParent.parent;
+    }
+    return false;
 }

@@ -1,3 +1,9 @@
+# 1.14.0
+
+**Features:**
+
+* `early-exit`: added option `"ignore-constructor"`
+
 # 1.13.3
 
 **Bugfixes:**

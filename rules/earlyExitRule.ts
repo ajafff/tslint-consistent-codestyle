@@ -1,10 +1,14 @@
-import { isBlock, isCaseOrDefaultClause, isIfStatement } from 'tsutils';
+import { isBlock, isCaseOrDefaultClause, isIfStatement, isFunctionScopeBoundary } from 'tsutils';
 import * as Lint from 'tslint';
 import * as ts from 'typescript';
 
 export class Rule extends Lint.Rules.AbstractRule {
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const options = { 'max-length': 2, ...this.ruleArguments[0] };
+        const options = {
+            'max-length': 2,
+            'ignore-constructor': false,
+            ...this.ruleArguments[0],
+        };
         return this.applyWithFunction(sourceFile, walk, options);
     }
 }
@@ -23,14 +27,19 @@ function failureStringAlways(exit: string): string {
 
 interface IOptions {
     'max-length': number;
+    'ignore-constructor': boolean;
 }
 
 function walk(ctx: Lint.WalkContext<IOptions>) {
-    const { sourceFile, options: { 'max-length': maxLineLength } } = ctx;
+    const {
+        sourceFile,
+        options: { 'max-length': maxLineLength, 'ignore-constructor': ignoreConstructor },
+    } = ctx;
 
     return ts.forEachChild(sourceFile, function cb(node): void {
-        if (isIfStatement(node))
+        if (isIfStatement(node) && (!ignoreConstructor || !isConstructorClosestFunctionScopeBoundary(node)))
             check(node);
+
         return ts.forEachChild(node, cb);
     });
 
@@ -153,4 +162,14 @@ function isLastStatement(ifStatement: ts.IfStatement, statements: ReadonlyArray<
             throw new Error();
         i--;
     }
+}
+
+function isConstructorClosestFunctionScopeBoundary(node: ts.Node): boolean {
+    let currentParent = node.parent;
+    while (currentParent) {
+        if (isFunctionScopeBoundary(currentParent))
+            return currentParent.kind === ts.SyntaxKind.Constructor;
+        currentParent = currentParent.parent;
+    }
+    return false;
 }

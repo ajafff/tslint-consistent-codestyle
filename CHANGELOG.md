@@ -1,3 +1,9 @@
+# 1.14.1
+
+**Bugfixes:**
+
+* fixed version of `tsutils` dependency
+
 # 1.14.0
 
 **Features:**

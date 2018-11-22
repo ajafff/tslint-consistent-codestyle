@@ -37,7 +37,7 @@ interface BadPAscal{}
 function foo({_Bar, Baz, _bas}) {}
               ~~~~      [parameter name must be in strictCamelCase]
                     ~~~ [parameter name must be in strictCamelCase]
-function Foo([Foo, , Bar) {}
+function Foo([Foo, , Bar]) {}
          ~~~ [function name must be in strictCamelCase]
               ~~~        [parameter name must be in strictCamelCase]
                      ~~~ [parameter name must be in strictCamelCase]

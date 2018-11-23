@@ -39,7 +39,7 @@
     "tsutils": "^2.29.0"
   },
   "devDependencies": {
-    "@fimbul/valtyr": "^0.15.0",
+    "@fimbul/valtyr": "^0.16.0",
     "@fimbul/wotan": "^0.15.0",
     "coveralls": "^3.0.0",
     "github-release-from-changelog": "^1.2.1",

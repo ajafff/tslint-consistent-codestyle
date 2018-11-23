@@ -34,7 +34,7 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@fimbul/bifrost": "^0.15.0",
+    "@fimbul/bifrost": "^0.16.0",
     "tslib": "^1.7.1",
     "tsutils": "^2.29.0"
   },

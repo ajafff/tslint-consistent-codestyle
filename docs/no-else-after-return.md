@@ -1,6 +1,6 @@
 ## no-else-after-return
 
-Works like [no-else-return from eslint](http://eslint.org/docs/rules/no-else-return).
+Works like [no-else-return from eslint](http://eslint.org/docs/rules/no-else-return). This rule can automatically fix errors.
 
 > If an if block contains a return statement, the else block becomes unnecessary. Its contents can be placed outside of the block.
 

@@ -1,43 +1,35 @@
 if (condition) {
     return;
-} else {}
-  ~~~~ [failblock]
+}
 
 if (condition) {
     return;
-} else {
-  ~~~~ [fail]
+}{
     const foo = "bar";
 }
 
 if (condition) {
   return;
-} else {
-  ~~~~ [failblock]
+}
   { const foo = "bar"; }
   return foo;
-}
 
-if (condition) return;
-else ;
-~~~~ [fail]
+
+if (condition) return;;
 
 if (condition) {
     {
         return;
     }
-} else {}
-  ~~~~ [failblock]
+}
 
 if (condition) {
     if (condition) {
         return;
-    } else {
-      ~~~~ [failblock]
-        return;
     }
-} else {}
-  ~~~~ [failblock]
+        return;
+    
+}
 
 if (condition) {
     if (condition) {
@@ -68,9 +60,8 @@ if (condition) {
 if (condition) {
     if (condition) {
         return;
-    } else {
-      ~~~~ [failblock]
     }
+    
 } else {}
 
 if (condition) {
@@ -87,8 +78,7 @@ if (condition) {
         default:
             return;
     }
-} else {}
-  ~~~~ [failblock]
+}
 
 if (condition) {
     switch (foo) {
@@ -97,8 +87,7 @@ if (condition) {
         case 'a':
             return;
     }
-} else {}
-  ~~~~ [failblock]
+}
 
 if (condition) {
     switch (foo) {
@@ -112,25 +101,21 @@ if (condition) {
 for (;;) {
     if (condition) {
         continue;
-    } else {}
-      ~~~~ [failblock]
+    }
 
     if (condition) {
         break;
-    } else {}
-      ~~~~ [failblock]
+    }
 
     switch (foo) {
         case 1:
             if (foo) {
                 continue;
-            } else {}
-              ~~~~ [failblock]
+            }
 
             if (foo) {
                 break;
-            } else {}
-              ~~~~ [failblock]
+            }
     }
 
     if (condition) {
@@ -143,8 +128,7 @@ for (;;) {
             case 2:
                 return;
         }
-    } else {}
-      ~~~~ [failblock]
+    }
 
     if (condition) {
         switch (foo) {
@@ -159,13 +143,10 @@ for (;;) {
 
 if (condition) {
     throw 'foo';
-} else {}
-  ~~~~ [failblock]
+}
 
 if (condition)
-    throw 'foo';
-else;
-~~~~ [fail]
+    throw 'foo';;
 
 if (condition) {
 }else if (condition) {
@@ -176,8 +157,7 @@ if (condition) {
 }else{
     if (condition) {
         return;
-    } else {}
-      ~~~~ [failblock]
+    }
 }
 
 if (condition) {
@@ -200,8 +180,7 @@ if (condition) {
     } finally {
         return;
     }
-} else {}
-  ~~~~ [failblock]
+}
 
 if (condition) {
     try {
@@ -216,16 +195,14 @@ if (condition) {
     } finally {
         return;
     }
-} else {}
-  ~~~~ [failblock]
+}
 
 if (condition) {
     try {
         return;
     } finally {
     }
-} else {}
-  ~~~~ [failblock]
+}
 
 if (condition) {
     for (;;) {
@@ -257,8 +234,7 @@ if (condition) {
             return;
         }
     }
-} else {}
-  ~~~~ [failblock]
+}
 
 if (condition) {
     for (;;) {
@@ -274,10 +250,9 @@ if (condition) {
     foo: for (;;) {
         if (condition) {
             continue;
-        } else {
-          ~~~~ [failblock]
-            break;
         }
+            break;
+        
     }
 } else {}
 
@@ -287,13 +262,10 @@ if (condition) {
             while (true) {
                 if (condition) {
                     continue foo;
-                } else {
-                  ~~~~ [failblock]
-                    break foo;
                 }
+                    break foo;
+                
             }
-        else {}
-        ~~~~ [failblock]
     }
 } else {}
 
@@ -305,10 +277,9 @@ if (condition) {
                     continue;
                 if (condition) {
                     continue foo;
-                } else {
-                  ~~~~ [failblock]
-                    break foo;
                 }
+                    break foo;
+                
             }
         else {}
     }
@@ -320,8 +291,7 @@ foo: for (;;) {
             case 1:
                 if (condition) {
                     break;
-                } else {}
-                  ~~~~ [failblock]
+                }
             default:
                 continue foo;
         }
@@ -360,37 +330,30 @@ if (condition) {
     } catch {
         throw 'foo';
     }
-} else {}
-  ~~~~ [failblock]
+}
 
 if (condition) {
     try {
         return foo();
     } finally {
     }
-} else {}
-  ~~~~ [failblock]
+}
 
 if (condition) {
     try {
     } finally {
         return;
     }
-} else {}
-  ~~~~ [failblock]
+}
 
 foo: bar: for (;;) {
     if (condition)
         for (;;)
             continue foo;
-    else {}
-    ~~~~ [failblock]
 
     if (condition)
         for (;;)
             break bar;
-    else {}
-    ~~~~ [failblock]
 
     if (condition)
         baz: bas: for (;;)
@@ -403,5 +366,3 @@ foo: bar: for (;;) {
     else {}
 }
 
-[fail]: unnecessary else
-[failblock]: unnecessary else block

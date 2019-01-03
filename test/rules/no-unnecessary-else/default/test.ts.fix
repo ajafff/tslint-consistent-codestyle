@@ -1,35 +1,48 @@
 if (condition) {
     return;
-}
+} 
 
 if (condition) {
     return;
-}{
+}  {
     const foo = "bar";
 }
 
 if (condition) {
-  return;
+    return;
+} 
+    var foo = "bar";
+
+
+if (condition) {
+    return;
+}  {
+    class C {}
 }
+
+if (condition) {
+  return;
+} 
   { const foo = "bar"; }
   return foo;
 
 
-if (condition) return;;
+if (condition) return;
+ ;
 
 if (condition) {
     {
         return;
     }
-}
+} 
 
 if (condition) {
     if (condition) {
         return;
-    }
+    } 
         return;
     
-}
+} 
 
 if (condition) {
     if (condition) {
@@ -60,7 +73,7 @@ if (condition) {
 if (condition) {
     if (condition) {
         return;
-    }
+    } 
     
 } else {}
 
@@ -78,7 +91,7 @@ if (condition) {
         default:
             return;
     }
-}
+} 
 
 if (condition) {
     switch (foo) {
@@ -87,7 +100,7 @@ if (condition) {
         case 'a':
             return;
     }
-}
+} 
 
 if (condition) {
     switch (foo) {
@@ -101,21 +114,21 @@ if (condition) {
 for (;;) {
     if (condition) {
         continue;
-    }
+    } 
 
     if (condition) {
         break;
-    }
+    } 
 
     switch (foo) {
         case 1:
             if (foo) {
                 continue;
-            }
+            } 
 
             if (foo) {
                 break;
-            }
+            } 
     }
 
     if (condition) {
@@ -128,7 +141,7 @@ for (;;) {
             case 2:
                 return;
         }
-    }
+    } 
 
     if (condition) {
         switch (foo) {
@@ -143,10 +156,11 @@ for (;;) {
 
 if (condition) {
     throw 'foo';
-}
+} 
 
 if (condition)
-    throw 'foo';;
+    throw 'foo';
+;
 
 if (condition) {
 }else if (condition) {
@@ -157,7 +171,7 @@ if (condition) {
 }else{
     if (condition) {
         return;
-    }
+    } 
 }
 
 if (condition) {
@@ -180,7 +194,7 @@ if (condition) {
     } finally {
         return;
     }
-}
+} 
 
 if (condition) {
     try {
@@ -195,14 +209,14 @@ if (condition) {
     } finally {
         return;
     }
-}
+} 
 
 if (condition) {
     try {
         return;
     } finally {
     }
-}
+} 
 
 if (condition) {
     for (;;) {
@@ -234,7 +248,7 @@ if (condition) {
             return;
         }
     }
-}
+} 
 
 if (condition) {
     for (;;) {
@@ -250,7 +264,7 @@ if (condition) {
     foo: for (;;) {
         if (condition) {
             continue;
-        }
+        } 
             break;
         
     }
@@ -262,10 +276,11 @@ if (condition) {
             while (true) {
                 if (condition) {
                     continue foo;
-                }
+                } 
                     break foo;
                 
             }
+        
     }
 } else {}
 
@@ -277,7 +292,7 @@ if (condition) {
                     continue;
                 if (condition) {
                     continue foo;
-                }
+                } 
                     break foo;
                 
             }
@@ -291,7 +306,7 @@ foo: for (;;) {
             case 1:
                 if (condition) {
                     break;
-                }
+                } 
             default:
                 continue foo;
         }
@@ -330,30 +345,32 @@ if (condition) {
     } catch {
         throw 'foo';
     }
-}
+} 
 
 if (condition) {
     try {
         return foo();
     } finally {
     }
-}
+} 
 
 if (condition) {
     try {
     } finally {
         return;
     }
-}
+} 
 
 foo: bar: for (;;) {
     if (condition)
         for (;;)
             continue foo;
+    
 
     if (condition)
         for (;;)
             break bar;
+    
 
     if (condition)
         baz: bas: for (;;)

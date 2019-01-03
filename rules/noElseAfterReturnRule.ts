@@ -23,11 +23,11 @@ export class Rule extends Lint.Rules.AbstractRule {
 class IfWalker extends AbstractIfStatementWalker<IOptions> {
     protected _checkIfStatement(node: ts.IfStatement) {
         if (shouldCheckNode(node, this.options.allowElseIf) && endsWithReturnStatement(node.thenStatement))
-            this.addFailureAtNode(node.getChildAt(5 /*else*/, this.sourceFile), FAIL_MESSAGE);
+            this._reportUnnecessaryElse(node.elseStatement, FAIL_MESSAGE);
     }
 }
 
-function shouldCheckNode(node: ts.IfStatement, allowElseIf: boolean): boolean {
+function shouldCheckNode(node: ts.IfStatement, allowElseIf: boolean): node is ts.IfStatement & {elseStatement: {}} {
     if (node.elseStatement === undefined)
         return false;
     if (!allowElseIf)

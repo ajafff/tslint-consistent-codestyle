@@ -1,7 +1,7 @@
 if (condition) {
     return;
 } else {}
-  ~~~~ [failblock]
+  ~~~~ [fail]
 
 if (condition) {
     return;
@@ -11,9 +11,23 @@ if (condition) {
 }
 
 if (condition) {
+    return;
+} else {
+  ~~~~ [fail]
+    var foo = "bar";
+}
+
+if (condition) {
+    return;
+} else {
+  ~~~~ [fail]
+    class C {}
+}
+
+if (condition) {
   return;
 } else {
-  ~~~~ [failblock]
+  ~~~~ [fail]
   { const foo = "bar"; }
   return foo;
 }
@@ -27,17 +41,17 @@ if (condition) {
         return;
     }
 } else {}
-  ~~~~ [failblock]
+  ~~~~ [fail]
 
 if (condition) {
     if (condition) {
         return;
     } else {
-      ~~~~ [failblock]
+      ~~~~ [fail]
         return;
     }
 } else {}
-  ~~~~ [failblock]
+  ~~~~ [fail]
 
 if (condition) {
     if (condition) {
@@ -69,7 +83,7 @@ if (condition) {
     if (condition) {
         return;
     } else {
-      ~~~~ [failblock]
+      ~~~~ [fail]
     }
 } else {}
 
@@ -88,7 +102,7 @@ if (condition) {
             return;
     }
 } else {}
-  ~~~~ [failblock]
+  ~~~~ [fail]
 
 if (condition) {
     switch (foo) {
@@ -98,7 +112,7 @@ if (condition) {
             return;
     }
 } else {}
-  ~~~~ [failblock]
+  ~~~~ [fail]
 
 if (condition) {
     switch (foo) {
@@ -113,24 +127,24 @@ for (;;) {
     if (condition) {
         continue;
     } else {}
-      ~~~~ [failblock]
+      ~~~~ [fail]
 
     if (condition) {
         break;
     } else {}
-      ~~~~ [failblock]
+      ~~~~ [fail]
 
     switch (foo) {
         case 1:
             if (foo) {
                 continue;
             } else {}
-              ~~~~ [failblock]
+              ~~~~ [fail]
 
             if (foo) {
                 break;
             } else {}
-              ~~~~ [failblock]
+              ~~~~ [fail]
     }
 
     if (condition) {
@@ -144,7 +158,7 @@ for (;;) {
                 return;
         }
     } else {}
-      ~~~~ [failblock]
+      ~~~~ [fail]
 
     if (condition) {
         switch (foo) {
@@ -160,7 +174,7 @@ for (;;) {
 if (condition) {
     throw 'foo';
 } else {}
-  ~~~~ [failblock]
+  ~~~~ [fail]
 
 if (condition)
     throw 'foo';
@@ -177,7 +191,7 @@ if (condition) {
     if (condition) {
         return;
     } else {}
-      ~~~~ [failblock]
+      ~~~~ [fail]
 }
 
 if (condition) {
@@ -201,7 +215,7 @@ if (condition) {
         return;
     }
 } else {}
-  ~~~~ [failblock]
+  ~~~~ [fail]
 
 if (condition) {
     try {
@@ -217,7 +231,7 @@ if (condition) {
         return;
     }
 } else {}
-  ~~~~ [failblock]
+  ~~~~ [fail]
 
 if (condition) {
     try {
@@ -225,7 +239,7 @@ if (condition) {
     } finally {
     }
 } else {}
-  ~~~~ [failblock]
+  ~~~~ [fail]
 
 if (condition) {
     for (;;) {
@@ -258,7 +272,7 @@ if (condition) {
         }
     }
 } else {}
-  ~~~~ [failblock]
+  ~~~~ [fail]
 
 if (condition) {
     for (;;) {
@@ -275,7 +289,7 @@ if (condition) {
         if (condition) {
             continue;
         } else {
-          ~~~~ [failblock]
+          ~~~~ [fail]
             break;
         }
     }
@@ -288,12 +302,12 @@ if (condition) {
                 if (condition) {
                     continue foo;
                 } else {
-                  ~~~~ [failblock]
+                  ~~~~ [fail]
                     break foo;
                 }
             }
         else {}
-        ~~~~ [failblock]
+        ~~~~ [fail]
     }
 } else {}
 
@@ -306,7 +320,7 @@ if (condition) {
                 if (condition) {
                     continue foo;
                 } else {
-                  ~~~~ [failblock]
+                  ~~~~ [fail]
                     break foo;
                 }
             }
@@ -321,7 +335,7 @@ foo: for (;;) {
                 if (condition) {
                     break;
                 } else {}
-                  ~~~~ [failblock]
+                  ~~~~ [fail]
             default:
                 continue foo;
         }
@@ -361,7 +375,7 @@ if (condition) {
         throw 'foo';
     }
 } else {}
-  ~~~~ [failblock]
+  ~~~~ [fail]
 
 if (condition) {
     try {
@@ -369,7 +383,7 @@ if (condition) {
     } finally {
     }
 } else {}
-  ~~~~ [failblock]
+  ~~~~ [fail]
 
 if (condition) {
     try {
@@ -377,20 +391,20 @@ if (condition) {
         return;
     }
 } else {}
-  ~~~~ [failblock]
+  ~~~~ [fail]
 
 foo: bar: for (;;) {
     if (condition)
         for (;;)
             continue foo;
     else {}
-    ~~~~ [failblock]
+    ~~~~ [fail]
 
     if (condition)
         for (;;)
             break bar;
     else {}
-    ~~~~ [failblock]
+    ~~~~ [fail]
 
     if (condition)
         baz: bas: for (;;)
@@ -404,4 +418,3 @@ foo: bar: for (;;) {
 }
 
 [fail]: unnecessary else
-[failblock]: unnecessary else block

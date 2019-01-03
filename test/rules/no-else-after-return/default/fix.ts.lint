@@ -1,0 +1,4 @@
+if (condition) {
+    return;
+} else {}
+  ~~~~ [unnecessary else after return]

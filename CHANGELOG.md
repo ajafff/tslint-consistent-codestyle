@@ -1,3 +1,9 @@
+# 1.15.0
+
+**Features:**
+
+* `no-unnecessary-else` and `no-else-after-return` are now automatically fixable
+
 # 1.14.1
 
 **Bugfixes:**

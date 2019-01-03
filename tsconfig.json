@@ -13,6 +13,9 @@
     "stripInternal": true,
     "lib": ["es6"],
     "skipLibCheck": true,
-    "importHelpers": true
+    "importHelpers": true,
+    "plugins": [
+      {"name": "@fimbul/mithotyn", "displayErrorsAsWarnings": true}
+    ]
   }
 }

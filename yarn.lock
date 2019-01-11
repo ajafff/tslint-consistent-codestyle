@@ -102,12 +102,12 @@
     tslib "^1.8.1"
     tsutils "^3.5.0"
 
-"@fimbul/mimir@^0.17.0":
-  version "0.17.0"
-  resolved "https://registry.yarnpkg.com/@fimbul/mimir/-/mimir-0.17.0.tgz#8c4c2173ed57080931137fca26eb4f0a94b34d0b"
-  integrity sha512-LNnftuFiLbrZNvA8a69Lv3egvjkOfIzTE/50EQRBaNxz4nG+Cbuz+EcxSP61NfnlZ1OeMS9ciF/bkXwfO+TG3A==
+"@fimbul/mimir@^0.18.0":
+  version "0.18.0"
+  resolved "https://registry.yarnpkg.com/@fimbul/mimir/-/mimir-0.18.0.tgz#37e30f531aa96588b73262379b523c482d8c9807"
+  integrity sha512-zQ3of5zy9JoDCroEWbOBfxcyc6Gy0CAhr2WwDW27F/QE2vRg5ssUkZxKFXl/ie1g0vRtMkhoyXiSA4rtPnLlaw==
   dependencies:
-    "@fimbul/ymir" "^0.17.0"
+    "@fimbul/ymir" "^0.18.0"
     chalk "^2.3.2"
     debug "^4.0.0"
     tslib "^1.8.1"
@@ -131,17 +131,17 @@
     tslint "^5.0.0"
     tsutils "^3.5.0"
 
-"@fimbul/wotan@^0.17.0":
-  version "0.17.0"
-  resolved "https://registry.yarnpkg.com/@fimbul/wotan/-/wotan-0.17.0.tgz#c17d7043bec1b5d4af99d03d633cc8761b045afd"
-  integrity sha512-dEWRskpbRrgU52M8AzvcWCgTqSOueF5HPb7jc/WDTEbR6fWds5jKSrZEJua0cRs3PS6aLS3kY6npcj0yV1A3lg==
+"@fimbul/wotan@^0.18.0":
+  version "0.18.0"
+  resolved "https://registry.yarnpkg.com/@fimbul/wotan/-/wotan-0.18.0.tgz#d5430087682d550f9ae8f7d963407db779f56982"
+  integrity sha512-BArrp6K/NS5IygngNmYU6t2SOhuA4xmLwzJ7H+heTFtN4RZLP3aV4chZ7n2Gu/PBuYg72CB2W86w7DASDfBJpQ==
   dependencies:
-    "@fimbul/mimir" "^0.17.0"
-    "@fimbul/ymir" "^0.17.0"
+    "@fimbul/mimir" "^0.18.0"
+    "@fimbul/ymir" "^0.18.0"
     bind-decorator "^1.0.11"
     chalk "^2.3.0"
     debug "^4.0.0"
-    diff "^3.4.0"
+    diff "^4.0.0"
     glob "^7.1.2"
     import-local "^2.0.0"
     inversify "^5.0.0"
@@ -155,12 +155,21 @@
     semver "^5.4.1"
     stable "^0.1.8"
     tslib "^1.8.1"
-    tsutils "^3.5.0"
+    tsutils "^3.6.0"
 
 "@fimbul/ymir@^0.17.0":
   version "0.17.0"
   resolved "https://registry.yarnpkg.com/@fimbul/ymir/-/ymir-0.17.0.tgz#4f28389b9f804d1cd202e11983af1743488b7815"
   integrity sha512-xMXM9KTXRLHLVS6dnX1JhHNEkmWHcAVCQ/4+DA1KKwC/AFnGHzu/7QfQttEPgw3xplT+ILf9e3i64jrFwB3JtA==
+  dependencies:
+    inversify "^5.0.0"
+    reflect-metadata "^0.1.12"
+    tslib "^1.8.1"
+
+"@fimbul/ymir@^0.18.0":
+  version "0.18.0"
+  resolved "https://registry.yarnpkg.com/@fimbul/ymir/-/ymir-0.18.0.tgz#9032bdd3b1ec536840ece2725e19eb12084f1f8e"
+  integrity sha512-fZHvoy3lO7WyapLa0vYmJ4iKVbm/NWEqa6yPQpbSTUlWI7Kj1wfHRd5Aa2eOdTXpGHYeU8GkZ35Xb/51dnv95A==
   dependencies:
     inversify "^5.0.0"
     reflect-metadata "^0.1.12"
@@ -693,10 +702,15 @@ delayed-stream@~1.0.0:
   resolved "https://registry.yarnpkg.com/delayed-stream/-/delayed-stream-1.0.0.tgz#df3ae199acadfb7d440aaae0b29e2272b24ec619"
   integrity sha1-3zrhmayt+31ECqrgsp4icrJOxhk=
 
-diff@^3.2.0, diff@^3.4.0:
+diff@^3.2.0:
   version "3.5.0"
   resolved "https://registry.yarnpkg.com/diff/-/diff-3.5.0.tgz#800c0dd1e0a8bfbc95835c202ad220fe317e5a12"
   integrity sha512-A46qtFgd+g7pDZinpnwiRJtxbC1hpgf0uzP3iG89scHk0AUC7A1TGxf5OiiOUv/JMZR8GOt8hL900hV0bOy5xA==
+
+diff@^4.0.0:
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/diff/-/diff-4.0.1.tgz#0c667cb467ebbb5cea7f14f135cc2dba7780a8ff"
+  integrity sha512-s2+XdvhPCOF01LRQBC8hf4vhbVmI2CGS5aZnxLJlT5FtdhPCDFq80q++zK2KlrVorVDdL5BOGZ/VfLrVtYNF+Q==
 
 duplexer@~0.1.1:
   version "0.1.1"
@@ -2618,6 +2632,13 @@ tsutils@^3.5.0, tsutils@^3.5.1:
   version "3.6.0"
   resolved "https://registry.yarnpkg.com/tsutils/-/tsutils-3.6.0.tgz#33fc3ddb74abf5bba10789acd03eee6ea96c839c"
   integrity sha512-hCG3lZz+uRmmiC4brr/kY6Yuypnl20PNe8t49DO4OUGlbxWkxYHF63EeG2XPSd0JcKiWmp9p55yQyrkxqSS5Dg==
+  dependencies:
+    tslib "^1.8.1"
+
+tsutils@^3.6.0:
+  version "3.7.0"
+  resolved "https://registry.yarnpkg.com/tsutils/-/tsutils-3.7.0.tgz#f97bdd2f109070bd1865467183e015b25734b477"
+  integrity sha512-n+e+3q7Jx2kfZw7tjfI9axEIWBY0sFMOlC+1K70X0SeXpO/UYSB+PN+E9tIJNqViB7oiXQdqD7dNchnvoneZew==
   dependencies:
     tslib "^1.8.1"
 

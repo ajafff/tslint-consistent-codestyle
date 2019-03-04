@@ -187,14 +187,14 @@ class NormalizedConfig {
         this._format = raw;
     }
 
-    public matches(type: TypeSelector, modifiers: number, name: string): [boolean, boolean] {
+    public matches(type: TypeSelector, modifiers: number, name: string): boolean {
         if (this._final && type > this._type << 1) // check if TypeSelector has a higher bit set than this._type
-            return [false, false];
+            return false;
         if ((this._type & type) === 0 || (this._modifiers & ~modifiers) !== 0)
-            return [false, false];
+            return false;
         if (this._filter === undefined)
-            return [true, false];
-        return [this._filter.test(name), true];
+            return true;
+        return this._filter.test(name);
     }
 
     public getFormat() {
@@ -303,7 +303,6 @@ class NameChecker {
 
 class IdentifierNameWalker extends Lint.AbstractWalker<NormalizedConfig[]> {
     private _depth = 0;
-    private _cache = new Map<string, NameChecker | null>();
     private _usage: Map<ts.Identifier, utils.VariableInfo> | undefined = undefined;
 
     private _isUnused(name: ts.Identifier): boolean {
@@ -448,32 +447,16 @@ class IdentifierNameWalker extends Lint.AbstractWalker<NormalizedConfig[]> {
     }
 
     private _checkName(name: ts.Identifier, type: TypeSelector, modifiers: number) {
-        const matchingChecker = this._getMatchingChecker(type, modifiers, name.text);
+        const matchingChecker = this._createChecker(type, modifiers, name.text);
         if (matchingChecker !== null) // tslint:disable-line:no-null-keyword
             matchingChecker.check(name, this);
     }
 
-    private _getMatchingChecker(type: TypeSelector, modifiers: number, name: string): NameChecker | null {
-        const key = `${type},${modifiers}`;
-        const cached = this._cache.get(key);
-        if (cached !== undefined)
-            return cached;
-
-        const [checker, hasFilter] = this._createChecker(type, modifiers, name);
-        if (!hasFilter) // only cache if there is no filter for the name
-            this._cache.set(key, checker);
-        return checker;
-    }
-
-    private _createChecker(type: TypeSelector, modifiers: number, name: string): [NameChecker | null, boolean] {
-        let hasFilter = false;
+    private _createChecker(type: TypeSelector, modifiers: number, name: string): NameChecker | null {
         const config = this.options.reduce(
             (format: IFormat, rule) => {
-                const [matches, filterUsed] = rule.matches(type, modifiers, name);
-                if (!matches)
+                if (!rule.matches(type, modifiers, name))
                     return format;
-                if (filterUsed)
-                    hasFilter = true;
                 return Object.assign(format, rule.getFormat()); // tslint:disable-line:prefer-object-spread
             },
             {
@@ -492,8 +475,8 @@ class IdentifierNameWalker extends Lint.AbstractWalker<NormalizedConfig[]> {
             !config.prefix &&
             !config.regex &&
             !config.suffix)
-            return [null, hasFilter]; // tslint:disable-line:no-null-keyword
-        return [new NameChecker(type, config), hasFilter];
+            return null; // tslint:disable-line:no-null-keyword
+        return new NameChecker(type, config);
     }
 
     private _getModifiers(node: ts.Node, type: TypeSelector, modifiers: Modifiers = 0): number {

@@ -67,7 +67,7 @@ Rule | Description
 [const-parameters](https://github.com/ajafff/tslint-consistent-codestyle/blob/master/docs/const-parameters.md) | Declare parameters as `const` with JsDoc `/** @const */`
 [early-exit](https://github.com/ajafff/tslint-consistent-codestyle/blob/master/docs/early-exit.md) | Recommends to use an early exit instead of a long `if` block.
 [ext-curly](https://github.com/ajafff/tslint-consistent-codestyle/blob/master/docs/ext-curly.md) |Enforces where to consistently use curly braces where not strictly necessary.
-[naming-convention](https://github.com/ajafff/tslint-consistent-codestyle/blob/master/docs/naming-convention.md) | Fine grained configuration to enfoce consistent naming for almost everything. E.g. variables, functions, classes, methods, parameters, enums, etc.
+[naming-convention](https://github.com/ajafff/tslint-consistent-codestyle/blob/master/docs/naming-convention.md) | Fine grained configuration to enforce consistent naming for almost everything. E.g. variables, functions, classes, methods, parameters, enums, etc.
 [no-as-type-assertion](https://github.com/ajafff/tslint-consistent-codestyle/blob/master/docs/no-as-type-assertion.md) | Prefer `<Type>foo` over `foo as Type`.
 [no-accessor-recursion](https://github.com/ajafff/tslint-consistent-codestyle/blob/master/docs/no-accessor-recursion.md) | Don't use `get foo() { return this.foo; }`. This is most likely a typo.
 [no-collapsible-if](https://github.com/ajafff/tslint-consistent-codestyle/blob/master/docs/no-collapsible-if.md) | Identifies nested if statements that can be combined into one.

@@ -1,3 +1,9 @@
+# 1.15.1
+
+**Bugfixes:**
+
+* `naming-convention`: `filter` option is no longer affect by the order of checked names and caching
+
 # 1.15.0
 
 **Features:**

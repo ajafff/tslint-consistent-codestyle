@@ -42,6 +42,7 @@ export abstract class AbstractIfStatementWalker<T> extends Lint.AbstractWalker<T
     protected abstract _checkIfStatement(node: ts.IfStatement): void;
 }
 
+// TODO replace with isBlockScopedDeclarationStatement from tsutils@3.7.0
 function isBlockScopedDeclaration(statement: ts.Statement): boolean {
     switch (statement.kind) {
         case ts.SyntaxKind.VariableStatement:

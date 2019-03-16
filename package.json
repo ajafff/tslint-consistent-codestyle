@@ -40,7 +40,7 @@
   },
   "devDependencies": {
     "@fimbul/mithotyn": "^0.17.0",
-    "@fimbul/valtyr": "^0.17.0",
+    "@fimbul/valtyr": "^0.20.0",
     "@fimbul/wotan": "^0.17.0",
     "coveralls": "^3.0.0",
     "github-release-from-changelog": "^1.2.1",

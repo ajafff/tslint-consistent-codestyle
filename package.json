@@ -39,7 +39,7 @@
     "tsutils": "^2.29.0"
   },
   "devDependencies": {
-    "@fimbul/mithotyn": "^0.17.0",
+    "@fimbul/mithotyn": "^0.21.0",
     "@fimbul/valtyr": "^0.17.0",
     "@fimbul/wotan": "^0.17.0",
     "coveralls": "^3.0.0",

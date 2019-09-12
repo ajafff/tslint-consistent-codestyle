@@ -67,8 +67,8 @@ class TestClass {
     public set camelPubAcc(Var) {}
                            ~~~ [parameter name must be in strictCamelCase]
     private get snake_priv_acc() {}
-                ~~~~~~~~~~~~~~  [property name must be in strictCamelCase]
-                ~~~~~~~~~~~~~~  [property name must have leading underscore]
+                ~~~~~~~~~~~~~~  [accessor name must be in strictCamelCase]
+                ~~~~~~~~~~~~~~  [accessor name must have leading underscore]
 
     readonly public static FOO = "foo";
     readonly public static foo = "foo";
@@ -148,7 +148,7 @@ export function foo(){}
 abstract class Foo {
                ~~~ [class name must start with Abstract]
     abstract get foo();
-                 ~~~ [property name must end with Ajaff]
+                 ~~~ [accessor name must end with Ajaff]
     abstract private bar();
                      ~~~ [method name must end with Ajaff]
                      ~~~ [method name must have leading underscore]

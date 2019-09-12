@@ -1,0 +1,11 @@
+class Test {
+    public get getValue() {}
+               ~~~~~~~~ [accessor name must have leading underscore]
+
+    public set setValue() {}
+               ~~~~~~~~ [accessor name must have leading underscore]
+
+    public get _getValue() {}
+
+    public set _setValue() {}
+}

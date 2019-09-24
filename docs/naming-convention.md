@@ -198,7 +198,7 @@ After filtering the formatting rules are reduced from the first to the last. Rem
 #### accessor
 
 * Scope: all accessors (get, set)
-* Extends: `method`, `member`
+* Extends: `member`
 * Valid modifiers:
   * `private`, `protected` or `public`
   * `static`

@@ -66,7 +66,7 @@ enum TypeSelector {
     genericTypeParameter = Types.type | Types.genericTypeParameter,
     enum = Types.type | Types.enum,
     enumMember = property | Types.enumMember,
-    accessor = Types.member | Types.method | Types.accessor,
+    accessor = Types.member | Types.accessor,
     // tslint:enable:naming-convention
 }
 

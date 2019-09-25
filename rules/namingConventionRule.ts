@@ -47,6 +47,7 @@ enum Types {
     enum = 1 << 12,
     enumMember = 1 << 13,
     functionVariable = 1 << 14,
+    accessor = 1 << 15,
     // tslint:enable:naming-convention
 }
 
@@ -65,6 +66,7 @@ enum TypeSelector {
     genericTypeParameter = Types.type | Types.genericTypeParameter,
     enum = Types.type | Types.enum,
     enumMember = property | Types.enumMember,
+    accessor = Types.member | Types.accessor,
     // tslint:enable:naming-convention
 }
 
@@ -386,12 +388,12 @@ class IdentifierNameWalker extends Lint.AbstractWalker<NormalizedConfig[]> {
 
     public visitSetAccessor(node: ts.SetAccessorDeclaration) {
         if (isNameIdentifier(node))
-            this._checkDeclaration(node, TypeSelector.property);
+            this._checkDeclaration(node, TypeSelector.accessor);
     }
 
     public visitGetAccessor(node: ts.GetAccessorDeclaration) {
         if (isNameIdentifier(node))
-            this._checkDeclaration(node, TypeSelector.property);
+            this._checkDeclaration(node, TypeSelector.accessor);
     }
 
     private _checkVariableDeclarationList(list: ts.VariableDeclarationList, modifiers: number) {

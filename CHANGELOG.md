@@ -1,3 +1,9 @@
+# 1.16.0
+
+**Features:**
+
+* `naming-convention`: `accessor` is now configurable
+
 # 1.15.1
 
 **Bugfixes:**

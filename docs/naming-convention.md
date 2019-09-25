@@ -122,7 +122,7 @@ After filtering the formatting rules are reduced from the first to the last. Rem
   * `private`, `protected` or `public`
   * `static`
   * `const` == `readonly` // can be used interchangeably. internally both are handled as `const`
-  * `abstract` // for abstract property accessors
+  * `abstract`
 
 #### parameterProperty
 
@@ -194,6 +194,15 @@ After filtering the formatting rules are reduced from the first to the last. Rem
   * `global` or `local`
   * `const`
   * `export`
+
+#### accessor
+
+* Scope: all accessors (get, set)
+* Extends: `member`
+* Valid modifiers:
+  * `private`, `protected` or `public`
+  * `static`
+  * `abstract`
 
 ### Examples
 

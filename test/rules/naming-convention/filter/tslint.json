@@ -1,0 +1,10 @@
+{
+  "rulesDirectory": ["../../../../rules"],
+  "rules": {
+    "naming-convention": [
+       true,
+      {"type": "parameter", "format": ["camelCase"]},
+      {"type": "parameter", "format": ["PascalCase"], "filter": "Baz"}
+    ]
+  }
+}

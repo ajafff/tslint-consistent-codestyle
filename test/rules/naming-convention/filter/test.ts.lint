@@ -1,0 +1,5 @@
+function foo(baz) {}
+function foo(Baz) {}
+function foo(bar) {}
+function foo(Bar) {}
+             ~~~     [parameter name must be in camelCase]

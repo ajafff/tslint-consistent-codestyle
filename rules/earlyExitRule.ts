@@ -52,7 +52,7 @@ function walk(ctx: Lint.WalkContext<IOptions>) {
         const thenSize = size(thenStatement, sourceFile);
 
         if (elseStatement === undefined) {
-            if (isLarge(thenSize) || !isThrow(thenStatement))
+            if (isLarge(thenSize) && !isThrow(thenStatement))
                 fail(failureString(exit));
             return;
         }
@@ -94,7 +94,7 @@ function size(node: ts.Node, sourceFile: ts.SourceFile): number {
 
 function isThrow(node: ts.Node): boolean {
     return isBlock(node)
-        ? node.statements.length > 0
+        ? node.statements.length === 1
             ? isThrowStatement(node.statements[0])
             : false
         : isThrowStatement(node);

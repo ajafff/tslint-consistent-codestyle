@@ -1,0 +1,8 @@
+class Foo {
+    f(a) {
+        if (a === undefined) {
+            throw new Error("a is undefined");
+        }
+    }
+}
+

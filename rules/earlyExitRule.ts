@@ -1,4 +1,4 @@
-import { isBlock, isCaseOrDefaultClause, isIfStatement, isFunctionScopeBoundary } from 'tsutils';
+import { isBlock, isThrowStatement, isCaseOrDefaultClause, isIfStatement, isFunctionScopeBoundary } from 'tsutils';
 import * as Lint from 'tslint';
 import * as ts from 'typescript';
 
@@ -52,7 +52,7 @@ function walk(ctx: Lint.WalkContext<IOptions>) {
         const thenSize = size(thenStatement, sourceFile);
 
         if (elseStatement === undefined) {
-            if (isLarge(thenSize))
+            if (isLarge(thenSize) || !isThrowStatement(thenStatement))
                 fail(failureString(exit));
             return;
         }
@@ -90,6 +90,14 @@ function size(node: ts.Node, sourceFile: ts.SourceFile): number {
     return isBlock(node)
         ? node.statements.length === 0 ? 0 : diff(node.statements[0].getStart(sourceFile), node.statements.end, sourceFile)
         : diff(node.getStart(sourceFile), node.end, sourceFile);
+}
+
+function isThrow(node: ts.Node): boolean {
+    return isBlock(node)
+        ? node.statements.length > 0
+            ? isThrowStatement(node.statements[0])
+            : false
+        : isThrowStatement(node);
 }
 
 function diff(start: number, end: number, sourceFile: ts.SourceFile): number {

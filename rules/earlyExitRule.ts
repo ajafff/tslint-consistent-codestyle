@@ -52,7 +52,7 @@ function walk(ctx: Lint.WalkContext<IOptions>) {
         const thenSize = size(thenStatement, sourceFile);
 
         if (elseStatement === undefined) {
-            if (isLarge(thenSize) || !isThrowStatement(thenStatement))
+            if (isLarge(thenSize) || !isThrow(thenStatement))
                 fail(failureString(exit));
             return;
         }

@@ -42,7 +42,7 @@
     "@fimbul/mithotyn": "^0.21.0",
     "@fimbul/valtyr": "^0.21.0",
     "@fimbul/wotan": "^0.21.1",
-    "coveralls": "^3.0.0",
+    "coveralls": "^3.0.12",
     "github-release-from-changelog": "^2.0.0",
     "npm-run-all": "^4.1.1",
     "nyc": "^13.2.0",

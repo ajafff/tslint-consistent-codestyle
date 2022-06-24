@@ -1,3 +1,10 @@
+# Deprecated - use eslint instead
+tslint has been deprecated https://github.com/palantir/tslint
+consider using the following eslint tool instead
+https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/docs/rules/naming-convention.md
+
+----
+
 [![npm version](http://img.shields.io/npm/v/tslint-consistent-codestyle.svg)](https://npmjs.org/package/tslint-consistent-codestyle)
 [![Downloads](http://img.shields.io/npm/dm/tslint-consistent-codestyle.svg)](https://npmjs.org/package/tslint-consistent-codestyle)
 [![CircleCI](https://circleci.com/gh/ajafff/tslint-consistent-codestyle.svg?style=shield)](https://circleci.com/gh/ajafff/tslint-consistent-codestyle)
